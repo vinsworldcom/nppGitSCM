@@ -8,8 +8,8 @@
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
 //
 1 VERSIONINFO
-FILEVERSION 1,0,0,1
-PRODUCTVERSION 1,0,0,1
+FILEVERSION 1,0,1,1
+PRODUCTVERSION 1,0,1,1
 FILETYPE VFT_DLL
 {
   BLOCK "StringFileInfo"
@@ -17,14 +17,14 @@ FILETYPE VFT_DLL
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "Vin's World"
-      VALUE "FileVersion", "1.0.0.1"
+      VALUE "FileVersion", "1.0.1.1"
       VALUE "FileDescription", "Notepad++ Plugin for Git SCM."
       VALUE "InternalName", "Notepad++ Git SCM"
       VALUE "LegalCopyright", "Copyright (C) VinsWorld. All Rights Reserved."
       VALUE "LegalTrademarks", ""
       VALUE "OriginalFilename", ""
-      VALUE "ProductName", "NPPGIT"
-      VALUE "ProductVersion", "1.0.0.1"
+      VALUE "ProductName", "NPPGITSCM"
+      VALUE "ProductVersion", "1.0.1.1"
     }
   }
   BLOCK "VarFileInfo"

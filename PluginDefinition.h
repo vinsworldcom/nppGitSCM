@@ -28,7 +28,7 @@
 //-------------------------------------//
 // Here define your plugin name
 //
-const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git" );
+const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 
 //-----------------------------------------------//
 //-- STEP 2. DEFINE YOUR PLUGIN COMMAND NUMBER --//
@@ -36,7 +36,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 9;
+const int nbFunc = 12;
 
 
 //
@@ -71,6 +71,8 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 //
 // Your plugin command functions
 //
+void giTk();
+void gitGui();
 void commitFile();
 void commitAllFiles();
 void addFile();

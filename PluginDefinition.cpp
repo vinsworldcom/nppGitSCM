@@ -63,17 +63,21 @@ void commandMenuInit()
     //            ShortcutKey *shortcut,          // optional. Define a shortcut to trigger this command
     //            bool check0nInit                // optional. Make this menu item be checked visually
     //            );
-    setCommand( 0, TEXT( "Status" ), statusAll, NULL, false );
-    setCommand( 1, TEXT( "Commit File" ), commitFile, NULL, false );
-    setCommand( 2, TEXT( "Commit All Open Files" ), commitAllFiles, NULL,
+
+    setCommand( 0, TEXT( "Git &GUI" ), gitGui, NULL, false );
+    setCommand( 1, TEXT( "GiT&k" ), giTk, NULL, false );
+    setCommand( 2, TEXT("-SEPARATOR-"), NULL, NULL, false );
+    setCommand( 3, TEXT( "&Status" ), statusAll, NULL, false );
+    setCommand( 4, TEXT( "&Commit File" ), commitFile, NULL, false );
+    setCommand( 5, TEXT( "Commit All Open Files" ), commitAllFiles, NULL,
                 false );
-    setCommand( 3, TEXT( "Add File" ), addFile, NULL, false );
-    setCommand( 4, TEXT( "Diff File" ), diffFile, NULL, false );
-    setCommand( 5, TEXT( "Revert File" ), revertFile, NULL, false );
-    setCommand( 6, TEXT( "Revert All Open Files" ), revertAllFiles, NULL,
+    setCommand( 6, TEXT( "&Add File" ), addFile, NULL, false );
+    setCommand( 7, TEXT( "&Diff File" ), diffFile, NULL, false );
+    setCommand( 8, TEXT( "&Revert File" ), revertFile, NULL, false );
+    setCommand( 9, TEXT( "Revert All Open Files" ), revertAllFiles, NULL,
                 false );
-    setCommand( 7, TEXT( "Show File Log" ), showFileLog, NULL, false );
-    setCommand( 8, TEXT( "Blame File" ), blameFile, NULL, false );
+    setCommand( 10, TEXT( "Show File &Log" ), showFileLog, NULL, false );
+    setCommand( 11, TEXT( "&Blame File" ), blameFile, NULL, false );
 }
 
 //
@@ -223,7 +227,7 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false )
         files.push_back( getCurrentFile() );
 
     std::wstring command = gitLoc;
-    command += TEXT( " " ) + cmd + TEXT( " " );
+    command += cmd + TEXT( " " );
 
     if ( !ALL )
     {
@@ -249,45 +253,55 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false )
 ///
 void commitFile()
 {
-    ExecCommand( TEXT( "commit" ) );
+    ExecCommand( TEXT( " commit" ) );
 }
 
 void commitAllFiles()
 {
-    ExecCommand( TEXT( "commit" ), true );
+    ExecCommand( TEXT( " commit" ), true );
 }
 
 void addFile()
 {
-    ExecCommand( TEXT( "add" ) );
+    ExecCommand( TEXT( " add" ) );
 }
 
 void diffFile()
 {
-    ExecCommand( TEXT( "diff" ) );
+    ExecCommand( TEXT( " diff" ) );
 }
 
 void revertFile()
 {
-    ExecCommand( TEXT( "revert" ) );
+    ExecCommand( TEXT( " revert" ) );
 }
 
 void revertAllFiles()
 {
-    ExecCommand( TEXT( "revert" ), true );
+    ExecCommand( TEXT( " revert" ), true );
 }
 
 void showFileLog()
 {
-    ExecCommand( TEXT( "log" ) );
+    ExecCommand( TEXT( " log" ) );
 }
 
 void blameFile()
 {
-    ExecCommand( TEXT( "blame" ) );
+    ExecCommand( TEXT( " blame" ) );
 }
 
 void statusAll()
 {
-    ExecCommand( TEXT( "status" ), false, true );
+    ExecCommand( TEXT( " status" ), false, true );
+}
+
+void giTk()
+{
+    ExecCommand( TEXT( "k" ), false, true );
+}
+
+void gitGui()
+{
+    ExecCommand( TEXT( "-gui" ), false, true );
 }

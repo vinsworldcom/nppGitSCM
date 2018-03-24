@@ -1,7 +1,7 @@
 # Project: NppColHighLight
 # Makefile created by Dev-C++ 5.9.2
 
-PROJECT  = NPPGit
+PROJECT  = NPPGitSCM
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
