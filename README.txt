@@ -15,7 +15,7 @@ https://github.com/alansbraga/NPPGit
 ... to use GIT SCM for Windows, not TortoiseGit.
 
 You need to have GIT SCM (https://git-scm.com/) installed and in your 
-PATH environment variable.
+PATH environment variable.  Usually C:\Program Files\git\cmd.
 
 
 DEPENDENCIES
