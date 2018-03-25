@@ -2,9 +2,12 @@
 # Makefile created by Dev-C++ 5.9.2
 
 PROJECT  = NPPGitSCM
+
 CPP      = g++.exe
 CC       = gcc.exe
 WINDRES  = windres.exe
+RM       = rm.exe -f
+
 DLLRES   = $(PROJECT)_private.res
 OBJ      = $(PROJECT).o PluginDefinition.o $(DLLRES)
 LINKOBJ  = $(PROJECT).o PluginDefinition.o $(DLLRES)
@@ -14,7 +17,6 @@ CXXINCS  =
 BIN      = $(PROJECT).dll
 CXXFLAGS = $(CXXINCS) -Wall -g3 -DBUILDING_DLL=1 -DUNICODE 
 CFLAGS   = $(INCS) -Wall -g3 -DBUILDING_DLL=1 -DUNICODE 
-RM       = rm.exe -f
 DEF      = lib$(PROJECT).def
 STATIC   = lib$(PROJECT).a
 
