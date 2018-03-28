@@ -1,4 +1,4 @@
-bin/NPPGitSCM.dll
+bin\NPPGitSCM.dll
 Makefile
 MANIFEST
 menuCmdID.h
