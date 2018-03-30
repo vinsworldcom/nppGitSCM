@@ -15,10 +15,10 @@ PREOBJS       =
 POSTOBJS      = 
 CLEAN-CUSTOM  = clean-cxxdll
 
-DEFINE        = -DBUILDING_DLL=1 -DUNICODE
-FLAGS         = -Wall -fexpensive-optimizations -O3
+DEFINE        = -DUNICODE
+FLAGS         = -Wall -g3
 INCS          = 
-LIBS          = -static-libgcc
+LIBS          = -static-libgcc -municode -mthreads
 
 # Remember to update MANIFEST if using RELEASEDIR
 RELEASEDIR    = bin
@@ -131,17 +131,9 @@ $(RELEASEDIR):
 
 # Additional targets
 ##########
-# C++
-CXXFLAGS      = $(INCS) $(FLAGS) $(DEFINE)
-
-%.o: %.cpp
-	$(CXX) -c $< -o $@ $(CXXFLAGS)
-
-##########
 # C++ .dll
 DLLWRAP       = dllwrap.exe
 
-CXXFLAGS      = $(INCS) $(FLAGS) $(DEFINE)
 CXXLINKOPTS   = -Bstatic
 DEFINE       += -DBUILDING_DLL=1
 
@@ -154,4 +146,11 @@ $(BIN): $(OBJLINK)
 
 clean-cxxdll:
 	$(RM_F) $(CXXDEFFILE) $(CXXSTATICLIB)
+
+##########
+# C++
+CXXFLAGS      = $(INCS) $(FLAGS) $(DEFINE)
+
+%.o: %.cpp
+	$(CXX) -c $< -o $@ $(CXXFLAGS)
 
