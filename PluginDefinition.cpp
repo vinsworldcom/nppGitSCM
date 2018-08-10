@@ -21,6 +21,10 @@
 #include "stdafx.h"
 #include <string>
 #include <vector>
+#include <shlwapi.h>
+#include "DockingFeature/GitPanelDlg.h"
+
+DemoDlg _gitPanel;
 
 //
 // The plugin data that Notepad++ needs
@@ -32,11 +36,15 @@ FuncItem funcItem[nbFunc];
 //
 NppData nppData;
 
+#define DOCKABLE_INDEX 3
+
 //
 // Initialize your plugin data here
 // It will be called while plugin loading
 void pluginInit( HANDLE hModule )
 {
+    // Initialize dockable dialog
+    _gitPanel.init((HINSTANCE)hModule, NULL);
 }
 
 //
@@ -67,17 +75,17 @@ void commandMenuInit()
     setCommand( 0, TEXT( "Git &GUI" ), gitGui, NULL, false );
     setCommand( 1, TEXT( "GiT&k" ), giTk, NULL, false );
     setCommand( 2, TEXT("-SEPARATOR-"), NULL, NULL, false );
-    setCommand( 3, TEXT( "&Status" ), statusAll, NULL, false );
-    setCommand( 4, TEXT( "&Commit File" ), commitFile, NULL, false );
-    setCommand( 5, TEXT( "Commit All Open Files" ), commitAllFiles, NULL,
-                false );
-    setCommand( 6, TEXT( "&Add File" ), addFile, NULL, false );
-    setCommand( 7, TEXT( "&Diff File" ), diffFile, NULL, false );
-    setCommand( 8, TEXT( "&Revert File" ), revertFile, NULL, false );
-    setCommand( 9, TEXT( "Revert All Open Files" ), revertAllFiles, NULL,
-                false );
-    setCommand( 10, TEXT( "Show File &Log" ), showFileLog, NULL, false );
-    setCommand( 11, TEXT( "&Blame File" ), blameFile, NULL, false );
+    setCommand( 3, TEXT( "Git Docking &Panel" ), DockableDlg, NULL, false );
+    setCommand( 4, TEXT("-SEPARATOR-"), NULL, NULL, false );
+    setCommand( 5, TEXT( "&Status" ), statusAll, NULL, false );
+    setCommand( 6, TEXT( "&Commit File" ), commitFile, NULL, false );
+    setCommand( 7, TEXT( "Commit All Open Files" ), commitAllFiles, NULL, false );
+    setCommand( 8, TEXT( "&Add File" ), addFile, NULL, false );
+    setCommand( 9, TEXT( "&Diff File" ), diffFile, NULL, false );
+    setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
+    setCommand( 11, TEXT( "Revert All Open Files" ), revertAllFiles, NULL, false );
+    setCommand( 12, TEXT( "Show File &Log" ), showFileLog, NULL, false );
+    setCommand( 13, TEXT( "&Blame File" ), blameFile, NULL, false );
 }
 
 //
@@ -87,7 +95,6 @@ void commandMenuCleanUp()
 {
     // Don't forget to deallocate your shortcut here
 }
-
 
 //
 // This function help you to initialize your plugin commands
@@ -251,6 +258,49 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false )
 ///
 /// Execution commands:
 ///
+void gitGui()
+{
+    ExecCommand( TEXT( "-gui" ), false, true );
+}
+
+void giTk()
+{
+    ExecCommand( TEXT( "k" ), false, true );
+}
+
+void DockableDlg()
+{
+	_gitPanel.setParent(nppData._nppHandle);
+	tTbData	data = {0};
+
+	if (!_gitPanel.isCreated())
+	{
+		_gitPanel.create(&data);
+
+		// define the default docking behaviour
+		data.uMask = DWS_DF_CONT_LEFT;
+
+		data.pszModuleName = _gitPanel.getPluginFileName();
+
+		// the dlgDlg should be the index of funcItem where the current function pointer is
+		// in this case is DOCKABLE_INDEX
+		data.dlgID = DOCKABLE_INDEX;
+		::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, (LPARAM)&data);
+	}
+
+    UINT state = ::GetMenuState(::GetMenu(nppData._nppHandle), funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND);
+	if (state & MF_CHECKED)
+		_gitPanel.display(false);
+	else
+        _gitPanel.display();
+	::SendMessage(nppData._nppHandle, NPPM_SETMENUITEMCHECK, funcItem[DOCKABLE_INDEX]._cmdID, !(state & MF_CHECKED));
+}
+
+void statusAll()
+{
+    ExecCommand( TEXT( " status" ), false, true );
+}
+
 void commitFile()
 {
     ExecCommand( TEXT( " commit" ) );
@@ -289,19 +339,4 @@ void showFileLog()
 void blameFile()
 {
     ExecCommand( TEXT( " blame" ) );
-}
-
-void statusAll()
-{
-    ExecCommand( TEXT( " status" ), false, true );
-}
-
-void giTk()
-{
-    ExecCommand( TEXT( "k" ), false, true );
-}
-
-void gitGui()
-{
-    ExecCommand( TEXT( "-gui" ), false, true );
 }
