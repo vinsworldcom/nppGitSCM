@@ -40,6 +40,9 @@
     <ClCompile Include="..\PluginDefinition.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="..\res\git.ico" />
+  </ItemGroup>
+  <ItemGroup>
     <ResourceCompile Include="..\DockingFeature\gitPanel.rc" />
     <ResourceCompile Include="..\NPPGitSCM_private.rc" />
   </ItemGroup>

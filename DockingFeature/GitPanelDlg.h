@@ -29,8 +29,6 @@ class DemoDlg : public DockingDlgInterface
         virtual void display( bool toShow = true ) const
         {
             DockingDlgInterface::display( toShow );
-//        if (toShow)
-//            ::SetFocus(::GetDlgItem(_hSelf, ID_GOLINE_EDIT));
         };
 
         void setParent( HWND parent2set )
