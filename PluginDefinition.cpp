@@ -81,9 +81,10 @@ void commandMenuInit()
     setCommand( 6, TEXT( "&Commit" ), commitAll, NULL, false );
     setCommand( 7, TEXT( "&Add File" ), addFile, NULL, false );
     setCommand( 8, TEXT( "&Diff File" ), diffFile, NULL, false );
-    setCommand( 9, TEXT( "&Revert File" ), revertFile, NULL, false );
-    setCommand( 10, TEXT( "&Log File" ), logFile, NULL, false );
-    setCommand( 11, TEXT( "&Blame File" ), blameFile, NULL, false );
+    setCommand( 9, TEXT( "&Unstage File" ), unstageFile, NULL, false );
+    setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
+    setCommand( 11, TEXT( "&Log File" ), logFile, NULL, false );
+    setCommand( 12, TEXT( "&Blame File" ), blameFile, NULL, false );
 }
 
 //
@@ -300,6 +301,11 @@ void addFile()
 void diffFile()
 {
     ExecCommand( TEXT( " diff" ) );
+}
+
+void unstageFile()
+{
+    ExecCommand( TEXT( " reset HEAD" ), false, false, false );
 }
 
 void revertFile()
