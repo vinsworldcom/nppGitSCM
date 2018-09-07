@@ -46,12 +46,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 }
                 case IDC_BTN4 :
                 {
-                    commitFile();
-                    return TRUE;
-                }
-                case IDC_BTN5 :
-                {
-                    commitAllFiles();
+                    commitAll();
                     return TRUE;
                 }
                 case IDC_BTN6 :
@@ -69,14 +64,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     revertFile();
                     return TRUE;
                 }
-                case IDC_BTN9 :
-                {
-                    revertAllFiles();
-                    return TRUE;
-                }
                 case IDC_BTN10 :
                 {
-                    showFileLog();
+                    logFile();
                     return TRUE;
                 }
                 case IDC_BTN11 :

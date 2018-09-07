@@ -19,32 +19,32 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\DockingFeature\Docking.h" />
-    <ClInclude Include="..\DockingFeature\DockingDlgInterface.h" />
-    <ClInclude Include="..\DockingFeature\dockingResource.h" />
-    <ClInclude Include="..\DockingFeature\GitPanelDlg.h" />
-    <ClInclude Include="..\DockingFeature\resource.h" />
-    <ClInclude Include="..\DockingFeature\StaticDialog.h" />
-    <ClInclude Include="..\DockingFeature\Window.h" />
-    <ClInclude Include="..\menuCmdID.h" />
-    <ClInclude Include="..\Notepad_plus_msgs.h" />
-    <ClInclude Include="..\NppGitSCM_private.h" />
-    <ClInclude Include="..\PluginDefinition.h" />
-    <ClInclude Include="..\PluginInterface.h" />
-    <ClInclude Include="..\Scintilla.h" />
+    <ClInclude Include="DockingFeature\Docking.h" />
+    <ClInclude Include="DockingFeature\DockingDlgInterface.h" />
+    <ClInclude Include="DockingFeature\dockingResource.h" />
+    <ClInclude Include="DockingFeature\GitPanelDlg.h" />
+    <ClInclude Include="DockingFeature\resource.h" />
+    <ClInclude Include="DockingFeature\StaticDialog.h" />
+    <ClInclude Include="DockingFeature\Window.h" />
+    <ClInclude Include="menuCmdID.h" />
+    <ClInclude Include="Notepad_plus_msgs.h" />
+    <ClInclude Include="NppGitSCM_private.h" />
+    <ClInclude Include="PluginDefinition.h" />
+    <ClInclude Include="PluginInterface.h" />
+    <ClInclude Include="Scintilla.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\DockingFeature\GitPanelDlg.cpp" />
-    <ClCompile Include="..\DockingFeature\StaticDialog.cpp" />
-    <ClCompile Include="..\NppGitSCM.cpp" />
-    <ClCompile Include="..\PluginDefinition.cpp" />
+    <ClCompile Include="DockingFeature\GitPanelDlg.cpp" />
+    <ClCompile Include="DockingFeature\StaticDialog.cpp" />
+    <ClCompile Include="NppGitSCM.cpp" />
+    <ClCompile Include="PluginDefinition.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="..\res\git.ico" />
+    <Image Include="NppGitSCM.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="..\DockingFeature\gitPanel.rc" />
-    <ResourceCompile Include="..\NppGitSCM_private.rc" />
+    <ResourceCompile Include="DockingFeature\gitPanel.rc" />
+    <ResourceCompile Include="NppGitSCM_private.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{9D04DBD5-E12E-44E0-A683-6F43F21D533B}</ProjectGuid>
@@ -103,11 +103,11 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin\</OutDir>
+    <OutDir>bin\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>..\bin64\</OutDir>
+    <OutDir>bin64\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -167,9 +167,6 @@
       <AdditionalDependencies>shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(TargetName).lib</ImportLibrary>
     </Link>
-    <PostBuildEvent>
-      <Command>copy ..\license.txt ..\bin\license.txt</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -193,10 +190,6 @@
       <AdditionalDependencies>shlwapi.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ImportLibrary>$(TargetName).lib</ImportLibrary>
     </Link>
-    <PostBuildEvent>
-      <Command>copy ..\license.txt ..\bin64\license.txt
-copy ..\readme.FIRST ..\bin64\readme.FIRST</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

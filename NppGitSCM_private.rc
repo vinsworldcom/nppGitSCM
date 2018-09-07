@@ -2,14 +2,14 @@
 /* DO NOT EDIT! */
 
 #include <windows.h> // include for version info constants
-
+#include <NppGitSCM_private.h> // include for version info constants
 
 //
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
 //
 1 VERSIONINFO
-FILEVERSION 1,1,1,1
-PRODUCTVERSION 1,1,1,1
+FILEVERSION 1,2,1,1
+PRODUCTVERSION 1,2,1,1
 FILETYPE VFT_DLL
 {
   BLOCK "StringFileInfo"
@@ -17,14 +17,14 @@ FILETYPE VFT_DLL
     BLOCK "040904E4"
     {
       VALUE "CompanyName", "Vin's World"
-      VALUE "FileVersion", "1.1.1.1"
+      VALUE "FileVersion", VER_STRING
       VALUE "FileDescription", "Notepad++ Plugin for Git SCM."
       VALUE "InternalName", "Notepad++ Git SCM"
       VALUE "LegalCopyright", "Copyright (C) VinsWorld. All Rights Reserved."
       VALUE "LegalTrademarks", ""
       VALUE "OriginalFilename", ""
       VALUE "ProductName", "NPPGITSCM"
-      VALUE "ProductVersion", "1.1.1.1"
+      VALUE "ProductVersion", VER_STRING
     }
   }
   BLOCK "VarFileInfo"
