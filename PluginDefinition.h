@@ -36,7 +36,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 14;
+const int nbFunc = 12;
 
 
 //
@@ -75,13 +75,11 @@ void gitGui();
 void giTk();
 void DockableDlg();
 void statusAll();
-void commitFile();
-void commitAllFiles();
+void commitAll();
 void addFile();
 void diffFile();
 void revertFile();
-void revertAllFiles();
-void showFileLog();
+void logFile();
 void blameFile();
 
 #endif //PLUGINDEFINITION_H

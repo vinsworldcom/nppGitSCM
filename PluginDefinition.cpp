@@ -78,14 +78,12 @@ void commandMenuInit()
     setCommand( 3, TEXT( "Git Docking &Panel" ), DockableDlg, NULL, false );
     setCommand( 4, TEXT("-SEPARATOR-"), NULL, NULL, false );
     setCommand( 5, TEXT( "&Status" ), statusAll, NULL, false );
-    setCommand( 6, TEXT( "&Commit File" ), commitFile, NULL, false );
-    setCommand( 7, TEXT( "Commit All Open Files" ), commitAllFiles, NULL, false );
-    setCommand( 8, TEXT( "&Add File" ), addFile, NULL, false );
-    setCommand( 9, TEXT( "&Diff File" ), diffFile, NULL, false );
-    setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
-    setCommand( 11, TEXT( "Revert All Open Files" ), revertAllFiles, NULL, false );
-    setCommand( 12, TEXT( "Show File &Log" ), showFileLog, NULL, false );
-    setCommand( 13, TEXT( "&Blame File" ), blameFile, NULL, false );
+    setCommand( 6, TEXT( "&Commit" ), commitAll, NULL, false );
+    setCommand( 7, TEXT( "&Add File" ), addFile, NULL, false );
+    setCommand( 8, TEXT( "&Diff File" ), diffFile, NULL, false );
+    setCommand( 9, TEXT( "&Revert File" ), revertFile, NULL, false );
+    setCommand( 10, TEXT( "&Log File" ), logFile, NULL, false );
+    setCommand( 11, TEXT( "&Blame File" ), blameFile, NULL, false );
 }
 
 //
@@ -207,14 +205,24 @@ bool launchGit( std::wstring &command )
                &pi ) != 0;
 }
 
+// Used for debug printing to MessageBox
+std::string ws2s(const std::wstring& wstr)
+{
+    int size_needed = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), int(wstr.length() + 1), 0, 0, 0, 0); 
+    std::string strTo(size_needed, 0);
+    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), int(wstr.length() + 1), &strTo[0], size_needed, 0, 0); 
+    return strTo;
+}
 
 ///
 /// Builds and executes command line string to send to CreateProcess
 ///
 /// @param cmd Command name to execute.
 /// @param all Execute command on all files, or just the current file.
+/// @param ALL No files
+/// @param pause Pause after command.
 ///
-void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false )
+void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false, bool pause = true )
 {
     std::wstring gitLoc;
     bool gitInstalled = getGitLocation( gitLoc );
@@ -247,7 +255,13 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false )
     
         }
     }
-    command += TEXT( " && pause\"" );
+    if ( pause )
+        command += TEXT( " && pause" );
+
+    command += TEXT( "\"" );
+
+    // Debug
+    //MessageBoxA(NULL, ws2s(command).c_str(), "Command to run", MB_OK);
 
     if ( !launchGit( command ) )
         MessageBox( NULL, TEXT( "Could not launch Git." ),
@@ -260,14 +274,53 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false )
 ///
 void gitGui()
 {
-    ExecCommand( TEXT( "-gui" ), false, true );
+    ExecCommand( TEXT( "-gui" ), false, true, false );
 }
 
 void giTk()
 {
-    ExecCommand( TEXT( "k" ), false, true );
+    ExecCommand( TEXT( "k" ), false, true, false );
 }
 
+void statusAll()
+{
+    ExecCommand( TEXT( " status" ), false, true );
+}
+
+void commitAll()
+{
+    ExecCommand( TEXT( " commit" ), false, true );
+}
+
+void addFile()
+{
+    ExecCommand( TEXT( " add" ), false, false, false );
+}
+
+void diffFile()
+{
+    ExecCommand( TEXT( " diff" ) );
+}
+
+void revertFile()
+{
+    ExecCommand( TEXT( " checkout --" ), false, false, false );
+}
+
+void logFile()
+{
+    ExecCommand( TEXT( " log" ) );
+}
+
+void blameFile()
+{
+    ExecCommand( TEXT( " blame" ) );
+}
+
+////////////////////////////////////////////////////////////////////////////
+///
+/// Dockable dialog:
+///
 void DockableDlg()
 {
 	_gitPanel.setParent(nppData._nppHandle);
@@ -295,49 +348,4 @@ void DockableDlg()
 	else
         _gitPanel.display();
 	::SendMessage(nppData._nppHandle, NPPM_SETMENUITEMCHECK, funcItem[DOCKABLE_INDEX]._cmdID, !(state & MF_CHECKED));
-}
-
-void statusAll()
-{
-    ExecCommand( TEXT( " status" ), false, true );
-}
-
-void commitFile()
-{
-    ExecCommand( TEXT( " commit" ) );
-}
-
-void commitAllFiles()
-{
-    ExecCommand( TEXT( " commit" ), true );
-}
-
-void addFile()
-{
-    ExecCommand( TEXT( " add" ) );
-}
-
-void diffFile()
-{
-    ExecCommand( TEXT( " diff" ) );
-}
-
-void revertFile()
-{
-    ExecCommand( TEXT( " revert" ) );
-}
-
-void revertAllFiles()
-{
-    ExecCommand( TEXT( " revert" ), true );
-}
-
-void showFileLog()
-{
-    ExecCommand( TEXT( " log" ) );
-}
-
-void blameFile()
-{
-    ExecCommand( TEXT( " blame" ) );
 }
