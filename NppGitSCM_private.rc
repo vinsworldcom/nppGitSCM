@@ -16,15 +16,15 @@ FILETYPE VFT_DLL
   {
     BLOCK "040904E4"
     {
-      VALUE "CompanyName", "Vin's World"
-      VALUE "FileVersion", VER_STRING
-      VALUE "FileDescription", "Notepad++ Plugin for Git SCM."
-      VALUE "InternalName", "Notepad++ Git SCM"
-      VALUE "LegalCopyright", "Copyright (C) VinsWorld. All Rights Reserved."
-      VALUE "LegalTrademarks", ""
+      VALUE "CompanyName",      COMPANY_NAME
+      VALUE "FileVersion",      VER_STRING
+      VALUE "FileDescription",  FILE_DESCRIPTION
+      VALUE "InternalName",     INTERNAL_NAME
+      VALUE "LegalCopyright",   LEGAL_COPYRIGHT
+      VALUE "LegalTrademarks",  ""
       VALUE "OriginalFilename", ""
-      VALUE "ProductName", "NPPGITSCM"
-      VALUE "ProductVersion", VER_STRING
+      VALUE "ProductName",      PRODUCT_NAME
+      VALUE "ProductVersion",   VER_STRING
     }
   }
   BLOCK "VarFileInfo"
