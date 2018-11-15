@@ -18,22 +18,22 @@ You need to have GIT SCM (https://git-scm.com/) installed and in your
 PATH environment variable.  Usually C:\Program Files\git\cmd.
 
 
-DEPENDENCIES
+COMPILING
 
-The Makefile is written for gmake.exe from the MinGW distribution.  There 
-is a Dev-Cpp project file (.dev) included.
+There was a Makefile written for gmake.exe from the MinGW distribution.
 
-I compiled with the MinGW released with Strawberry Perl version:
+I've compiled it fine, but needed to statically include glibc so I could 
+change my C compiler in my path.  This led to a much larger DLL.  Also, 
+I couldn't get the docking interface to work when compiling with MinGW.
 
-This is perl 5, version 18, subversion 4 (v5.18.4) built for 
-MSWin32-x86-multi-thread-64int
+I compiled with MS Visual Studio Community 2017 and this seems to work 
+OK.
 
-g++ (release with patches / build 20130526 by strawberryperl.com) 4.7.3
+[x86 Native Tools Command Prompt for VS 2017]
+Configuration=Release
+Platform=Win32
 
-  - I need to compile as 32-bit to match my Notepad++ install
-  - I have UNICODE enabled to match my Notepad++ install
-  
-You can edit the Makefile to suit your needs.
+  msbuild
 
 
 INSTALLATION
@@ -44,8 +44,12 @@ uses the command line features of it.
 
 It needs to be in your PATH environment variable.
 
-After that, take the DLL NPPGit.dll in the ./bin folder of this repository 
-and copy to the Notepad++ plugins folder.
+  PATH=[..];<INSTALL_DIR>\git\cmd;
+
+After that, take the GitSCM.dll in the ./bin folder of this repository 
+and copy to the Notepad++ plugins folder:
+  - In N++ <7.6, directly in the plugins/ folder
+  - In N++ >=7.6, in a directory called GitSCM in the plugins/ folder
 
 Next time you open Notepad++ you can access through menu Plugins->Git or 
 quickly with Alt+P then G.
