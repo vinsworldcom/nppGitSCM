@@ -144,7 +144,7 @@ std::vector<std::wstring> getAllFiles()
 {
     //get the number of opened files
     //notepad++ always returns an extra "new 1", remove it by subtracting 1
-    int numFiles = ( ::SendMessage( nppData._nppHandle, NPPM_GETNBOPENFILES, 0,
+    int numFiles = (int)( ::SendMessage( nppData._nppHandle, NPPM_GETNBOPENFILES, 0,
                                     ALL_OPEN_FILES ) ) - 1;
 
     //allocate memory to hold filenames
