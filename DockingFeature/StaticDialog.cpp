@@ -80,7 +80,7 @@ void StaticDialog::create(int dialogID, bool isRTL)
 	{
 		DWORD err = ::GetLastError();
 		char errMsg[256];
-		sprintf(errMsg, "CreateDialogParam() return NULL.\rGetLastError() == %lu\rHandle = %i\rResourceID = %i", err,(int)GetModuleHandle(TEXT("NppPluginDemo.dll")),dialogID);
+		sprintf(errMsg, "CreateDialogParam() return NULL.\rGetLastError() == %lu\rHandle = %p\rResourceID = %i", err,(void*)GetModuleHandle(TEXT("NppPluginDemo.dll")),dialogID);
 		::MessageBoxA(NULL, errMsg, "In StaticDialog::create()", MB_OK);
 		return;
 	}
