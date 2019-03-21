@@ -39,6 +39,11 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     giTk();
                     return TRUE;
                 }
+                case IDC_CHK1 :
+                {
+                    doTortoise();
+                    return TRUE;
+                }
                 case IDC_BTN3 :
                 {
                     statusAll();
