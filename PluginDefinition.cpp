@@ -24,9 +24,9 @@
 #include <shlwapi.h>
 #include "DockingFeature/GitPanelDlg.h"
 
-const TCHAR sectionName[] = TEXT("Git");
-const TCHAR keyName[] = TEXT("Tortoise");
-const TCHAR configFileName[] = TEXT("GitSCM.ini");
+const TCHAR sectionName[] = TEXT( "Git" );
+const TCHAR keyName[] = TEXT( "Tortoise" );
+const TCHAR configFileName[] = TEXT( "GitSCM.ini" );
 
 DemoDlg _gitPanel;
 
@@ -52,7 +52,7 @@ bool useTortoise = false;
 void pluginInit( HANDLE hModule )
 {
     // Initialize dockable dialog
-    _gitPanel.init((HINSTANCE)hModule, NULL);
+    _gitPanel.init( ( HINSTANCE )hModule, NULL );
 }
 
 //
@@ -60,7 +60,8 @@ void pluginInit( HANDLE hModule )
 //
 void pluginCleanUp()
 {
-    ::WritePrivateProfileString(sectionName, keyName, useTortoise?TEXT("1"):TEXT("0"), iniFilePath);
+    ::WritePrivateProfileString( sectionName, keyName,
+                                 useTortoise ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
 }
 
 //
@@ -73,19 +74,19 @@ void commandMenuInit()
     //
 
     // get path of plugin configuration
-    ::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)iniFilePath);
+    ::SendMessage( nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH,
+                   ( LPARAM )iniFilePath );
 
     // if config path doesn't exist, we create it
-    if (PathFileExists(iniFilePath) == FALSE)
-    {
-        ::CreateDirectory(iniFilePath, NULL);
-    }
+    if ( PathFileExists( iniFilePath ) == FALSE )
+        ::CreateDirectory( iniFilePath, NULL );
 
     // make your plugin config file full file path name
-    PathAppend(iniFilePath, configFileName);
+    PathAppend( iniFilePath, configFileName );
 
     // get the parameter value from plugin config
-    useTortoise = ::GetPrivateProfileInt(sectionName, keyName, 0, iniFilePath);
+    useTortoise = ::GetPrivateProfileInt( sectionName, keyName, 0,
+                                          iniFilePath );
 
     //--------------------------------------------//
     //-- STEP 3. CUSTOMIZE YOUR PLUGIN COMMANDS --//
@@ -100,9 +101,10 @@ void commandMenuInit()
 
     setCommand( 0, TEXT( "Git &GUI" ), gitGui, NULL, false );
     setCommand( 1, TEXT( "GiT&k" ), giTk, NULL, false );
-    setCommand( 2, TEXT("-SEPARATOR-"), NULL, NULL, false );
-    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking &Panel" ), DockableDlg, NULL, false );
-    setCommand( 4, TEXT("-SEPARATOR-"), NULL, NULL, false );
+    setCommand( 2, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
+    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking &Panel" ), DockableDlg, NULL,
+                false );
+    setCommand( 4, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
     setCommand( 5, TEXT( "&Status" ), statusAll, NULL, false );
     setCommand( 6, TEXT( "&Commit" ), commitAll, NULL, false );
     setCommand( 7, TEXT( "&Add File" ), addFile, NULL, false );
@@ -111,8 +113,9 @@ void commandMenuInit()
     setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
     setCommand( 11, TEXT( "&Log File" ), logFile, NULL, false );
     setCommand( 12, TEXT( "&Blame File" ), blameFile, NULL, false );
-    setCommand( 13, TEXT("-SEPARATOR-"), NULL, NULL, false );
-    setCommand( TORTOISE_INDEX, TEXT("Use &TortoiseGit"), doTortoise, NULL, useTortoise?true:false );
+    setCommand( 13, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
+    setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
+                useTortoise ? true : false );
 }
 
 //
@@ -172,11 +175,13 @@ std::vector<std::wstring> getAllFiles()
 {
     //get the number of opened files
     //notepad++ always returns an extra "new 1", remove it by subtracting 1
-    int numFiles = (int)( ::SendMessage( nppData._nppHandle, NPPM_GETNBOPENFILES, 0,
-                                    ALL_OPEN_FILES ) ) - 1;
+    int numFiles = ( int )( ::SendMessage( nppData._nppHandle,
+                                           NPPM_GETNBOPENFILES, 0,
+                                           ALL_OPEN_FILES ) ) - 1;
 
     //allocate memory to hold filenames
     TCHAR **files = new TCHAR*[numFiles];
+
     for ( int i = 0; i < numFiles; i++ )
         files[i] = new TCHAR[MAX_PATH];
 
@@ -185,6 +190,7 @@ std::vector<std::wstring> getAllFiles()
                    ( LPARAM )numFiles );
 
     std::vector<std::wstring> filePaths;
+
     for ( int i = 0; i < numFiles; i++ )
         filePaths.push_back( files[i] );
 
@@ -202,6 +208,39 @@ bool getGitLocation( std::wstring &loc )
 {
     TCHAR procPath[MAX_PATH];
     wcscpy( procPath, TEXT( "cmd /c \"git" ) );
+    loc = loc.append( procPath );
+    return true;
+}
+
+///
+/// Gets the path to the TortioseGit executable from the registry.
+///
+/// @param loc [out] Location of Tortoise executable
+///
+/// @return Whether or not the path was successfully retrieved.
+///         If false, Tortoise is most likely not installed.
+bool getTortoiseLocation( std::wstring &loc )
+{
+    HKEY hKey;
+
+    if ( RegOpenKeyEx( HKEY_LOCAL_MACHINE, TEXT( "Software\\TortoiseGit" ), 0,
+                       KEY_READ | KEY_WOW64_64KEY, &hKey ) != ERROR_SUCCESS )
+        return false;
+
+    TCHAR procPath[MAX_PATH];
+    DWORD length = MAX_PATH;
+
+    // Modified Douglas Phillips <doug@sbscomp.com> 2008-12-29 to
+    // support 32-bit and Non-Vista operating Systems.
+    if ( RegQueryValueEx(
+                hKey,
+                TEXT( "ProcPath" ),
+                NULL,
+                NULL,
+                ( LPBYTE )procPath,
+                &length ) != ERROR_SUCCESS )
+        return false;
+
     loc = loc.append( procPath );
     return true;
 }
@@ -235,11 +274,13 @@ bool launchGit( std::wstring &command )
 }
 
 // Used for debug printing to MessageBox
-std::string ws2s(const std::wstring& wstr)
+std::string ws2s( const std::wstring &wstr )
 {
-    int size_needed = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), int(wstr.length() + 1), 0, 0, 0, 0); 
-    std::string strTo(size_needed, 0);
-    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), int(wstr.length() + 1), &strTo[0], size_needed, 0, 0); 
+    int size_needed = WideCharToMultiByte( CP_ACP, 0, wstr.c_str(),
+                                           int( wstr.length() + 1 ), 0, 0, 0, 0 );
+    std::string strTo( size_needed, 0 );
+    WideCharToMultiByte( CP_ACP, 0, wstr.c_str(), int( wstr.length() + 1 ),
+                         &strTo[0], size_needed, 0, 0 );
     return strTo;
 }
 
@@ -251,7 +292,8 @@ std::string ws2s(const std::wstring& wstr)
 /// @param ALL No files
 /// @param pause Pause after command.
 ///
-void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false, bool pause = true )
+void ExecGitCommand( const std::wstring &cmd, bool all = false,
+                     bool ALL = false, bool pause = true )
 {
     std::wstring gitLoc;
     bool gitInstalled = getGitLocation( gitLoc );
@@ -279,11 +321,12 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false, b
                 itr != files.end(); itr++ )
         {
             command += ( *itr );
+
             if ( itr != files.end() - 1 )
                 command += TEXT( "*" );
-    
         }
     }
+
     if ( pause )
         command += TEXT( " && pause" );
 
@@ -297,63 +340,138 @@ void ExecCommand( const std::wstring &cmd, bool all = false, bool ALL = false, b
                     TEXT( "Update Failed" ), 0 );
 }
 
+///
+/// Builds and executes command line string to send to CreateProcess
+/// See http://tortoisesvn.net/docs/release/TortoiseSVN_en/tsvn-automation.html
+/// for TortoiseSVN command line parameters.
+///
+/// @param cmd Command name to execute.
+/// @param all Execute command on all files, or just the current file.
+///
+void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
+                          bool ALL = false )
+{
+    std::wstring tortoiseLoc;
+    bool tortoiseInstalled = getTortoiseLocation( tortoiseLoc );
+
+    if ( !tortoiseInstalled )
+    {
+        MessageBox( NULL, TEXT( "Could not locate TortoiseGit" ),
+                    TEXT( "Update Failed" ), 0 );
+        return;
+    }
+
+    std::vector<std::wstring> files;
+
+    if ( all )
+        files = getAllFiles();
+    else
+        files.push_back( getCurrentFile() );
+
+    std::wstring command = tortoiseLoc;
+    command += TEXT( " /command:" ) + cmd + TEXT( " /path:\"" );
+
+    if ( !ALL )
+    {
+        for ( std::vector<std::wstring>::iterator itr = files.begin();
+                itr != files.end(); itr++ )
+        {
+            command += ( *itr );
+
+            if ( itr != files.end() - 1 )
+                command += TEXT( "*" );
+        }
+    }
+    else
+        command += TEXT( "*" );
+
+    command += TEXT( "\" /closeonend:0" );
+
+    if ( !launchGit( command ) )
+        MessageBox( NULL, TEXT( "Could not launch TortoiseGit." ),
+                    TEXT( "Update Failed" ), 0 );
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ///
 /// Execution commands:
 ///
 void gitGui()
 {
-    ExecCommand( TEXT( "-gui" ), false, true, false );
+    ExecGitCommand( TEXT( "-gui" ), false, true, false );
 }
 
 void giTk()
 {
-    ExecCommand( TEXT( "k" ), false, true, false );
+    ExecGitCommand( TEXT( "k" ), false, true, false );
 }
 
 void statusAll()
 {
-    ExecCommand( TEXT( " status" ), false, true );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "repostatus" ), false, true );
+    else
+        ExecGitCommand( TEXT( " status" ), false, true );
 }
 
 void commitAll()
 {
-    ExecCommand( TEXT( " commit" ), false, true );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "commit" ), false, true );
+    else
+        ExecGitCommand( TEXT( " commit" ), false, true );
 }
 
 void addFile()
 {
-    ExecCommand( TEXT( " add" ), false, false, false );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "add" ) );
+    else
+        ExecGitCommand( TEXT( " add" ), false, false, false );
 }
 
 void diffFile()
 {
-    ExecCommand( TEXT( " diff" ) );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "diff" ) );
+    else
+        ExecGitCommand( TEXT( " diff" ) );
 }
 
 void unstageFile()
 {
-    ExecCommand( TEXT( " reset HEAD" ), false, false, false );
+    ExecGitCommand( TEXT( " reset HEAD" ), false, false, false );
 }
 
 void revertFile()
 {
-    ExecCommand( TEXT( " checkout --" ), false, false, false );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "revert" ) );
+    else
+        ExecGitCommand( TEXT( " checkout --" ), false, false, false );
 }
 
 void logFile()
 {
-    ExecCommand( TEXT( " log" ) );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "log" ) );
+    else
+        ExecGitCommand( TEXT( " log" ) );
+
 }
 
 void blameFile()
 {
-    ExecCommand( TEXT( " blame" ) );
+    if ( useTortoise )
+        ExecTortoiseCommand( TEXT( "blame" ) );
+    else
+        ExecGitCommand( TEXT( " blame" ) );
 }
 
 void doTortoise()
 {
-    UINT state = ::GetMenuState( ::GetMenu(nppData._nppHandle), funcItem[TORTOISE_INDEX]._cmdID, 
+    UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
+                                 funcItem[TORTOISE_INDEX]._cmdID,
                                  MF_BYCOMMAND );
 
     if ( state & MF_CHECKED )
@@ -371,29 +489,36 @@ void doTortoise()
 ///
 void DockableDlg()
 {
-    _gitPanel.setParent(nppData._nppHandle);
+    _gitPanel.setParent( nppData._nppHandle );
     tTbData data = {0};
 
-    if (!_gitPanel.isCreated())
+    if ( !_gitPanel.isCreated() )
     {
-        _gitPanel.create(&data);
+        _gitPanel.create( &data );
 
         // define the default docking behaviour
         data.uMask = DWS_DF_CONT_LEFT | DWS_ICONTAB;
 
-        data.hIconTab = (HICON)::LoadImage(_gitPanel.getHinst(), MAKEINTRESOURCE(IDI_PLUGINGITPANEL), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
+        data.hIconTab = ( HICON )::LoadImage( _gitPanel.getHinst(),
+                                              MAKEINTRESOURCE( IDI_PLUGINGITPANEL ), IMAGE_ICON, 0, 0,
+                                              LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT );
         data.pszModuleName = _gitPanel.getPluginFileName();
 
         // the dlgDlg should be the index of funcItem where the current function pointer is
         // in this case is DOCKABLE_INDEX
         data.dlgID = DOCKABLE_INDEX;
-        ::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, (LPARAM)&data);
+        ::SendMessage( nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0,
+                       ( LPARAM )&data );
     }
 
-    UINT state = ::GetMenuState(::GetMenu(nppData._nppHandle), funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND);
-    if (state & MF_CHECKED)
-        _gitPanel.display(false);
+    UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
+                                 funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND );
+
+    if ( state & MF_CHECKED )
+        _gitPanel.display( false );
     else
         _gitPanel.display();
-    ::SendMessage(nppData._nppHandle, NPPM_SETMENUITEMCHECK, funcItem[DOCKABLE_INDEX]._cmdID, !(state & MF_CHECKED));
+
+    ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                   funcItem[DOCKABLE_INDEX]._cmdID, !( state & MF_CHECKED ) );
 }
