@@ -36,7 +36,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 13;
+const int nbFunc = 15;
 
 
 //
@@ -82,5 +82,6 @@ void unstageFile();
 void revertFile();
 void logFile();
 void blameFile();
+void doTortoise();
 
 #endif //PLUGINDEFINITION_H

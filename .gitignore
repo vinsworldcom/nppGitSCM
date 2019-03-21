@@ -2,7 +2,6 @@ Debug
 Release
 .vs
 *.suo
-*.sln
 *.exp
 *.lib
 *.iobj
