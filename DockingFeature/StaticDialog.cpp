@@ -20,6 +20,7 @@
 #include "resource.h"
 
 extern bool useTortoise;
+HWND hDialog;
 
 void StaticDialog::goToCenter()
 {
@@ -94,6 +95,7 @@ void StaticDialog::create(int dialogID, bool isRTL)
 
 INT_PTR CALLBACK StaticDialog::dlgProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    hDialog = hwnd;
     switch (message)
     {
         case WM_INITDIALOG:

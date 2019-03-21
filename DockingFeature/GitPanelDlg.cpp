@@ -17,12 +17,18 @@
 
 #include "GitPanelDlg.h"
 #include "../PluginDefinition.h"
+#include "resource.h"
 
 extern NppData nppData;
+extern bool useTortoise;
+extern HWND hDialog;
 
 INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                        LPARAM lParam )
 {
+
+    ::SendMessage( GetDlgItem( hDialog, IDC_CHK1 ), BM_SETCHECK, ( LPARAM )( useTortoise ? 1 : 0 ), 0 );
+
     switch ( message )
     {
         case WM_COMMAND :
