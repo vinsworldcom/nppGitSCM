@@ -24,6 +24,10 @@
 #include <shlwapi.h>
 #include "DockingFeature/GitPanelDlg.h"
 
+const TCHAR sectionName[] = TEXT("Git");
+const TCHAR keyName[] = TEXT("Tortoise");
+const TCHAR configFileName[] = TEXT("GitSCM.ini");
+
 DemoDlg _gitPanel;
 
 //
@@ -36,7 +40,11 @@ FuncItem funcItem[nbFunc];
 //
 NppData nppData;
 
+TCHAR iniFilePath[MAX_PATH];
+bool useTortoise = false;
+
 #define DOCKABLE_INDEX 3
+#define TORTOISE_INDEX 14
 
 //
 // Initialize your plugin data here
@@ -52,7 +60,7 @@ void pluginInit( HANDLE hModule )
 //
 void pluginCleanUp()
 {
-
+    ::WritePrivateProfileString(sectionName, keyName, useTortoise?TEXT("1"):TEXT("0"), iniFilePath);
 }
 
 //
@@ -60,6 +68,24 @@ void pluginCleanUp()
 // You should fill your plugins commands here
 void commandMenuInit()
 {
+    //
+    // Firstly we get the parameters from your plugin config file (if any)
+    //
+
+    // get path of plugin configuration
+    ::SendMessage(nppData._nppHandle, NPPM_GETPLUGINSCONFIGDIR, MAX_PATH, (LPARAM)iniFilePath);
+
+    // if config path doesn't exist, we create it
+    if (PathFileExists(iniFilePath) == FALSE)
+    {
+        ::CreateDirectory(iniFilePath, NULL);
+    }
+
+    // make your plugin config file full file path name
+    PathAppend(iniFilePath, configFileName);
+
+    // get the parameter value from plugin config
+    useTortoise = ::GetPrivateProfileInt(sectionName, keyName, 0, iniFilePath);
 
     //--------------------------------------------//
     //-- STEP 3. CUSTOMIZE YOUR PLUGIN COMMANDS --//
@@ -75,7 +101,7 @@ void commandMenuInit()
     setCommand( 0, TEXT( "Git &GUI" ), gitGui, NULL, false );
     setCommand( 1, TEXT( "GiT&k" ), giTk, NULL, false );
     setCommand( 2, TEXT("-SEPARATOR-"), NULL, NULL, false );
-    setCommand( 3, TEXT( "Git Docking &Panel" ), DockableDlg, NULL, false );
+    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking &Panel" ), DockableDlg, NULL, false );
     setCommand( 4, TEXT("-SEPARATOR-"), NULL, NULL, false );
     setCommand( 5, TEXT( "&Status" ), statusAll, NULL, false );
     setCommand( 6, TEXT( "&Commit" ), commitAll, NULL, false );
@@ -85,6 +111,8 @@ void commandMenuInit()
     setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
     setCommand( 11, TEXT( "&Log File" ), logFile, NULL, false );
     setCommand( 12, TEXT( "&Blame File" ), blameFile, NULL, false );
+    setCommand( 13, TEXT("-SEPARATOR-"), NULL, NULL, false );
+    setCommand( TORTOISE_INDEX, TEXT("Use &TortoiseGit"), doTortoise, NULL, useTortoise?true:false );
 }
 
 //
@@ -323,35 +351,49 @@ void blameFile()
     ExecCommand( TEXT( " blame" ) );
 }
 
+void doTortoise()
+{
+    UINT state = ::GetMenuState( ::GetMenu(nppData._nppHandle), funcItem[TORTOISE_INDEX]._cmdID, 
+                                 MF_BYCOMMAND );
+
+    if ( state & MF_CHECKED )
+        useTortoise = 0;
+    else
+        useTortoise = 1;
+
+    ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                   funcItem[TORTOISE_INDEX]._cmdID, !( state & MF_CHECKED ) );
+}
+
 ////////////////////////////////////////////////////////////////////////////
 ///
 /// Dockable dialog:
 ///
 void DockableDlg()
 {
-	_gitPanel.setParent(nppData._nppHandle);
-	tTbData	data = {0};
+    _gitPanel.setParent(nppData._nppHandle);
+    tTbData data = {0};
 
-	if (!_gitPanel.isCreated())
-	{
-		_gitPanel.create(&data);
+    if (!_gitPanel.isCreated())
+    {
+        _gitPanel.create(&data);
 
-		// define the default docking behaviour
-		data.uMask = DWS_DF_CONT_LEFT | DWS_ICONTAB;
+        // define the default docking behaviour
+        data.uMask = DWS_DF_CONT_LEFT | DWS_ICONTAB;
 
-		data.hIconTab = (HICON)::LoadImage(_gitPanel.getHinst(), MAKEINTRESOURCE(IDI_PLUGINGITPANEL), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
-		data.pszModuleName = _gitPanel.getPluginFileName();
+        data.hIconTab = (HICON)::LoadImage(_gitPanel.getHinst(), MAKEINTRESOURCE(IDI_PLUGINGITPANEL), IMAGE_ICON, 0, 0, LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT);
+        data.pszModuleName = _gitPanel.getPluginFileName();
 
-		// the dlgDlg should be the index of funcItem where the current function pointer is
-		// in this case is DOCKABLE_INDEX
-		data.dlgID = DOCKABLE_INDEX;
-		::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, (LPARAM)&data);
-	}
+        // the dlgDlg should be the index of funcItem where the current function pointer is
+        // in this case is DOCKABLE_INDEX
+        data.dlgID = DOCKABLE_INDEX;
+        ::SendMessage(nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0, (LPARAM)&data);
+    }
 
     UINT state = ::GetMenuState(::GetMenu(nppData._nppHandle), funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND);
-	if (state & MF_CHECKED)
-		_gitPanel.display(false);
-	else
+    if (state & MF_CHECKED)
+        _gitPanel.display(false);
+    else
         _gitPanel.display();
-	::SendMessage(nppData._nppHandle, NPPM_SETMENUITEMCHECK, funcItem[DOCKABLE_INDEX]._cmdID, !(state & MF_CHECKED));
+    ::SendMessage(nppData._nppHandle, NPPM_SETMENUITEMCHECK, funcItem[DOCKABLE_INDEX]._cmdID, !(state & MF_CHECKED));
 }
