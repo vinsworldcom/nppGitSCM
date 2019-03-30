@@ -85,8 +85,8 @@ void commandMenuInit()
     PathAppend( iniFilePath, configFileName );
 
     // get the parameter value from plugin config
-    useTortoise = ::GetPrivateProfileInt( sectionName, keyName, 0,
-                                          iniFilePath );
+    useTortoise = (::GetPrivateProfileInt( sectionName, keyName, 0,
+                                          iniFilePath ) ? true : false);
 
     //--------------------------------------------//
     //-- STEP 3. CUSTOMIZE YOUR PLUGIN COMMANDS --//
