@@ -2,7 +2,7 @@
 /* DO NOT EDIT! */
 
 #include <windows.h> // include for version info constants
-#include <NppGitSCM_private.h> // include for version info constants
+#include <GitSCM_private.h> // include for version info constants
 
 //
 // TO CHANGE VERSION INFORMATION, EDIT PROJECT OPTIONS...
