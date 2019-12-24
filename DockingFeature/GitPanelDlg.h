@@ -18,8 +18,13 @@
 #ifndef GITPANEL_DLG_H
 #define GITPANEL_DLG_H
 
+#include <string>
+
 #include "DockingDlgInterface.h"
+#include "..\PluginDefinition.h"
 #include "resource.h"
+
+typedef std::basic_string<TCHAR> generic_string;
 
 class DemoDlg : public DockingDlgInterface
 {

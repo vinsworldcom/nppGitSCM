@@ -158,6 +158,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DockingFeature\GitPanelDlg.cpp" />
+    <ClCompile Include="DockingFeature\Process.cpp" />
     <ClCompile Include="DockingFeature\StaticDialog.cpp" />
     <ClCompile Include="GitSCM.cpp" />
     <ClCompile Include="PluginDefinition.cpp" />
@@ -167,19 +168,20 @@
     <ClInclude Include="DockingFeature\DockingDlgInterface.h" />
     <ClInclude Include="DockingFeature\dockingResource.h" />
     <ClInclude Include="DockingFeature\GitPanelDlg.h" />
+    <ClInclude Include="DockingFeature\Process.h" />
     <ClInclude Include="DockingFeature\resource.h" />
     <ClInclude Include="DockingFeature\StaticDialog.h" />
     <ClInclude Include="DockingFeature\Window.h" />
     <ClInclude Include="menuCmdID.h" />
     <ClInclude Include="Notepad_plus_msgs.h" />
-    <ClInclude Include="GitSCM_private.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="PluginDefinition.h" />
     <ClInclude Include="PluginInterface.h" />
     <ClInclude Include="Scintilla.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DockingFeature\gitPanel.rc" />
-    <ResourceCompile Include="GitSCM_private.rc" />
+    <ResourceCompile Include="GitSCM.rc" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="GitSCM.ico" />

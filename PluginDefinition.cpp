@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <shlwapi.h>
+
 #include "DockingFeature/GitPanelDlg.h"
 
 const TCHAR sectionName[] = TEXT( "Git" );
@@ -396,6 +397,11 @@ void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
 ///
 /// Execution commands:
 ///
+void notifyPanel()
+{
+
+}
+
 void gitGui()
 {
     ExecGitCommand( TEXT( "-gui" ), false, true, false );

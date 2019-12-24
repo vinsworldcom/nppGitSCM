@@ -71,6 +71,7 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 //
 // Your plugin command functions
 //
+void notifyPanel();
 void gitGui();
 void giTk();
 void DockableDlg();
