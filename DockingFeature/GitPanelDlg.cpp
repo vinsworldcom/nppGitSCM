@@ -26,33 +26,9 @@
 #include <fstream>
 #include <vector>
 
-#include <cstdio>
-#include <iostream>
-#include <string>
-#include <memory>
-#include <stdexcept>
-#include <array>
-
 extern NppData nppData;
 extern bool useTortoise;
 extern HWND hDialog;
-
-// std::string gitStatusPorc()
-// {
-    // std::string result;
-    // std::array<char, 128> buffer;
-    // const char* cmd = "git status --porcelain";
-
-    // std::unique_ptr<FILE, decltype(&_pclose)> pipe(_popen(cmd, "r"), _pclose);
-
-    // if (!pipe)
-        // return result;
-
-    // while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr)
-        // result += buffer.data();
-    
-    // return result;
-// }
 
 HWND getCurScintilla()
 {
@@ -63,21 +39,47 @@ HWND getCurScintilla()
            nppData._scintillaSecondHandle;
 }
 
-void refreshDialog()
+void clearList()
 {
+    SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_RESETCONTENT, 0, 0 );
+}
 
-    HWND hCurScintilla = getCurScintilla();
-    TCHAR pathName[MAX_PATH];
-    ::SendMessage( hCurScintilla, NPPM_GETCURRENTDIRECTORY, 0, (LPARAM)pathName);
+std::vector<std::wstring> split(std::wstring stringToBeSplitted, std::wstring delimeter)
+{
+    std::vector<std::wstring> splittedString;
+    size_t startIndex = 0;
+    size_t endIndex = 0;
+
+    while( (endIndex = stringToBeSplitted.find(delimeter, startIndex)) < stringToBeSplitted.size() )
+    {
+        std::wstring val = stringToBeSplitted.substr(startIndex, endIndex - startIndex);
+        splittedString.push_back(val);
+        startIndex = endIndex + delimeter.size();
+    }
+
+    if(startIndex < stringToBeSplitted.size())
+    {
+        std::wstring val = stringToBeSplitted.substr(startIndex);
+        splittedString.push_back(val);
+    }
+
+    return splittedString;
+}
+
+void updateList()
+{
+    // HWND hCurScintilla = getCurScintilla();
+    // TCHAR pathName[MAX_PATH];
+    // ::SendMessage( hCurScintilla, NPPM_GETCURRENTDIRECTORY, 0, (LPARAM)pathName);
 
     // std::wstring gitLoc;
     // bool gitInstalled = getGitLocation( gitLoc );
     // if ( !gitInstalled )
         // return;
 
-    const TCHAR *programPath = TEXT("\0"); // Overridden as NULL in Process.cpp
-    const TCHAR *pProgramDir = pathName;   // Overridden as NULL in Process.cpp
-    // const TCHAR *param       = TEXT("C:\\usr\\bin\\git\\cmd\\git.exe status --porcelain");
+    const TCHAR *programPath = TEXT("\0");  // Overridden as NULL in Process.cpp
+    // const TCHAR *pProgramDir = pathName; // Overridden as NULL in Process.cpp
+    const TCHAR *pProgramDir = TEXT("\0");  // Overridden as NULL in Process.cpp
     const TCHAR *param       = TEXT("cmd /c \"git status --porcelain\"");
     const TCHAR *progInput   = TEXT("");
     const TCHAR *progOutput  = TEXT("");
@@ -97,7 +99,7 @@ void refreshDialog()
         size_t pOutputLen = 0;
         // If progOutput is defined, then we search the file to read
         if (progOutputStr != TEXT(""))
-        { 
+        {
             if (::PathFileExists(progOutputStr.c_str()))
             {
                 // open the file for binary reading
@@ -144,8 +146,10 @@ void refreshDialog()
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
             std::wstring wide = converter.from_bytes(output.c_str());
 
-            SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_RESETCONTENT, 0, 0 );
-            SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_ADDSTRING, 0, ( LPARAM )wide.c_str() );
+            clearList();
+            std::vector<std::wstring> splittedStrings_2 = split(wide, TEXT("\n"));
+            for(unsigned int i = 0; i < splittedStrings_2.size() ; i++)
+                SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_ADDSTRING, i, ( LPARAM )splittedStrings_2[i].c_str() );
         }
     }
     else
@@ -153,21 +157,22 @@ void refreshDialog()
 // TODO:2019-12-24:MVINCENT: currently printing every other character
 //                           outputW.c_str() prints Asian characters
 //                           UTF8/16 issue
-        std::wstring outputW = program.getStderr();
-        std::string output(outputW.begin(), outputW.end());
-        output.assign(outputW.begin(), outputW.end());
+        // std::wstring outputW = program.getStderr();
+        // std::string output(outputW.begin(), outputW.end());
+        // output.assign(outputW.begin(), outputW.end());
 
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        std::wstring wide = converter.from_bytes(output.c_str());
+        // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        // std::wstring wide = converter.from_bytes(output.c_str());
 
 //        MessageBox(NULL, wide.c_str(), TEXT("Error"), MB_OK);
-        SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_RESETCONTENT, 0, 0 );
+        clearList();
     }
 }
 
 void initDialog()
 {
-    refreshDialog();    
+    SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_SETHORIZONTALEXTENT, 165, 0 );
+    updateList();
 }
 
 INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
@@ -200,10 +205,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN3 :
                 {
                     statusAll();
-                    refreshDialog();
+                    updateList();
                     return TRUE;
                 }
-    
                 case IDC_BTN4 :
                 {
                     commitAll();
@@ -239,20 +243,39 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     blameFile();
                     return TRUE;
                 }
+
+// TODO:2019-12-25:MVINCENT: Weird focus issue when clicking in the ListBox
+//                           Even with this disabled
+                // case IDC_LST1 :
+                // {
+                    // switch (HIWORD(wParam))
+                    // {
+                        // case LBN_SETFOCUS :
+                        // {
+                            // updateList();
+                            // return TRUE;
+                        // }
+                        // case LBN_KILLFOCUS :
+                        // {
+                            // clearList();
+                            // return TRUE;
+                        // }
+                    // }
+                    // return FALSE;
+                // }
             }
-            return FALSE;
         }
 
         case WM_INITDIALOG :
         {
             initDialog();
-            break;
+            return TRUE;
         }
 
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
 
-    return FALSE;
+    // return FALSE;
 }
 

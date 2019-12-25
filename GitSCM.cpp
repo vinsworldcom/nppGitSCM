@@ -66,28 +66,31 @@ extern "C" __declspec( dllexport ) void beNotified( SCNotification *notifyCode )
 {
     switch (notifyCode->nmhdr.code)
     {
-        case NPPN_SHUTDOWN:
-            commandMenuCleanUp();
+// TODO:2019-12-25:MVINCENT: Causes very slow startup time
+        // case NPPN_READY:
+            // clearList();
+            // break;
+
+// TODO:2019-12-25:MVINCENT: Causes very slow tab switching
+        case NPPN_BUFFERACTIVATED:
+            clearPanel();
             break;
 
-        case NPPN_BUFFERACTIVATED:
-            notifyPanel();
-            break;
         case NPPN_FILESAVED:
-            notifyPanel();
+            updatePanel();
             break;
         case NPPN_FILEOPENED:
-            notifyPanel();
+            updatePanel();
             break;
-        case NPPN_READY:
-            notifyPanel();
+
+        case NPPN_SHUTDOWN:
+            commandMenuCleanUp();
             break;
 
         default:
             return;
     }
 }
-
 
 // Here you can process the Npp Messages
 // I will make the messages accessible little by little, according to the need of plugin development.

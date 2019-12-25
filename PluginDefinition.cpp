@@ -397,10 +397,16 @@ void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
 ///
 /// Execution commands:
 ///
-void notifyPanel()
+void updatePanel()
 {
     if ( _gitPanel.isVisible() )
-        refreshDialog();
+        updateList();
+}
+
+void clearPanel()
+{
+    if ( _gitPanel.isVisible() )
+        clearList();
 }
 
 void gitGui()

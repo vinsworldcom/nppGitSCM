@@ -73,7 +73,8 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 // Your plugin command functions
 //
 bool getGitLocation( std::wstring & );
-void notifyPanel();
+void updatePanel();
+void clearPanel();
 void gitGui();
 void giTk();
 void DockableDlg();

@@ -26,7 +26,8 @@
 
 typedef std::basic_string<TCHAR> generic_string;
 
-void refreshDialog();
+void updateList();
+void clearList();
 
 class DemoDlg : public DockingDlgInterface
 {
