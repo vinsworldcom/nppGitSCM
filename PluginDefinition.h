@@ -22,6 +22,7 @@
 // All difinitions of plugin interface
 //
 #include "PluginInterface.h"
+#include <string>
 
 //-------------------------------------//
 //-- STEP 1. DEFINE YOUR PLUGIN NAME --//
@@ -71,6 +72,7 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 //
 // Your plugin command functions
 //
+bool getGitLocation( std::wstring & );
 void notifyPanel();
 void gitGui();
 void giTk();

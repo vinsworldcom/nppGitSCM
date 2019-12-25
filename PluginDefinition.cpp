@@ -25,8 +25,8 @@
 
 #include "DockingFeature/GitPanelDlg.h"
 
-const TCHAR sectionName[] = TEXT( "Git" );
-const TCHAR keyName[] = TEXT( "Tortoise" );
+const TCHAR sectionName[]    = TEXT( "Git" );
+const TCHAR keyName[]        = TEXT( "Tortoise" );
 const TCHAR configFileName[] = TEXT( "GitSCM.ini" );
 
 DemoDlg _gitPanel;
@@ -107,9 +107,9 @@ void commandMenuInit()
                 false );
     setCommand( 4, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
     setCommand( 5, TEXT( "&Status" ), statusAll, NULL, false );
-    setCommand( 6, TEXT( "&Commit" ), commitAll, NULL, false );
+    setCommand( 6, TEXT( "&Diff File" ), diffFile, NULL, false );
     setCommand( 7, TEXT( "&Add File" ), addFile, NULL, false );
-    setCommand( 8, TEXT( "&Diff File" ), diffFile, NULL, false );
+    setCommand( 8, TEXT( "&Commit" ), commitAll, NULL, false );
     setCommand( 9, TEXT( "&Unstage File" ), unstageFile, NULL, false );
     setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
     setCommand( 11, TEXT( "&Log File" ), logFile, NULL, false );
@@ -399,7 +399,8 @@ void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
 ///
 void notifyPanel()
 {
-
+    if ( _gitPanel.isVisible() )
+        refreshDialog();
 }
 
 void gitGui()

@@ -67,16 +67,21 @@ extern "C" __declspec( dllexport ) void beNotified( SCNotification *notifyCode )
     switch (notifyCode->nmhdr.code)
     {
         case NPPN_SHUTDOWN:
-        {
             commandMenuCleanUp();
-        }
-        break;
-    
-        case NPPN_FILESAVED:
-        {
+            break;
+
+        case NPPN_BUFFERACTIVATED:
             notifyPanel();
-        }
-        break;
+            break;
+        case NPPN_FILESAVED:
+            notifyPanel();
+            break;
+        case NPPN_FILEOPENED:
+            notifyPanel();
+            break;
+        case NPPN_READY:
+            notifyPanel();
+            break;
 
         default:
             return;

@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-#include "process.h"
+#include "Process.h"
 #include <string>
 
 void systemMessage(const TCHAR *title) {
@@ -85,21 +85,18 @@ BOOL Process::run()
         //lstrcpy(pArgs, _args.c_str());
         //::MessageBox(NULL, cmd.c_str(), TEXT("cmd"), MB_OK);
         //::MessageBox(NULL, _args.c_str(), TEXT("_args"), MB_OK);
-        // BOOL started = ::CreateProcess(_command.c_str(),   //TEXT("C:\\Program Files\\Mozilla Firefox\\firefox.exe"),     // command is part of input string
-std::wstring command = TEXT("C:\\usr\\bin\\git\\cmd\\git.exe status --porcelain");
         BOOL started = ::CreateProcess(
-                        NULL,
-                        // (TCHAR *)_args.c_str(),         // (writeable) command string
-                        // const_cast<LPWSTR>( _args ),
-                        (TCHAR *) _args.c_str(),
+//                        _command.c_str(),   //TEXT("C:\\Program Files\\Mozilla Firefox\\firefox.exe"),     // command is part of input string
+NULL,
+                        (TCHAR *)_args.c_str(),         // (writeable) command string
 						NULL,        // process security
 						NULL,        // thread security
 						TRUE,        // inherit handles flag
 						(_type == WIN32_PROG)?NULL:CREATE_SUSPENDED,           // flags
 						NULL,        // inherit environment
 //						_curDir.c_str(),        // inherit directory
-						NULL,
-						&startup,    // STARTUPINFO
+NULL,
+                        &startup,    // STARTUPINFO
 						&procinfo);  // PROCESS_INFORMATION
 		
 		_hProcess = procinfo.hProcess;

@@ -63,22 +63,30 @@ HWND getCurScintilla()
            nppData._scintillaSecondHandle;
 }
 
-void launchProgram()
+void refreshDialog()
 {
 
     HWND hCurScintilla = getCurScintilla();
     TCHAR pathName[MAX_PATH];
     ::SendMessage( hCurScintilla, NPPM_GETCURRENTDIRECTORY, 0, (LPARAM)pathName);
 
-    const TCHAR *programPath = TEXT("");
-    const TCHAR *pProgramDir = TEXT("");
-    const TCHAR *param       = TEXT("cmd /c \"git.exe status --porcelain\"");
+    // std::wstring gitLoc;
+    // bool gitInstalled = getGitLocation( gitLoc );
+    // if ( !gitInstalled )
+        // return;
+
+    const TCHAR *programPath = TEXT("\0"); // Overridden as NULL in Process.cpp
+    const TCHAR *pProgramDir = pathName;   // Overridden as NULL in Process.cpp
+    // const TCHAR *param       = TEXT("C:\\usr\\bin\\git\\cmd\\git.exe status --porcelain");
+    const TCHAR *param       = TEXT("cmd /c \"git status --porcelain\"");
     const TCHAR *progInput   = TEXT("");
     const TCHAR *progOutput  = TEXT("");
 
-    generic_string paramInput = param;
-    generic_string progInputStr = progInput?progInput:TEXT("");
+    generic_string progInputStr  = progInput?progInput:TEXT("");
     generic_string progOutputStr = progOutput?progOutput:TEXT("");
+    generic_string paramInput    = param;
+
+    // paramInput += gitLoc + TEXT( " status --porcelain\"" );
 
     Process program(programPath, paramInput.c_str(), pProgramDir, CONSOLE_PROG);
 	program.run();
@@ -152,11 +160,15 @@ void launchProgram()
         std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
         std::wstring wide = converter.from_bytes(output.c_str());
 
-        ::MessageBox(NULL, wide.c_str(), TEXT("Error"), MB_OK);
+//        MessageBox(NULL, wide.c_str(), TEXT("Error"), MB_OK);
+        SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_RESETCONTENT, 0, 0 );
     }
 }
 
-
+void initDialog()
+{
+    refreshDialog();    
+}
 
 INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                        LPARAM lParam )
@@ -188,11 +200,10 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN3 :
                 {
                     statusAll();
-                    launchProgram();
+                    refreshDialog();
                     return TRUE;
                 }
     
-
                 case IDC_BTN4 :
                 {
                     commitAll();
@@ -232,8 +243,16 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
             return FALSE;
         }
 
+        case WM_INITDIALOG :
+        {
+            initDialog();
+            break;
+        }
+
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
+
+    return FALSE;
 }
 
