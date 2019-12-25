@@ -49,6 +49,7 @@ class DemoDlg : public DockingDlgInterface
                                               LPARAM lParam );
 };
 
+// https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
 typedef struct _LV_ITEM {  
     UINT   mask;        // attributes of this data structure
     int    iItem;       // index of the item to which this structure refers
