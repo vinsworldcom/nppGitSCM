@@ -19,6 +19,7 @@
 #include "../PluginDefinition.h"
 #include "Process.h"
 #include "resource.h"
+#include <commctrl.h>
 
 #include <locale>
 #include <codecvt>
@@ -29,6 +30,9 @@
 extern NppData nppData;
 extern bool useTortoise;
 extern HWND hDialog;
+
+LVITEM LvItem;
+LVCOLUMN LvCol;
 
 HWND getCurScintilla()
 {
@@ -41,26 +45,29 @@ HWND getCurScintilla()
 
 void clearList()
 {
-    SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_RESETCONTENT, 0, 0 );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_DELETEALLITEMS, 0, 0 );
 }
 
-std::vector<std::wstring> split(std::wstring stringToBeSplitted, std::wstring delimeter)
+std::vector<std::wstring> split( std::wstring stringToBeSplitted,
+                                 std::wstring delimeter )
 {
     std::vector<std::wstring> splittedString;
     size_t startIndex = 0;
     size_t endIndex = 0;
 
-    while( (endIndex = stringToBeSplitted.find(delimeter, startIndex)) < stringToBeSplitted.size() )
+    while ( ( endIndex = stringToBeSplitted.find( delimeter,
+                         startIndex ) ) < stringToBeSplitted.size() )
     {
-        std::wstring val = stringToBeSplitted.substr(startIndex, endIndex - startIndex);
-        splittedString.push_back(val);
+        std::wstring val = stringToBeSplitted.substr( startIndex,
+                           endIndex - startIndex );
+        splittedString.push_back( val );
         startIndex = endIndex + delimeter.size();
     }
 
-    if(startIndex < stringToBeSplitted.size())
+    if ( startIndex < stringToBeSplitted.size() )
     {
-        std::wstring val = stringToBeSplitted.substr(startIndex);
-        splittedString.push_back(val);
+        std::wstring val = stringToBeSplitted.substr( startIndex );
+        splittedString.push_back( val );
     }
 
     return splittedString;
@@ -75,81 +82,104 @@ void updateList()
     // std::wstring gitLoc;
     // bool gitInstalled = getGitLocation( gitLoc );
     // if ( !gitInstalled )
-        // return;
+    // return;
 
-    const TCHAR *programPath = TEXT("\0");  // Overridden as NULL in Process.cpp
+    const TCHAR *programPath =
+        TEXT( "\0" ); // Overridden as NULL in Process.cpp
     // const TCHAR *pProgramDir = pathName; // Overridden as NULL in Process.cpp
-    const TCHAR *pProgramDir = TEXT("\0");  // Overridden as NULL in Process.cpp
-    const TCHAR *param       = TEXT("cmd /c \"git status --porcelain\"");
-    const TCHAR *progInput   = TEXT("");
-    const TCHAR *progOutput  = TEXT("");
+    const TCHAR *pProgramDir =
+        TEXT( "\0" ); // Overridden as NULL in Process.cpp
+    const TCHAR *param       = TEXT( "cmd /c \"git status --porcelain\"" );
+    const TCHAR *progInput   = TEXT( "" );
+    const TCHAR *progOutput  = TEXT( "" );
 
-    generic_string progInputStr  = progInput?progInput:TEXT("");
-    generic_string progOutputStr = progOutput?progOutput:TEXT("");
+    generic_string progInputStr  = progInput ? progInput : TEXT( "" );
+    generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
     generic_string paramInput    = param;
 
     // paramInput += gitLoc + TEXT( " status --porcelain\"" );
 
-    Process program(programPath, paramInput.c_str(), pProgramDir, CONSOLE_PROG);
-	program.run();
+    Process program( programPath, paramInput.c_str(), pProgramDir,
+                     CONSOLE_PROG );
+    program.run();
 
-    if (!program.hasStderr())
+    if ( !program.hasStderr() )
     {
         const char *pOutput = NULL;
         size_t pOutputLen = 0;
+
         // If progOutput is defined, then we search the file to read
-        if (progOutputStr != TEXT(""))
+        if ( progOutputStr != TEXT( "" ) )
         {
-            if (::PathFileExists(progOutputStr.c_str()))
+            if ( ::PathFileExists( progOutputStr.c_str() ) )
             {
                 // open the file for binary reading
                 std::ifstream file;
-                file.open(progOutputStr.c_str(), std::ios_base::binary);
+                file.open( progOutputStr.c_str(), std::ios_base::binary );
                 std::vector<byte> fileContent;
-                if (file.is_open())
+
+                if ( file.is_open() )
                 {
                     // get the length of the file
-                    file.seekg(0, std::ios::end);
-                    pOutputLen = static_cast<size_t>(file.tellg());
-                    file.seekg(0, std::ios::beg);
+                    file.seekg( 0, std::ios::end );
+                    pOutputLen = static_cast<size_t>( file.tellg() );
+                    file.seekg( 0, std::ios::beg );
 
                     // create a vector to hold all the bytes in the file
-                    fileContent.resize(pOutputLen, 0);
+                    fileContent.resize( pOutputLen, 0 );
 
                     // read the file
-                    file.read(reinterpret_cast<char*>(&fileContent[0]), (std::streamsize)pOutputLen);
+                    file.read( reinterpret_cast<char *>( &fileContent[0] ),
+                               ( std::streamsize )pOutputLen );
 
                     // close the file
                     file.close();
 
-                    pOutput = reinterpret_cast<const char*>(&fileContent[0]);
+                    pOutput = reinterpret_cast<const char *>( &fileContent[0] );
                 }
+
                 const char errMsg[] = "ERROR: NO FILE CONTENT";
-                if (!pOutput || !(pOutput[0]))
+
+                if ( !pOutput || !( pOutput[0] ) )
                 {
                     pOutput = errMsg;
-                    pOutputLen = strlen(errMsg);
+                    pOutputLen = strlen( errMsg );
                 }
             }
             else
-            {
-                ::MessageBox(NULL, TEXT("The file is invalid"), progOutputStr.c_str(), MB_OK);
-            }
+                ::MessageBox( NULL, TEXT( "The file is invalid" ), progOutputStr.c_str(),
+                              MB_OK );
         }
         // otherwise, we look in stdout
         else if ( program.hasStdout() )
         {
             std::wstring outputW = program.getStdout();
-            std::string output(outputW.begin(), outputW.end());
-            output.assign(outputW.begin(), outputW.end());
+            std::string output( outputW.begin(), outputW.end() );
+            output.assign( outputW.begin(), outputW.end() );
 
             std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            std::wstring wide = converter.from_bytes(output.c_str());
+            std::wstring wide = converter.from_bytes( output.c_str() );
 
             clearList();
-            std::vector<std::wstring> splittedStrings_2 = split(wide, TEXT("\n"));
-            for(unsigned int i = 0; i < splittedStrings_2.size() ; i++)
-                SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_ADDSTRING, i, ( LPARAM )splittedStrings_2[i].c_str() );
+            std::vector<std::wstring> splittedStrings_2 = split( wide, TEXT( "\n" ) );
+
+            for ( unsigned int i = 0; i < splittedStrings_2.size() ; i++ )
+            {
+                memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
+                LvItem.mask       = LVIF_TEXT;    // Text Style
+                LvItem.cchTextMax = MAX_PATH;     // Max size of test
+                LvItem.iItem      = i;            // choose item
+                LvItem.iSubItem   = 0;            // Put in first coluom
+                std::wstring str2 = splittedStrings_2[i].substr(0, 3);
+                LvItem.pszText    = const_cast<LPWSTR>( str2.c_str() );
+                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
+                             ( LPARAM )&LvItem );
+                LvItem.iSubItem   = 1;
+                splittedStrings_2[i].erase(0, 3);
+                LvItem.pszText    =  const_cast<LPWSTR>( splittedStrings_2[i].c_str() );
+                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                             ( LPARAM )&LvItem );
+            }
         }
     }
     else
@@ -171,7 +201,23 @@ void updateList()
 
 void initDialog()
 {
-    SendMessage( GetDlgItem( hDialog, IDC_LST1 ), LB_SETHORIZONTALEXTENT, 165, 0 );
+    // Here we put the info on the Coulom headers
+    // this is not data, only name of each header we like
+    memset( &LvCol, 0, sizeof( LvCol ) );            // Zero Members
+
+    LvCol.mask    = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM; // Type of mask
+    LvCol.cx      = 20;                                    // width between each coloum
+    LvCol.pszText = TEXT( "Status" );                      // First Header Text
+    LvCol.cx      = 170;                                   // width of column
+
+    HWND hList = GetDlgItem( hDialog, IDC_LSV1 );
+
+    SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT );
+    SendMessage( hList, LVM_INSERTCOLUMN, 0, ( LPARAM )&LvCol );
+    LvCol.pszText = TEXT( "File" );
+    SendMessage( hList, LVM_INSERTCOLUMN, 1, ( LPARAM )&LvCol );
+
+    SendMessage( hList, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER );
     updateList();
 }
 
@@ -179,7 +225,8 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                        LPARAM lParam )
 {
 
-    ::SendMessage( GetDlgItem( hDialog, IDC_CHK1 ), BM_SETCHECK, ( LPARAM )( useTortoise ? 1 : 0 ), 0 );
+    ::SendMessage( GetDlgItem( hDialog, IDC_CHK1 ), BM_SETCHECK,
+                   ( LPARAM )( useTortoise ? 1 : 0 ), 0 );
 
     switch ( message )
     {
@@ -192,52 +239,66 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     gitGui();
                     return TRUE;
                 }
+
                 case IDC_BTN2 :
                 {
                     giTk();
                     return TRUE;
                 }
+
                 case IDC_CHK1 :
                 {
                     doTortoise();
                     return TRUE;
                 }
+
                 case IDC_BTN3 :
                 {
                     statusAll();
                     updateList();
                     return TRUE;
                 }
+
                 case IDC_BTN4 :
-                {
-                    commitAll();
-                    return TRUE;
-                }
-                case IDC_BTN5 :
-                {
-                    addFile();
-                    return TRUE;
-                }
-                case IDC_BTN6 :
                 {
                     diffFile();
                     return TRUE;
                 }
+
+                case IDC_BTN5 :
+                {
+                    addFile();
+                    updateList();
+                    return TRUE;
+                }
+
+                case IDC_BTN6 :
+                {
+                    commitAll();
+                    updateList();
+                    return TRUE;
+                }
+
                 case IDC_BTN7 :
                 {
                     unstageFile();
+                    updateList();
                     return TRUE;
                 }
+
                 case IDC_BTN8 :
                 {
                     revertFile();
+                    updateList();
                     return TRUE;
                 }
+
                 case IDC_BTN9 :
                 {
                     logFile();
                     return TRUE;
                 }
+
                 case IDC_BTN10 :
                 {
                     blameFile();
@@ -246,36 +307,34 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
 
 // TODO:2019-12-25:MVINCENT: Weird focus issue when clicking in the ListBox
 //                           Even with this disabled
-                // case IDC_LST1 :
-                // {
-                    // switch (HIWORD(wParam))
-                    // {
-                        // case LBN_SETFOCUS :
-                        // {
-                            // updateList();
-                            // return TRUE;
-                        // }
-                        // case LBN_KILLFOCUS :
-                        // {
+                case IDC_LSV1 :
+                {
+                    switch ( HIWORD( wParam ) )
+                    {
+                        case LBN_SETFOCUS :
+                            updateList();
+                            break;
+
+                            // case LBN_KILLFOCUS :
                             // clearList();
-                            // return TRUE;
-                        // }
-                    // }
-                    // return FALSE;
-                // }
+                            // break;
+                    }
+
+                    return FALSE;
+                }
             }
         }
 
         case WM_INITDIALOG :
         {
             initDialog();
-            return TRUE;
         }
+        break;
 
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
 
-    // return FALSE;
+    return FALSE;
 }
 

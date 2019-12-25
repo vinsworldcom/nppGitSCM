@@ -49,4 +49,27 @@ class DemoDlg : public DockingDlgInterface
                                               LPARAM lParam );
 };
 
+typedef struct _LV_ITEM {  
+    UINT   mask;        // attributes of this data structure
+    int    iItem;       // index of the item to which this structure refers
+    int    iSubItem;    // index of the subitem to which this structure refers
+    UINT   state;       // Specifies the current state of the item
+    UINT   stateMask;   // Specifies the bits of the state member that are valid. 
+    LPWSTR pszText;     // Pointer to a null-terminated string
+                        // that contains the item text 
+    int    cchTextMax;  // Size of the buffer pointed to by the pszText member
+    int    iImage;      // index of the list view item's icon 
+    LPARAM lParam;      // 32-bit value to associate with item 
+} LV_ITEM;
+
+typedef struct _LV_COLUMN {  
+    UINT   mask;     // which members of this structure contain valid information
+    int    fmt;      // alignment of the column heading and the subitem text 
+    int    cx;       // Specifies the width, in pixels, of the column.
+    LPWSTR pszText;  // Pointer to a null-terminated string
+                     // that contains the column heading 
+    int cchTextMax;  // Specifies the size, in characters, of the buffer
+    int iSubItem;    // index of subitem
+} LV_COLUMN;
+
 #endif //GITPANEL_DLG_H
