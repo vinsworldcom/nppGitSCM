@@ -94,8 +94,7 @@ NULL,
 						TRUE,        // inherit handles flag
 						(_type == WIN32_PROG)?NULL:CREATE_SUSPENDED,           // flags
 						NULL,        // inherit environment
-//						_curDir.c_str(),        // inherit directory
-NULL,
+						_curDir.c_str(),        // inherit directory
                         &startup,    // STARTUPINFO
 						&procinfo);  // PROCESS_INFORMATION
 		

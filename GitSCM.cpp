@@ -22,6 +22,7 @@
 
 extern FuncItem funcItem[nbFunc];
 extern NppData nppData;
+extern bool g_NppReady;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  reasonForCall, LPVOID /*lpReserved*/ )
 {
@@ -66,22 +67,30 @@ extern "C" __declspec( dllexport ) void beNotified( SCNotification *notifyCode )
 {
     switch (notifyCode->nmhdr.code)
     {
-// TODO:2019-12-25:MVINCENT: Causes very slow startup time
-        // case NPPN_READY:
-            // clearList();
-            // break;
-
-// TODO:2019-12-25:MVINCENT: Causes very slow tab switching
-        case NPPN_BUFFERACTIVATED:
-            clearPanel();
+        case NPPN_READY:
+            g_NppReady = true;
             break;
+
+// TODO:2019-12-25:MVINCENT: if updatePanel() is used, 
+//                           Causes very slow tab switching
+//                           Not quite as threaded as one would think
+        case NPPN_BUFFERACTIVATED:
+        {
+            if ( g_NppReady )    
+                updatePanelLoc();
+        }
+        break;
 
         case NPPN_FILESAVED:
             updatePanel();
             break;
+
         case NPPN_FILEOPENED:
-            updatePanel();
-            break;
+        {
+            if ( g_NppReady )    
+                updatePanel();
+        }
+        break;
 
         case NPPN_SHUTDOWN:
             commandMenuCleanUp();

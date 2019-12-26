@@ -43,6 +43,7 @@ NppData nppData;
 
 TCHAR iniFilePath[MAX_PATH];
 bool useTortoise = false;
+bool g_NppReady  = false;
 
 #define DOCKABLE_INDEX 3
 #define TORTOISE_INDEX 14
@@ -100,21 +101,21 @@ void commandMenuInit()
     //            bool check0nInit                // optional. Make this menu item be checked visually
     //            );
 
-    setCommand( 0, TEXT( "Git &GUI" ), gitGui, NULL, false );
-    setCommand( 1, TEXT( "GiT&k" ), giTk, NULL, false );
-    setCommand( 2, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
+    setCommand( 0,  TEXT( "Git &GUI" ),      gitGui, NULL, false );
+    setCommand( 1,  TEXT( "GiT&k" ),         giTk, NULL, false );
+    setCommand( 2,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( DOCKABLE_INDEX, TEXT( "Git Docking &Panel" ), DockableDlg, NULL,
                 false );
-    setCommand( 4, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
-    setCommand( 5, TEXT( "&Status" ), statusAll, NULL, false );
-    setCommand( 6, TEXT( "&Diff File" ), diffFile, NULL, false );
-    setCommand( 7, TEXT( "&Add File" ), addFile, NULL, false );
-    setCommand( 8, TEXT( "&Commit" ), commitAll, NULL, false );
-    setCommand( 9, TEXT( "&Unstage File" ), unstageFile, NULL, false );
-    setCommand( 10, TEXT( "&Revert File" ), revertFile, NULL, false );
-    setCommand( 11, TEXT( "&Log File" ), logFile, NULL, false );
-    setCommand( 12, TEXT( "&Blame File" ), blameFile, NULL, false );
-    setCommand( 13, TEXT( "-SEPARATOR-" ), NULL, NULL, false );
+    setCommand( 4,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 5,  TEXT( "&Status" ),       statusAll, NULL, false );
+    setCommand( 6,  TEXT( "&Diff File" ),    diffFile, NULL, false );
+    setCommand( 7,  TEXT( "&Add File" ),     addFile, NULL, false );
+    setCommand( 8,  TEXT( "&Commit" ),       commitAll, NULL, false );
+    setCommand( 9,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
+    setCommand( 10, TEXT( "&Revert File" ),  revertFile, NULL, false );
+    setCommand( 11, TEXT( "&Log File" ),     logFile, NULL, false );
+    setCommand( 12, TEXT( "&Blame File" ),   blameFile, NULL, false );
+    setCommand( 13, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
                 useTortoise ? true : false );
 }
@@ -397,6 +398,12 @@ void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
 ///
 /// Execution commands:
 ///
+void updatePanelLoc()
+{
+    if ( _gitPanel.isVisible() )
+        updateLoc();
+}
+
 void updatePanel()
 {
     if ( _gitPanel.isVisible() )

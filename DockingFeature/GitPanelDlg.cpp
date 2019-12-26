@@ -29,19 +29,11 @@
 
 extern NppData nppData;
 extern bool useTortoise;
+extern bool g_NppReady;
 extern HWND hDialog;
 
 LVITEM LvItem;
 LVCOLUMN LvCol;
-
-HWND getCurScintilla()
-{
-    int which = -1;
-    ::SendMessage( nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0,
-                   ( LPARAM )&which );
-    return ( which == 0 ) ? nppData._scintillaMainHandle :
-           nppData._scintillaSecondHandle;
-}
 
 void clearList()
 {
@@ -73,22 +65,30 @@ std::vector<std::wstring> split( std::wstring stringToBeSplitted,
     return splittedString;
 }
 
+void updateLoc()
+{
+    TCHAR pathName[MAX_PATH];
+    SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
+    SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
+}
+
 void updateList()
 {
-    // HWND hCurScintilla = getCurScintilla();
-    // TCHAR pathName[MAX_PATH];
-    // ::SendMessage( hCurScintilla, NPPM_GETCURRENTDIRECTORY, 0, (LPARAM)pathName);
+    if ( ! g_NppReady )
+        return;
+
+    TCHAR pathName[MAX_PATH];
+    SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
+    SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
     // std::wstring gitLoc;
     // bool gitInstalled = getGitLocation( gitLoc );
     // if ( !gitInstalled )
     // return;
 
-    const TCHAR *programPath =
-        TEXT( "\0" ); // Overridden as NULL in Process.cpp
-    // const TCHAR *pProgramDir = pathName; // Overridden as NULL in Process.cpp
-    const TCHAR *pProgramDir =
-        TEXT( "\0" ); // Overridden as NULL in Process.cpp
+    const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
+    const TCHAR *pProgramDir = pathName;     // Overridden as NULL in Process.cpp
+    // const TCHAR *pProgramDir = TEXT( "\0" ); // Overridden as NULL in Process.cpp
     const TCHAR *param       = TEXT( "cmd /c \"git status --porcelain\"" );
     const TCHAR *progInput   = TEXT( "" );
     const TCHAR *progOutput  = TEXT( "" );
@@ -161,22 +161,31 @@ void updateList()
             std::wstring wide = converter.from_bytes( output.c_str() );
 
             clearList();
-            std::vector<std::wstring> splittedStrings_2 = split( wide, TEXT( "\n" ) );
+            std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
 
-            for ( unsigned int i = 0; i < splittedStrings_2.size() ; i++ )
+            for ( unsigned int i = 0; i < splittedStrings.size() ; i++ )
             {
+                // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
                 memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
                 LvItem.mask       = LVIF_TEXT;    // Text Style
-                LvItem.cchTextMax = MAX_PATH;     // Max size of test
+                LvItem.cchTextMax = MAX_PATH;     // Max size of text
                 LvItem.iItem      = i;            // choose item
+
                 LvItem.iSubItem   = 0;            // Put in first coluom
-                std::wstring str2 = splittedStrings_2[i].substr(0, 3);
-                LvItem.pszText    = const_cast<LPWSTR>( str2.c_str() );
+                std::wstring strI = splittedStrings[i].substr(0, 1);
+                LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
                              ( LPARAM )&LvItem );
-                LvItem.iSubItem   = 1;
-                splittedStrings_2[i].erase(0, 3);
-                LvItem.pszText    =  const_cast<LPWSTR>( splittedStrings_2[i].c_str() );
+
+                LvItem.iSubItem   = 1;            // Put in second coluom
+                std::wstring strW = splittedStrings[i].substr(1, 1);
+                LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
+                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                             ( LPARAM )&LvItem );
+
+                LvItem.iSubItem   = 2;            // Put in third coluom
+                splittedStrings[i].erase(0, 3);
+                LvItem.pszText    =  const_cast<LPWSTR>( splittedStrings[i].c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
                              ( LPARAM )&LvItem );
             }
@@ -201,21 +210,27 @@ void updateList()
 
 void initDialog()
 {
-    // Here we put the info on the Coulom headers
-    // this is not data, only name of each header we like
-    memset( &LvCol, 0, sizeof( LvCol ) );            // Zero Members
-
-    LvCol.mask    = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM; // Type of mask
-    LvCol.cx      = 20;                                    // width between each coloum
-    LvCol.pszText = TEXT( "Status" );                      // First Header Text
-    LvCol.cx      = 170;                                   // width of column
-
     HWND hList = GetDlgItem( hDialog, IDC_LSV1 );
 
+    // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
     SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT );
+
+    memset( &LvCol, 0, sizeof( LvCol ) );            // Zero Members
+    LvCol.mask    = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM; // Type of mask
+
+    // Column I and W are Index and Working from:
+    // https://git-scm.com/docs/git-status
+    LvCol.cx      = 25;                                    // width between each coloum
+    LvCol.pszText = TEXT( "I" );                           // First Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, 0, ( LPARAM )&LvCol );
-    LvCol.pszText = TEXT( "File" );
+
+    LvCol.cx      = 25;                                    // width between each coloum
+    LvCol.pszText = TEXT( "W" );                           // First Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, 1, ( LPARAM )&LvCol );
+    
+    LvCol.cx      = 170;                                   // width of column
+    LvCol.pszText = TEXT( "File" );
+    SendMessage( hList, LVM_INSERTCOLUMN, 2, ( LPARAM )&LvCol );
 
     SendMessage( hList, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER );
     updateList();
@@ -305,36 +320,23 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     return TRUE;
                 }
 
-// TODO:2019-12-25:MVINCENT: Weird focus issue when clicking in the ListBox
-//                           Even with this disabled
-                case IDC_LSV1 :
+                case MAKELONG( IDC_EDT1, EN_SETFOCUS ) :
                 {
-                    switch ( HIWORD( wParam ) )
-                    {
-                        case LBN_SETFOCUS :
-                            updateList();
-                            break;
-
-                            // case LBN_KILLFOCUS :
-                            // clearList();
-                            // break;
-                    }
-
+                    updateList();
                     return FALSE;
                 }
+
             }
+            return FALSE;
         }
 
         case WM_INITDIALOG :
         {
             initDialog();
         }
-        break;
 
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
-
-    return FALSE;
 }
 
