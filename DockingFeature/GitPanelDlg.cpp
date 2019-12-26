@@ -28,11 +28,12 @@
 #include <vector>
 
 extern NppData nppData;
-extern bool useTortoise;
-extern bool g_NppReady;
-extern HWND hDialog;
+extern bool    g_useTortoise;
+extern bool    g_NppReady;
+extern TCHAR   g_GitPath[MAX_PATH];;
+extern HWND    hDialog;
 
-LVITEM LvItem;
+LVITEM   LvItem;
 LVCOLUMN LvCol;
 
 void clearList()
@@ -81,23 +82,18 @@ void updateList()
     SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
     SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
-    // std::wstring gitLoc;
-    // bool gitInstalled = getGitLocation( gitLoc );
-    // if ( !gitInstalled )
-    // return;
-
     const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
     const TCHAR *pProgramDir = pathName;     // Overridden as NULL in Process.cpp
     // const TCHAR *pProgramDir = TEXT( "\0" ); // Overridden as NULL in Process.cpp
-    const TCHAR *param       = TEXT( "cmd /c \"git status --porcelain\"" );
+    // const TCHAR *param       = TEXT( "cmd /c \"git status --porcelain\"" );
     const TCHAR *progInput   = TEXT( "" );
     const TCHAR *progOutput  = TEXT( "" );
 
     generic_string progInputStr  = progInput ? progInput : TEXT( "" );
     generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
-    generic_string paramInput    = param;
-
-    // paramInput += gitLoc + TEXT( " status --porcelain\"" );
+    generic_string paramInput    = g_GitPath;
+    paramInput += TEXT( "\\git.exe status --porcelain\"" );
+    // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
 
     Process program( programPath, paramInput.c_str(), pProgramDir,
                      CONSOLE_PROG );
@@ -241,7 +237,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
 {
 
     ::SendMessage( GetDlgItem( hDialog, IDC_CHK1 ), BM_SETCHECK,
-                   ( LPARAM )( useTortoise ? 1 : 0 ), 0 );
+                   ( LPARAM )( g_useTortoise ? 1 : 0 ), 0 );
 
     switch ( message )
     {

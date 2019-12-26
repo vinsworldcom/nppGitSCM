@@ -25,9 +25,10 @@
 
 #include "DockingFeature/GitPanelDlg.h"
 
-const TCHAR sectionName[]    = TEXT( "Git" );
-const TCHAR keyName[]        = TEXT( "Tortoise" );
 const TCHAR configFileName[] = TEXT( "GitSCM.ini" );
+const TCHAR sectionName[]    = TEXT( "Git" );
+const TCHAR iniKeyTortoise[] = TEXT( "Tortoise" );
+const TCHAR iniKeyGitpath[]  = TEXT( "GitPath" );
 
 DemoDlg _gitPanel;
 
@@ -42,8 +43,12 @@ FuncItem funcItem[nbFunc];
 NppData nppData;
 
 TCHAR iniFilePath[MAX_PATH];
-bool useTortoise = false;
-bool g_NppReady  = false;
+bool  g_useTortoise = false;
+bool  g_NppReady    = false;
+TCHAR g_GitPath[MAX_PATH];
+
+std::wstring g_tortoiseLoc;
+bool g_haveTortoise;
 
 #define DOCKABLE_INDEX 3
 #define TORTOISE_INDEX 14
@@ -62,8 +67,10 @@ void pluginInit( HANDLE hModule )
 //
 void pluginCleanUp()
 {
-    ::WritePrivateProfileString( sectionName, keyName,
-                                 useTortoise ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+    ::WritePrivateProfileString( sectionName, iniKeyTortoise,
+                                 g_useTortoise ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+	::WritePrivateProfileString( sectionName, iniKeyGitpath, 
+                                 g_GitPath, iniFilePath);
 }
 
 //
@@ -87,8 +94,12 @@ void commandMenuInit()
     PathAppend( iniFilePath, configFileName );
 
     // get the parameter value from plugin config
-    useTortoise = ::GetPrivateProfileInt( sectionName, keyName, 0,
-                                          iniFilePath );
+    g_useTortoise = ::GetPrivateProfileInt( sectionName, iniKeyTortoise,
+                                            0, iniFilePath );
+	::GetPrivateProfileString( sectionName, iniKeyGitpath, TEXT(""), 
+                               g_GitPath, MAX_PATH, iniFilePath );
+
+    g_haveTortoise = getTortoiseLocation( g_tortoiseLoc );
 
     //--------------------------------------------//
     //-- STEP 3. CUSTOMIZE YOUR PLUGIN COMMANDS --//
@@ -117,7 +128,7 @@ void commandMenuInit()
     setCommand( 12, TEXT( "&Blame File" ),   blameFile, NULL, false );
     setCommand( 13, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
-                useTortoise ? true : false );
+                g_useTortoise ? true : false );
 }
 
 //
@@ -200,21 +211,6 @@ std::vector<std::wstring> getAllFiles()
 }
 
 ///
-/// Gets the path to the Git executable.
-///
-/// @param loc [out] Location of Git executable
-///
-/// @return Whether or not the path was successfully retrieved.
-///         If false, Git is most likely not installed.
-bool getGitLocation( std::wstring &loc )
-{
-    TCHAR procPath[MAX_PATH];
-    wcscpy( procPath, TEXT( "cmd /c \"git" ) );
-    loc = loc.append( procPath );
-    return true;
-}
-
-///
 /// Gets the path to the TortioseGit executable from the registry.
 ///
 /// @param loc [out] Location of Tortoise executable
@@ -262,6 +258,7 @@ bool launchGit( std::wstring &command )
     memset( &pi, 0, sizeof( pi ) );
     si.cb = sizeof( si );
 
+    // DEBUG: MessageBox( NULL, command.c_str(), TEXT("Command"), MB_OK );
     return CreateProcess(
                NULL,
                const_cast<LPWSTR>( command.c_str() ),
@@ -275,17 +272,6 @@ bool launchGit( std::wstring &command )
                &pi ) != 0;
 }
 
-// Used for debug printing to MessageBox
-std::string ws2s( const std::wstring &wstr )
-{
-    int size_needed = WideCharToMultiByte( CP_ACP, 0, wstr.c_str(),
-                                           int( wstr.length() + 1 ), 0, 0, 0, 0 );
-    std::string strTo( size_needed, 0 );
-    WideCharToMultiByte( CP_ACP, 0, wstr.c_str(), int( wstr.length() + 1 ),
-                         &strTo[0], size_needed, 0, 0 );
-    return strTo;
-}
-
 ///
 /// Builds and executes command line string to send to CreateProcess
 ///
@@ -297,15 +283,12 @@ std::string ws2s( const std::wstring &wstr )
 void ExecGitCommand( const std::wstring &cmd, bool all = false,
                      bool ALL = false, bool pause = true )
 {
-    std::wstring gitLoc;
-    bool gitInstalled = getGitLocation( gitLoc );
-
-    if ( !gitInstalled )
-    {
-        MessageBox( NULL, TEXT( "Could not locate Git" ),
-                    TEXT( "Update Failed" ), 0 );
-        return;
-    }
+    // if ( ! g_haveGit )
+    // {
+        // MessageBox( NULL, TEXT( "Could not locate Git" ),
+                    // TEXT( "Update Failed" ), 0 );
+        // return;
+    // }
 
     std::vector<std::wstring> files;
 
@@ -314,7 +297,9 @@ void ExecGitCommand( const std::wstring &cmd, bool all = false,
     else
         files.push_back( getCurrentFile() );
 
-    std::wstring command = gitLoc;
+    std::wstring command = TEXT( "cmd /c \"" );
+    command += g_GitPath;
+    command += TEXT( "\\git" );
     command += cmd + TEXT( " " );
 
     if ( !ALL )
@@ -333,9 +318,6 @@ void ExecGitCommand( const std::wstring &cmd, bool all = false,
         command += TEXT( " && pause" );
 
     command += TEXT( "\"" );
-
-    // Debug
-    //MessageBoxA(NULL, ws2s(command).c_str(), "Command to run", MB_OK);
 
     if ( !launchGit( command ) )
         MessageBox( NULL, TEXT( "Could not launch Git." ),
@@ -428,7 +410,7 @@ void giTk()
 
 void statusAll()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "repostatus" ), false, true );
     else
         ExecGitCommand( TEXT( " status" ), false, true );
@@ -436,7 +418,7 @@ void statusAll()
 
 void commitAll()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "commit" ), false, true );
     else
         ExecGitCommand( TEXT( " commit" ), false, true );
@@ -444,7 +426,7 @@ void commitAll()
 
 void addFile()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "add" ) );
     else
         ExecGitCommand( TEXT( " add" ), false, false, false );
@@ -452,7 +434,7 @@ void addFile()
 
 void diffFile()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "diff" ) );
     else
         ExecGitCommand( TEXT( " diff" ) );
@@ -465,7 +447,7 @@ void unstageFile()
 
 void revertFile()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "revert" ) );
     else
         ExecGitCommand( TEXT( " checkout --" ), false, false, false );
@@ -473,7 +455,7 @@ void revertFile()
 
 void logFile()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "log" ) );
     else
         ExecGitCommand( TEXT( " log" ) );
@@ -482,7 +464,7 @@ void logFile()
 
 void blameFile()
 {
-    if ( useTortoise )
+    if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "blame" ) );
     else
         ExecGitCommand( TEXT( " blame" ) );
@@ -495,9 +477,9 @@ void doTortoise()
                                  MF_BYCOMMAND );
 
     if ( state & MF_CHECKED )
-        useTortoise = 0;
+        g_useTortoise = 0;
     else
-        useTortoise = 1;
+        g_useTortoise = 1;
 
     ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
                    funcItem[TORTOISE_INDEX]._cmdID, !( state & MF_CHECKED ) );
