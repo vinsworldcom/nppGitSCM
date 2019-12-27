@@ -494,6 +494,19 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
             return FALSE;
         }
 
+        case WM_SIZE:
+        case WM_MOVE:
+        {
+            RECT rc = {0};
+            getClientRect( rc );
+
+            ::SetWindowPos(GetDlgItem( hDialog, IDC_EDT1 ), NULL, rc.left + 15, rc.top + 215, rc.right - 25, 20, SWP_NOZORDER | SWP_SHOWWINDOW);
+            ::SetWindowPos(GetDlgItem( hDialog, IDC_LSV1 ), NULL, rc.left + 15, rc.top + 245, rc.right - 25, rc.bottom - 260, SWP_NOZORDER | SWP_SHOWWINDOW);
+
+            redraw();
+            return FALSE;
+        }
+
         case WM_INITDIALOG :
         {
             initDialog();
