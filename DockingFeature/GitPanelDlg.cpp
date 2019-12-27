@@ -494,8 +494,12 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, iSlected, (LPARAM)&LvItem );
                                 wide += TEXT( "\\" );
                                 wide += file;
-// TODO:2019-12-27:MVINCENT: check file exist as file and not directory
-                                SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
+
+                                int fileOrDir = (int)::GetFileAttributes( wide.c_str() );
+                                if ( ! ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY ) )
+                                    SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
+                                // else
+                                //     Directory, what to do?
                             }
                         }
                     }
@@ -511,11 +515,11 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
             RECT rc = {0};
             getClientRect( rc );
 
-            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT1 ), NULL, 
-                            rc.left + 15, rc.top + 215, rc.right - 25, 20, 
+            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT1 ), NULL,
+                            rc.left + 15, rc.top + 215, rc.right - 25, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
-            ::SetWindowPos( GetDlgItem( hDialog, IDC_LSV1 ), NULL, 
-                            rc.left + 15, rc.top + 245, rc.right - 25, rc.bottom - 260, 
+            ::SetWindowPos( GetDlgItem( hDialog, IDC_LSV1 ), NULL,
+                            rc.left + 15, rc.top + 245, rc.right - 25, rc.bottom - 260,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
 
             SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
