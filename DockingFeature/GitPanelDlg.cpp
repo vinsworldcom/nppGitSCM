@@ -25,6 +25,7 @@
 #include <locale>
 #include <codecvt>
 
+#include <algorithm>
 #include <fstream>
 #include <vector>
 
@@ -78,11 +79,14 @@ std::vector<std::wstring> split( std::wstring stringToBeSplitted,
     return splittedString;
 }
 
-void updateLoc()
+bool updateLoc( std::wstring &loc )
 {
-    TCHAR pathName[MAX_PATH];
+    TCHAR pathName[MAX_PATH] = {0};
     SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
     SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
+
+    loc = loc.append( pathName );
+    return true;
 }
 
 void updateList()
@@ -90,19 +94,18 @@ void updateList()
     if ( ! g_NppReady )
         return;
 
-    TCHAR pathName[MAX_PATH];
-    SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
-    SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
+    std::wstring pathName;
+    updateLoc( pathName );
 
     const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
-    const TCHAR *pProgramDir = pathName;
+    const TCHAR *pProgramDir = pathName.c_str();
     const TCHAR *progInput   = TEXT( "" );
     const TCHAR *progOutput  = TEXT( "" );
 
     generic_string progInputStr  = progInput ? progInput : TEXT( "" );
     generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
     generic_string paramInput    = g_GitPath;
-    paramInput += TEXT( "\\git.exe status --porcelain\"" );
+    paramInput += TEXT( "\\git.exe status --porcelain" );
     // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
 
     Process program( programPath, paramInput.c_str(), pProgramDir,
@@ -373,6 +376,118 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     return FALSE;
                 }
 
+            }
+            return FALSE;
+        }
+
+        case WM_NOTIFY:
+        {
+            switch(LOWORD(wParam))
+            {
+                case IDC_LSV1 :
+                {
+                    if( ( (LPNMHDR)lParam )->code == NM_DBLCLK )
+                    {
+                        std::wstring pathName;
+                        updateLoc( pathName );
+
+                        const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
+                        const TCHAR *pProgramDir = pathName.c_str();
+                        const TCHAR *progInput   = TEXT( "" );
+                        const TCHAR *progOutput  = TEXT( "" );
+
+                        generic_string progInputStr  = progInput ? progInput : TEXT( "" );
+                        generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
+                        generic_string paramInput    = g_GitPath;
+                        paramInput += TEXT( "\\git.exe rev-parse --show-toplevel" );
+                        // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
+
+                        Process program( programPath, paramInput.c_str(), pProgramDir,
+                                         CONSOLE_PROG );
+                        program.run();
+
+                        if ( !program.hasStderr() )
+                        {
+                            const char *pOutput = NULL;
+                            size_t pOutputLen = 0;
+
+                            // If progOutput is defined, then we search the file to read
+                            if ( progOutputStr != TEXT( "" ) )
+                            {
+                                if ( ::PathFileExists( progOutputStr.c_str() ) )
+                                {
+                                    // open the file for binary reading
+                                    std::ifstream file;
+                                    file.open( progOutputStr.c_str(), std::ios_base::binary );
+                                    std::vector<byte> fileContent;
+
+                                    if ( file.is_open() )
+                                    {
+                                        // get the length of the file
+                                        file.seekg( 0, std::ios::end );
+                                        pOutputLen = static_cast<size_t>( file.tellg() );
+                                        file.seekg( 0, std::ios::beg );
+
+                                        // create a vector to hold all the bytes in the file
+                                        fileContent.resize( pOutputLen, 0 );
+
+                                        // read the file
+                                        file.read( reinterpret_cast<char *>( &fileContent[0] ),
+                                                   ( std::streamsize )pOutputLen );
+
+                                        // close the file
+                                        file.close();
+
+                                        pOutput = reinterpret_cast<const char *>( &fileContent[0] );
+                                    }
+
+                                    const char errMsg[] = "ERROR: NO FILE CONTENT";
+
+                                    if ( !pOutput || !( pOutput[0] ) )
+                                    {
+                                        pOutput = errMsg;
+                                        pOutputLen = strlen( errMsg );
+                                    }
+                                }
+                                else
+                                    ::MessageBox( NULL, TEXT( "The file is invalid" ), progOutputStr.c_str(),
+                                                  MB_OK );
+                            }
+                            // otherwise, we look in stdout
+                            else if ( program.hasStdout() )
+                            {
+                                std::wstring outputW = program.getStdout();
+                                std::string output( outputW.begin(), outputW.end() );
+                                output.assign( outputW.begin(), outputW.end() );
+
+                                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+                                std::wstring wide = converter.from_bytes( output.c_str() );
+
+                                wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
+
+                                TCHAR file[MAX_PATH] = {0};
+                                unsigned int iSlected = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, (WPARAM) -1, LVNI_FOCUSED );
+
+                                // No Items in ListView
+                                if ( iSlected == -1 )
+                                    break;
+
+                                memset( &LvItem, 0, sizeof(LvItem) );
+                                LvItem.mask       = LVIF_TEXT;
+                                LvItem.iSubItem   = COL_FILE;
+                                LvItem.pszText    = file;
+                                LvItem.cchTextMax = MAX_PATH;
+                                LvItem.iItem      = iSlected;
+
+                                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, iSlected, (LPARAM)&LvItem );
+                                wide += TEXT( "\\" );
+                                wide += file;
+                                SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
+                            }
+                        }
+                    }
+                    return FALSE;
+                }
             }
             return FALSE;
         }

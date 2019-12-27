@@ -26,7 +26,7 @@
 
 typedef std::basic_string<TCHAR> generic_string;
 
-void updateLoc();
+bool updateLoc( std::wstring & );
 void updateList();
 void clearList();
 
