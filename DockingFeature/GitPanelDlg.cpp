@@ -44,9 +44,9 @@ LVCOLUMN LvCol;
 
 static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pData)
 {
-	if (uMsg == BFFM_INITIALIZED)
-		::SendMessage(hwnd, BFFM_SETSELECTION, TRUE, pData);
-	return 0;
+    if (uMsg == BFFM_INITIALIZED)
+        ::SendMessage(hwnd, BFFM_SETSELECTION, TRUE, pData);
+    return 0;
 };
 
 void clearList()
@@ -333,41 +333,43 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 {
                     // From:
                     // npp-explorer-plugin\Explorer\src\OptionDlg\OptionDialog.cpp
-					LPMALLOC pShellMalloc = 0;
-					if (::SHGetMalloc(&pShellMalloc) == NO_ERROR)
-					{
-						// If we were able to get the shell malloc object,
-						// then proceed by initializing the BROWSEINFO stuct
-						BROWSEINFO info;
-						ZeroMemory(&info, sizeof(info));
-						info.hwndOwner			= _hParent;
-						info.pidlRoot			= NULL;
-						info.pszDisplayName		= (LPTSTR)new TCHAR[MAX_PATH];
-						info.lpszTitle			= TEXT( "Foler where GIT.exe is installed:" );
-						info.ulFlags			= BIF_RETURNONLYFSDIRS;
-						info.lpfn				= BrowseCallbackProc;
-						info.lParam				= (LPARAM)g_GitPath;
+                    LPMALLOC pShellMalloc = 0;
+                    if (::SHGetMalloc(&pShellMalloc) == NO_ERROR)
+                    {
+                        // If we were able to get the shell malloc object,
+                        // then proceed by initializing the BROWSEINFO stuct
+                        BROWSEINFO info;
+                        ZeroMemory(&info, sizeof(info));
+                        info.hwndOwner          = _hParent;
+                        info.pidlRoot           = NULL;
+                        info.pszDisplayName     = (LPTSTR)new TCHAR[MAX_PATH];
+                        info.lpszTitle          = TEXT( "Foler where GIT.exe is installed:" );
+                        info.ulFlags            = BIF_RETURNONLYFSDIRS;
+                        info.lpfn               = BrowseCallbackProc;
+                        info.lParam             = (LPARAM)g_GitPath;
 
-						// Execute the browsing dialog.
-						LPITEMIDLIST pidl = ::SHBrowseForFolder(&info);
+                        // Execute the browsing dialog.
+                        LPITEMIDLIST pidl = ::SHBrowseForFolder(&info);
 
-						// pidl will be null if they cancel the browse dialog.
-						// pidl will be not null when they select a folder.
-						if (pidl)
-						{
-							// Try to convert the pidl to a display string.
-							// Return is true if success.
-							if (::SHGetPathFromIDList( pidl, g_GitPath ))
-							{
-								// Set edit control to the directory path.
-								::SetWindowText(::GetDlgItem(hDialog, IDC_EDT1), g_GitPath);
-							}
-							pShellMalloc->Free(pidl);
-						}
-						pShellMalloc->Release();
-						delete [] info.pszDisplayName;
-					}
-					return FALSE;
+                        // pidl will be null if they cancel the browse dialog.
+                        // pidl will be not null when they select a folder.
+                        if (pidl)
+                        {
+                            // Try to convert the pidl to a display string.
+                            // Return is true if success.
+//                          if (
+                            ::SHGetPathFromIDList( pidl, g_GitPath );
+//                            )
+//                          {
+                                // Set edit control to the directory path.
+//                              ::SetWindowText(::GetDlgItem(hDialog, IDC_EDT1), g_GitPath);
+//                          }
+                            pShellMalloc->Free(pidl);
+                        }
+                        pShellMalloc->Release();
+                        delete [] info.pszDisplayName;
+                    }
+                    return FALSE;
                 }
 
                 case MAKELONG( IDC_EDT1, EN_SETFOCUS ) :
