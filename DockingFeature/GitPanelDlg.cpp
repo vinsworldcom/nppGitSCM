@@ -498,8 +498,15 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                 int fileOrDir = (int)::GetFileAttributes( wide.c_str() );
                                 if ( ! ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY ) )
                                     SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
-                                // else
-                                //     Directory, what to do?
+                                else
+                                {
+                                    std::wstring err;
+                                    err += wide;
+                                    err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
+                                    int ret = ( int )::MessageBox( hDialog, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
+                                    if ( ret == IDYES )
+                                        SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
+                                }
                             }
                         }
                     }
