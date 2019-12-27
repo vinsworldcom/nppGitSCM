@@ -37,6 +37,10 @@ extern HWND    hDialog;
 LVITEM   LvItem;
 LVCOLUMN LvCol;
 
+#define COL_I    0
+#define COL_W    1
+#define COL_FILE 2
+
 static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pData)
 {
 	if (uMsg == BFFM_INITIALIZED)
@@ -91,9 +95,7 @@ void updateList()
     SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
     const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
-    const TCHAR *pProgramDir = pathName;     // Overridden as NULL in Process.cpp
-    // const TCHAR *pProgramDir = TEXT( "\0" ); // Overridden as NULL in Process.cpp
-    // const TCHAR *param       = TEXT( "cmd /c \"git status --porcelain\"" );
+    const TCHAR *pProgramDir = pathName;
     const TCHAR *progInput   = TEXT( "" );
     const TCHAR *progOutput  = TEXT( "" );
 
@@ -175,19 +177,19 @@ void updateList()
                 LvItem.cchTextMax = MAX_PATH;     // Max size of text
                 LvItem.iItem      = i;            // choose item
 
-                LvItem.iSubItem   = 0;            // Put in first coluom
+                LvItem.iSubItem   = COL_I;        // Put in first coluom
                 std::wstring strI = splittedStrings[i].substr(0, 1);
                 LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
                              ( LPARAM )&LvItem );
 
-                LvItem.iSubItem   = 1;            // Put in second coluom
+                LvItem.iSubItem   = COL_W;        // Put in second coluom
                 std::wstring strW = splittedStrings[i].substr(1, 1);
                 LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
                              ( LPARAM )&LvItem );
 
-                LvItem.iSubItem   = 2;            // Put in third coluom
+                LvItem.iSubItem   = COL_FILE;     // Put in third coluom
                 splittedStrings[i].erase(0, 3);
                 LvItem.pszText    =  const_cast<LPWSTR>( splittedStrings[i].c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
@@ -226,15 +228,15 @@ void initDialog()
     // https://git-scm.com/docs/git-status
     LvCol.cx      = 25;                                    // width between each coloum
     LvCol.pszText = TEXT( "I" );                           // First Header Text
-    SendMessage( hList, LVM_INSERTCOLUMN, 0, ( LPARAM )&LvCol );
+    SendMessage( hList, LVM_INSERTCOLUMN, COL_I, ( LPARAM )&LvCol );
 
     LvCol.cx      = 25;                                    // width between each coloum
     LvCol.pszText = TEXT( "W" );                           // First Header Text
-    SendMessage( hList, LVM_INSERTCOLUMN, 1, ( LPARAM )&LvCol );
-    
+    SendMessage( hList, LVM_INSERTCOLUMN, COL_W, ( LPARAM )&LvCol );
+
     LvCol.cx      = 170;                                   // width of column
     LvCol.pszText = TEXT( "File" );
-    SendMessage( hList, LVM_INSERTCOLUMN, 2, ( LPARAM )&LvCol );
+    SendMessage( hList, LVM_INSERTCOLUMN, COL_FILE, ( LPARAM )&LvCol );
 
     SendMessage( hList, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER );
     updateList();
@@ -326,6 +328,8 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
 
                 case IDC_BTN11 :
                 {
+                    // From:
+                    // npp-explorer-plugin\Explorer\src\OptionDlg\OptionDialog.cpp
 					LPMALLOC pShellMalloc = 0;
 					if (::SHGetMalloc(&pShellMalloc) == NO_ERROR)
 					{
@@ -346,7 +350,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
 
 						// pidl will be null if they cancel the browse dialog.
 						// pidl will be not null when they select a folder.
-						if (pidl) 
+						if (pidl)
 						{
 							// Try to convert the pidl to a display string.
 							// Return is true if success.

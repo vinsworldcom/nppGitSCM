@@ -283,13 +283,6 @@ bool launchGit( std::wstring &command )
 void ExecGitCommand( const std::wstring &cmd, bool all = false,
                      bool ALL = false, bool pause = true )
 {
-    // if ( ! g_haveGit )
-    // {
-        // MessageBox( NULL, TEXT( "Could not locate Git" ),
-                    // TEXT( "Update Failed" ), 0 );
-        // return;
-    // }
-
     std::vector<std::wstring> files;
 
     if ( all )
@@ -335,10 +328,7 @@ void ExecGitCommand( const std::wstring &cmd, bool all = false,
 void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
                           bool ALL = false )
 {
-    std::wstring tortoiseLoc;
-    bool tortoiseInstalled = getTortoiseLocation( tortoiseLoc );
-
-    if ( !tortoiseInstalled )
+    if ( ! g_haveTortoise )
     {
         MessageBox( NULL, TEXT( "Could not locate TortoiseGit" ),
                     TEXT( "Update Failed" ), 0 );
@@ -352,7 +342,7 @@ void ExecTortoiseCommand( const std::wstring &cmd, bool all = false,
     else
         files.push_back( getCurrentFile() );
 
-    std::wstring command = tortoiseLoc;
+    std::wstring command = g_tortoiseLoc;
     command += TEXT( " /command:" ) + cmd + TEXT( " /path:\"" );
 
     if ( !ALL )
