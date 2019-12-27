@@ -38,9 +38,10 @@ extern HWND    hDialog;
 LVITEM   LvItem;
 LVCOLUMN LvCol;
 
-#define COL_I    0
-#define COL_W    1
-#define COL_FILE 2
+#define COL_CHK  0
+#define COL_I    1
+#define COL_W    2
+#define COL_FILE 3
 
 static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pData)
 {
@@ -180,19 +181,24 @@ void updateList()
                 LvItem.cchTextMax = MAX_PATH;     // Max size of text
                 LvItem.iItem      = i;            // choose item
 
-                LvItem.iSubItem   = COL_I;        // Put in first coluom
-                std::wstring strI = splittedStrings[i].substr(0, 1);
-                LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
+                LvItem.iSubItem   = COL_CHK;      // Put in first coluom
+                LvItem.pszText    = TEXT( "" );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
                              ( LPARAM )&LvItem );
 
-                LvItem.iSubItem   = COL_W;        // Put in second coluom
+                LvItem.iSubItem   = COL_I;        // Put in second coluom
+                std::wstring strI = splittedStrings[i].substr(0, 1);
+                LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
+                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                             ( LPARAM )&LvItem );
+
+                LvItem.iSubItem   = COL_W;        // Put in third coluom
                 std::wstring strW = splittedStrings[i].substr(1, 1);
                 LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
                              ( LPARAM )&LvItem );
 
-                LvItem.iSubItem   = COL_FILE;     // Put in third coluom
+                LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
                 splittedStrings[i].erase(0, 3);
                 LvItem.pszText    =  const_cast<LPWSTR>( splittedStrings[i].c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
@@ -222,7 +228,7 @@ void initDialog()
     HWND hList = GetDlgItem( hDialog, IDC_LSV1 );
 
     // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
-    SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT );
+    SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ( LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES ) );
 
     memset( &LvCol, 0, sizeof( LvCol ) );            // Zero Members
     LvCol.mask    = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM; // Type of mask
@@ -230,18 +236,22 @@ void initDialog()
     // Column I and W are Index and Working from:
     // https://git-scm.com/docs/git-status
     LvCol.cx      = 25;                                    // width between each coloum
-    LvCol.pszText = TEXT( "I" );                           // First Header Text
+    LvCol.pszText = TEXT( "" );                            // First Header Text
+    SendMessage( hList, LVM_INSERTCOLUMN, COL_CHK, ( LPARAM )&LvCol );
+
+    LvCol.cx      = 25;                                    // width between each coloum
+    LvCol.pszText = TEXT( "I" );                           // Second Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, COL_I, ( LPARAM )&LvCol );
 
     LvCol.cx      = 25;                                    // width between each coloum
-    LvCol.pszText = TEXT( "W" );                           // First Header Text
+    LvCol.pszText = TEXT( "W" );                           // Third Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, COL_W, ( LPARAM )&LvCol );
 
-    LvCol.cx      = 170;                                   // width of column
-    LvCol.pszText = TEXT( "File" );
+    LvCol.cx      = 25;                                   // width of column
+    LvCol.pszText = TEXT( "File" );                        // Fourth Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, COL_FILE, ( LPARAM )&LvCol );
 
-    SendMessage( hList, LVM_SETCOLUMNWIDTH, 0, LVSCW_AUTOSIZE_USEHEADER );
+    SendMessage( hList, LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
     updateList();
 }
 
@@ -484,6 +494,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, iSlected, (LPARAM)&LvItem );
                                 wide += TEXT( "\\" );
                                 wide += file;
+// TODO:2019-12-27:MVINCENT: check file exist as file and not directory
                                 SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
                             }
                         }
@@ -500,8 +511,14 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
             RECT rc = {0};
             getClientRect( rc );
 
-            ::SetWindowPos(GetDlgItem( hDialog, IDC_EDT1 ), NULL, rc.left + 15, rc.top + 215, rc.right - 25, 20, SWP_NOZORDER | SWP_SHOWWINDOW);
-            ::SetWindowPos(GetDlgItem( hDialog, IDC_LSV1 ), NULL, rc.left + 15, rc.top + 245, rc.right - 25, rc.bottom - 260, SWP_NOZORDER | SWP_SHOWWINDOW);
+            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT1 ), NULL, 
+                            rc.left + 15, rc.top + 215, rc.right - 25, 20, 
+                            SWP_NOZORDER | SWP_SHOWWINDOW );
+            ::SetWindowPos( GetDlgItem( hDialog, IDC_LSV1 ), NULL, 
+                            rc.left + 15, rc.top + 245, rc.right - 25, rc.bottom - 260, 
+                            SWP_NOZORDER | SWP_SHOWWINDOW );
+
+            SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
 
             redraw();
             return FALSE;
