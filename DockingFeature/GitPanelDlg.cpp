@@ -129,11 +129,8 @@ void setColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
                  ( LPARAM )&LvItem );
 }
 
-void updateList()
+bool execCommand( std::wstring command, std::wstring &wide )
 {
-    if ( ! g_NppReady )
-        return;
-
     std::wstring pathName;
     updateLoc( pathName );
 
@@ -145,7 +142,7 @@ void updateList()
     generic_string progInputStr  = progInput ? progInput : TEXT( "" );
     generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
     generic_string paramInput    = g_GitPath;
-    paramInput += TEXT( "\\git.exe status --porcelain" );
+    paramInput += command;
     // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
 
     Process program( programPath, paramInput.c_str(), pProgramDir,
@@ -196,35 +193,51 @@ void updateList()
                 }
             }
             else
+            {
                 ::MessageBox( NULL, TEXT( "The file is invalid" ), progOutputStr.c_str(),
                               MB_OK );
+                wide = progOutputStr.c_str();
+                return false;
+            }
         }
         // otherwise, we look in stdout
         else if ( program.hasStdout() )
         {
-            std::wstring wide;
             convertProcessText2Wide( program.getStdout(), wide );
-
-            clearList();
-            std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
-
-            for ( unsigned int i = 0; i < splittedStrings.size() ; i++ )
-            {
-                std::wstring strI    = splittedStrings[i].substr(0, 1);
-                std::wstring strW    = splittedStrings[i].substr(1, 1);
-                std::wstring strFile = splittedStrings[i].erase(0, 3);
-                setColumns( i, strI, strW, strFile );
-            }
+            return true;
         }
     }
     else
     {
-        std::wstring wide;
         convertProcessText2Wide( program.getStderr(), wide );
-
-        clearList();
-        setColumns( 0, TEXT( "" ), TEXT( "" ), wide );
+        return false;
     }
+    wide = TEXT( "" );
+    return false;
+}
+
+void updateList()
+{
+    if ( ! g_NppReady )
+        return;
+
+    clearList();
+
+    std::wstring wide;
+    if ( execCommand( TEXT( "\\git.exe status --porcelain" ), wide ) )
+    {
+        std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
+
+        for ( unsigned int i = 0; i < splittedStrings.size() ; i++ )
+        {
+            std::wstring strI    = splittedStrings[i].substr(0, 1);
+            std::wstring strW    = splittedStrings[i].substr(1, 1);
+            std::wstring strFile = splittedStrings[i].erase(0, 3);
+            setColumns( i, strI, strW, strFile );
+        }
+    }
+    else
+        setColumns( 0, TEXT( "" ), TEXT( "" ), wide );
 }
 
 void initDialog()
@@ -404,112 +417,48 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 {
                     if( ( (LPNMHDR)lParam )->code == NM_DBLCLK )
                     {
-                        std::wstring pathName;
-                        updateLoc( pathName );
-
-                        const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
-                        const TCHAR *pProgramDir = pathName.c_str();
-                        const TCHAR *progInput   = TEXT( "" );
-                        const TCHAR *progOutput  = TEXT( "" );
-
-                        generic_string progInputStr  = progInput ? progInput : TEXT( "" );
-                        generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
-                        generic_string paramInput    = g_GitPath;
-                        paramInput += TEXT( "\\git.exe rev-parse --show-toplevel" );
-                        // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
-
-                        Process program( programPath, paramInput.c_str(), pProgramDir,
-                                         CONSOLE_PROG );
-                        program.run();
-
-                        if ( !program.hasStderr() )
+                        std::wstring wide;
+                        if ( execCommand( TEXT( "\\git.exe rev-parse --show-toplevel" ), wide ) )
                         {
-                            const char *pOutput = NULL;
-                            size_t pOutputLen = 0;
-
-                            // If progOutput is defined, then we search the file to read
-                            if ( progOutputStr != TEXT( "" ) )
+                            wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
+                        
+                            TCHAR file[MAX_PATH] = {0};
+                            unsigned int iSlected = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, (WPARAM) -1, LVNI_FOCUSED );
+                        
+                            // No Items in ListView
+                            if ( iSlected == -1 )
+                                break;
+                        
+                            memset( &LvItem, 0, sizeof(LvItem) );
+                            LvItem.mask       = LVIF_TEXT;
+                            LvItem.iSubItem   = COL_FILE;
+                            LvItem.pszText    = file;
+                            LvItem.cchTextMax = MAX_PATH;
+                            LvItem.iItem      = iSlected;
+                        
+                            SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, iSlected, (LPARAM)&LvItem );
+                            wide += TEXT( "\\" );
+                            wide += file;
+                        
+                            DWORD fileOrDir = GetFileAttributes( wide.c_str() );
+                            if ( fileOrDir == INVALID_FILE_ATTRIBUTES )
+                                break;
+                            else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
                             {
-                                if ( ::PathFileExists( progOutputStr.c_str() ) )
-                                {
-                                    // open the file for binary reading
-                                    std::ifstream file;
-                                    file.open( progOutputStr.c_str(), std::ios_base::binary );
-                                    std::vector<byte> fileContent;
-
-                                    if ( file.is_open() )
-                                    {
-                                        // get the length of the file
-                                        file.seekg( 0, std::ios::end );
-                                        pOutputLen = static_cast<size_t>( file.tellg() );
-                                        file.seekg( 0, std::ios::beg );
-
-                                        // create a vector to hold all the bytes in the file
-                                        fileContent.resize( pOutputLen, 0 );
-
-                                        // read the file
-                                        file.read( reinterpret_cast<char *>( &fileContent[0] ),
-                                                   ( std::streamsize )pOutputLen );
-
-                                        // close the file
-                                        file.close();
-
-                                        pOutput = reinterpret_cast<const char *>( &fileContent[0] );
-                                    }
-
-                                    const char errMsg[] = "ERROR: NO FILE CONTENT";
-
-                                    if ( !pOutput || !( pOutput[0] ) )
-                                    {
-                                        pOutput = errMsg;
-                                        pOutputLen = strlen( errMsg );
-                                    }
-                                }
-                                else
-                                    ::MessageBox( NULL, TEXT( "The file is invalid" ), progOutputStr.c_str(),
-                                                  MB_OK );
-                            }
-                            // otherwise, we look in stdout
-                            else if ( program.hasStdout() )
-                            {
-                                std::wstring wide;
-                                convertProcessText2Wide( program.getStdout(), wide );
-
-                                wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
-
-                                TCHAR file[MAX_PATH] = {0};
-                                unsigned int iSlected = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, (WPARAM) -1, LVNI_FOCUSED );
-
-                                // No Items in ListView
-                                if ( iSlected == -1 )
-                                    break;
-
-                                memset( &LvItem, 0, sizeof(LvItem) );
-                                LvItem.mask       = LVIF_TEXT;
-                                LvItem.iSubItem   = COL_FILE;
-                                LvItem.pszText    = file;
-                                LvItem.cchTextMax = MAX_PATH;
-                                LvItem.iItem      = iSlected;
-
-                                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, iSlected, (LPARAM)&LvItem );
-                                wide += TEXT( "\\" );
-                                wide += file;
-
-                                DWORD fileOrDir = GetFileAttributes( wide.c_str() );
-                                if ( fileOrDir == INVALID_FILE_ATTRIBUTES )
-                                    break;
-                                else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
-                                {
-                                    std::wstring err;
-                                    err += wide;
-                                    err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
-                                    int ret = ( int )::MessageBox( hDialog, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
-                                    if ( ret == IDYES )
-                                        SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
-                                }
-                                else
+                                std::wstring err;
+                                err += wide;
+                                err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
+                                int ret = ( int )::MessageBox( hDialog, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
+                                if ( ret == IDYES )
                                     SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
                             }
+                            else
+                                SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
+                        }
+                        else
+                        {
+                            clearList();
+                            setColumns( 0, TEXT( "" ), TEXT( "" ), wide );
                         }
                     }
                     return FALSE;
