@@ -99,7 +99,7 @@ bool updateLoc( std::wstring &loc )
     return true;
 }
 
-void setColumns( unsigned int uItem, std::wstring strI, std::wstring strW, 
+void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
                  std::wstring strFile )
 {
     // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
@@ -127,6 +127,42 @@ void setColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
     LvItem.pszText    = const_cast<LPWSTR>( strFile.c_str() );
     SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
                  ( LPARAM )&LvItem );
+}
+
+/*
+Call with:
+    std::wstring selectedItems;
+    if ( getListSelected( selectedItems ) )
+        MessageBox( NULL, selectedItems.c_str(), TEXT( "Selected Items" ), MB_OK );
+    else
+        MessageBox( NULL, TEXT("NONE"), TEXT( "No Selected Items" ), MB_OK );
+ */
+ bool getListSelected( std::wstring &selectedItems )
+{
+    bool found = false;
+    for (int itemInt = -1; (itemInt = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, itemInt, LVNI_SELECTED)) != -1; )
+    {
+        found = true;
+        TCHAR file[MAX_PATH] = {0};
+
+        memset( &LvItem, 0, sizeof(LvItem) );
+        LvItem.mask       = LVIF_TEXT;
+        LvItem.iSubItem   = COL_FILE;
+        LvItem.pszText    = file;
+        LvItem.cchTextMax = MAX_PATH;
+        LvItem.iItem      = itemInt;
+
+        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, itemInt, (LPARAM)&LvItem );
+        selectedItems += TEXT( " " );
+        selectedItems += file;
+    }
+
+    memset( &LvItem, 0, sizeof(LvItem) );
+    LvItem.mask       = LVIF_STATE;
+    LvItem.stateMask  = LVIS_SELECTED;
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&LvItem );
+
+    return found;
 }
 
 bool execCommand( std::wstring command, std::wstring &wide )
@@ -233,11 +269,11 @@ void updateList()
             std::wstring strI    = splittedStrings[i].substr(0, 1);
             std::wstring strW    = splittedStrings[i].substr(1, 1);
             std::wstring strFile = splittedStrings[i].erase(0, 3);
-            setColumns( i, strI, strW, strFile );
+            setListColumns( i, strI, strW, strFile );
         }
     }
     else
-        setColumns( 0, TEXT( "" ), TEXT( "" ), wide );
+        setListColumns( 0, TEXT( "" ), TEXT( "" ), wide );
 }
 
 void initDialog()
@@ -421,25 +457,25 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                         if ( execCommand( TEXT( "\\git.exe rev-parse --show-toplevel" ), wide ) )
                         {
                             wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
-                        
+
                             TCHAR file[MAX_PATH] = {0};
                             unsigned int iSlected = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, (WPARAM) -1, LVNI_FOCUSED );
-                        
+
                             // No Items in ListView
                             if ( iSlected == -1 )
                                 break;
-                        
+
                             memset( &LvItem, 0, sizeof(LvItem) );
                             LvItem.mask       = LVIF_TEXT;
                             LvItem.iSubItem   = COL_FILE;
                             LvItem.pszText    = file;
                             LvItem.cchTextMax = MAX_PATH;
                             LvItem.iItem      = iSlected;
-                        
+
                             SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, iSlected, (LPARAM)&LvItem );
                             wide += TEXT( "\\" );
                             wide += file;
-                        
+
                             DWORD fileOrDir = GetFileAttributes( wide.c_str() );
                             if ( fileOrDir == INVALID_FILE_ATTRIBUTES )
                                 break;
@@ -458,7 +494,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                         else
                         {
                             clearList();
-                            setColumns( 0, TEXT( "" ), TEXT( "" ), wide );
+                            setListColumns( 0, TEXT( "" ), TEXT( "" ), wide );
                         }
                     }
                     return FALSE;
@@ -495,4 +531,3 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
 }
-
