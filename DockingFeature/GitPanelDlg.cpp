@@ -157,11 +157,6 @@ Call with:
         selectedItems += file;
     }
 
-    memset( &LvItem, 0, sizeof(LvItem) );
-    LvItem.mask       = LVIF_STATE;
-    LvItem.stateMask  = LVIS_SELECTED;
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEMSTATE, (WPARAM)-1, (LPARAM)&LvItem );
-
     return found;
 }
 
