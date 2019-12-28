@@ -200,7 +200,7 @@ void updateList()
 
                 LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
                 splittedStrings[i].erase(0, 3);
-                LvItem.pszText    =  const_cast<LPWSTR>( splittedStrings[i].c_str() );
+                LvItem.pszText    = const_cast<LPWSTR>( splittedStrings[i].c_str() );
                 SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
                              ( LPARAM )&LvItem );
             }
@@ -208,18 +208,39 @@ void updateList()
     }
     else
     {
-// TODO:2019-12-24:MVINCENT: currently printing every other character
-//                           outputW.c_str() prints Asian characters
-//                           UTF8/16 issue
-        // std::wstring outputW = program.getStderr();
-        // std::string output(outputW.begin(), outputW.end());
-        // output.assign(outputW.begin(), outputW.end());
+        std::wstring outputW = program.getStderr();
+        std::string output(outputW.begin(), outputW.end());
+        output.assign(outputW.begin(), outputW.end());
 
-        // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        // std::wstring wide = converter.from_bytes(output.c_str());
+        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+        std::wstring wide = converter.from_bytes(output.c_str());
 
-//        MessageBox(NULL, wide.c_str(), TEXT("Error"), MB_OK);
         clearList();
+
+        memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
+        LvItem.mask       = LVIF_TEXT;    // Text Style
+        LvItem.cchTextMax = MAX_PATH;     // Max size of text
+        LvItem.iItem      = 0;            // choose item
+
+        LvItem.iSubItem   = COL_CHK;      // Put in first coluom
+        LvItem.pszText    = TEXT( "" );
+        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
+                     ( LPARAM )&LvItem );
+
+        LvItem.iSubItem   = COL_I;        // Put in second coluom
+        LvItem.pszText    = TEXT( "" );
+        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                     ( LPARAM )&LvItem );
+
+        LvItem.iSubItem   = COL_W;        // Put in third coluom
+        LvItem.pszText    = TEXT( "" );
+        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                     ( LPARAM )&LvItem );
+
+        LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
+        LvItem.pszText    = const_cast<LPWSTR>( wide.c_str() );
+        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                     ( LPARAM )&LvItem );
     }
 }
 
@@ -495,10 +516,10 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                 wide += TEXT( "\\" );
                                 wide += file;
 
-                                int fileOrDir = (int)::GetFileAttributes( wide.c_str() );
-                                if ( ! ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY ) )
-                                    SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
-                                else
+                                DWORD fileOrDir = GetFileAttributes( wide.c_str() );
+                                if ( fileOrDir == INVALID_FILE_ATTRIBUTES )
+                                    break;
+                                else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
                                 {
                                     std::wstring err;
                                     err += wide;
@@ -507,6 +528,8 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                     if ( ret == IDYES )
                                         SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
                                 }
+                                else
+                                    SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )wide.c_str() );
                             }
                         }
                     }

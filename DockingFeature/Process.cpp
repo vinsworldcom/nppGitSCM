@@ -261,7 +261,8 @@ void Process::listenerStdErr()
 	HANDLE hListenerEvent = ::OpenEvent(EVENT_ALL_ACCESS, FALSE, TEXT("listenerStdErrEvent"));
 
 	int taille = 0;
-	TCHAR bufferErr[MAX_LINE_LENGTH + 1];
+	char bufferErr[MAX_LINE_LENGTH + 1];
+	//TCHAR bufferErr[MAX_LINE_LENGTH + 1];
 
 	int nExitCode = STILL_ACTIVE;
 	
@@ -289,8 +290,15 @@ void Process::listenerStdErr()
 				break;
 		}
 		bufferErr[errbytesRead] = '\0';
-		generic_string s;
-		s.assign(bufferErr);
+		// generic_string s;
+		// s.assign(bufferErr);
+#ifdef UNICODE
+        std::string inputA = bufferErr;
+        std::wstring s(inputA.begin(), inputA.end());
+        s.assign(inputA.begin(), inputA.end());
+#else
+        std::string s = bufferOut;
+#endif
 		_stderrStr += s;
 
 		if (::GetExitCodeProcess(_hProcess, (unsigned long*)&nExitCode))
