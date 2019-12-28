@@ -80,6 +80,15 @@ std::vector<std::wstring> split( std::wstring stringToBeSplitted,
     return splittedString;
 }
 
+void convertProcessText2Wide( std::wstring outputW, std::wstring &wide )
+{
+    std::string output(outputW.begin(), outputW.end());
+    output.assign(outputW.begin(), outputW.end());
+
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    wide = converter.from_bytes(output.c_str());
+}
+
 bool updateLoc( std::wstring &loc )
 {
     TCHAR pathName[MAX_PATH] = {0};
@@ -88,6 +97,36 @@ bool updateLoc( std::wstring &loc )
 
     loc = loc.append( pathName );
     return true;
+}
+
+void setColumns( unsigned int uItem, std::wstring strI, std::wstring strW, 
+                 std::wstring strFile )
+{
+    // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
+    memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
+    LvItem.mask       = LVIF_TEXT;    // Text Style
+    LvItem.cchTextMax = MAX_PATH;     // Max size of text
+    LvItem.iItem      = uItem;        // choose item
+
+    LvItem.iSubItem   = COL_CHK;      // Put in first coluom
+    LvItem.pszText    = TEXT( "" );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
+                 ( LPARAM )&LvItem );
+
+    LvItem.iSubItem   = COL_I;        // Put in second coluom
+    LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                 ( LPARAM )&LvItem );
+
+    LvItem.iSubItem   = COL_W;        // Put in third coluom
+    LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                 ( LPARAM )&LvItem );
+
+    LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
+    LvItem.pszText    = const_cast<LPWSTR>( strFile.c_str() );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
+                 ( LPARAM )&LvItem );
 }
 
 void updateList()
@@ -163,84 +202,28 @@ void updateList()
         // otherwise, we look in stdout
         else if ( program.hasStdout() )
         {
-            std::wstring outputW = program.getStdout();
-            std::string output( outputW.begin(), outputW.end() );
-            output.assign( outputW.begin(), outputW.end() );
-
-            std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-            std::wstring wide = converter.from_bytes( output.c_str() );
+            std::wstring wide;
+            convertProcessText2Wide( program.getStdout(), wide );
 
             clearList();
             std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
 
             for ( unsigned int i = 0; i < splittedStrings.size() ; i++ )
             {
-                // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
-                memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
-                LvItem.mask       = LVIF_TEXT;    // Text Style
-                LvItem.cchTextMax = MAX_PATH;     // Max size of text
-                LvItem.iItem      = i;            // choose item
-
-                LvItem.iSubItem   = COL_CHK;      // Put in first coluom
-                LvItem.pszText    = TEXT( "" );
-                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
-                             ( LPARAM )&LvItem );
-
-                LvItem.iSubItem   = COL_I;        // Put in second coluom
-                std::wstring strI = splittedStrings[i].substr(0, 1);
-                LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
-                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                             ( LPARAM )&LvItem );
-
-                LvItem.iSubItem   = COL_W;        // Put in third coluom
-                std::wstring strW = splittedStrings[i].substr(1, 1);
-                LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
-                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                             ( LPARAM )&LvItem );
-
-                LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
-                splittedStrings[i].erase(0, 3);
-                LvItem.pszText    = const_cast<LPWSTR>( splittedStrings[i].c_str() );
-                SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                             ( LPARAM )&LvItem );
+                std::wstring strI    = splittedStrings[i].substr(0, 1);
+                std::wstring strW    = splittedStrings[i].substr(1, 1);
+                std::wstring strFile = splittedStrings[i].erase(0, 3);
+                setColumns( i, strI, strW, strFile );
             }
         }
     }
     else
     {
-        std::wstring outputW = program.getStderr();
-        std::string output(outputW.begin(), outputW.end());
-        output.assign(outputW.begin(), outputW.end());
-
-        std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-        std::wstring wide = converter.from_bytes(output.c_str());
+        std::wstring wide;
+        convertProcessText2Wide( program.getStderr(), wide );
 
         clearList();
-
-        memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
-        LvItem.mask       = LVIF_TEXT;    // Text Style
-        LvItem.cchTextMax = MAX_PATH;     // Max size of text
-        LvItem.iItem      = 0;            // choose item
-
-        LvItem.iSubItem   = COL_CHK;      // Put in first coluom
-        LvItem.pszText    = TEXT( "" );
-        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
-                     ( LPARAM )&LvItem );
-
-        LvItem.iSubItem   = COL_I;        // Put in second coluom
-        LvItem.pszText    = TEXT( "" );
-        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                     ( LPARAM )&LvItem );
-
-        LvItem.iSubItem   = COL_W;        // Put in third coluom
-        LvItem.pszText    = TEXT( "" );
-        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                     ( LPARAM )&LvItem );
-
-        LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
-        LvItem.pszText    = const_cast<LPWSTR>( wide.c_str() );
-        SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                     ( LPARAM )&LvItem );
+        setColumns( 0, TEXT( "" ), TEXT( "" ), wide );
     }
 }
 
@@ -489,12 +472,8 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                             // otherwise, we look in stdout
                             else if ( program.hasStdout() )
                             {
-                                std::wstring outputW = program.getStdout();
-                                std::string output( outputW.begin(), outputW.end() );
-                                output.assign( outputW.begin(), outputW.end() );
-
-                                std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-                                std::wstring wide = converter.from_bytes( output.c_str() );
+                                std::wstring wide;
+                                convertProcessText2Wide( program.getStdout(), wide );
 
                                 wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
 
