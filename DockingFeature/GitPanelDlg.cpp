@@ -38,10 +38,10 @@ extern HWND    hDialog;
 LVITEM   LvItem;
 LVCOLUMN LvCol;
 
-#define COL_CHK  0
-#define COL_I    1
-#define COL_W    2
-#define COL_FILE 3
+// #define COL_CHK  0
+#define COL_I    0
+#define COL_W    1
+#define COL_FILE 2
 
 static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pData)
 {
@@ -108,25 +108,21 @@ void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
     LvItem.cchTextMax = MAX_PATH;     // Max size of text
     LvItem.iItem      = uItem;        // choose item
 
-    LvItem.iSubItem   = COL_CHK;      // Put in first coluom
-    LvItem.pszText    = TEXT( "" );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0,
-                 ( LPARAM )&LvItem );
+    // LvItem.iSubItem   = COL_CHK;      // Put in first coluom
+    // LvItem.pszText    = TEXT( "" );
+    // SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
 
     LvItem.iSubItem   = COL_I;        // Put in second coluom
     LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                 ( LPARAM )&LvItem );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
 
     LvItem.iSubItem   = COL_W;        // Put in third coluom
     LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                 ( LPARAM )&LvItem );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
 
     LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
     LvItem.pszText    = const_cast<LPWSTR>( strFile.c_str() );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0,
-                 ( LPARAM )&LvItem );
+    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
 }
 
 /*
@@ -276,16 +272,16 @@ void initDialog()
     HWND hList = GetDlgItem( hDialog, IDC_LSV1 );
 
     // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
-    SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ( LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES ) );
+    SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ( LVS_EX_FULLROWSELECT /*| LVS_EX_CHECKBOXES*/ ) );
 
     memset( &LvCol, 0, sizeof( LvCol ) );            // Zero Members
     LvCol.mask    = LVCF_TEXT | LVCF_WIDTH | LVCF_SUBITEM; // Type of mask
 
     // Column I and W are Index and Working from:
     // https://git-scm.com/docs/git-status
-    LvCol.cx      = 25;                                    // width between each coloum
-    LvCol.pszText = TEXT( "" );                            // First Header Text
-    SendMessage( hList, LVM_INSERTCOLUMN, COL_CHK, ( LPARAM )&LvCol );
+    // LvCol.cx      = 25;                                    // width between each coloum
+    // LvCol.pszText = TEXT( "" );                            // First Header Text
+    // SendMessage( hList, LVM_INSERTCOLUMN, COL_CHK, ( LPARAM )&LvCol );
 
     LvCol.cx      = 25;                                    // width between each coloum
     LvCol.pszText = TEXT( "I" );                           // Second Header Text
