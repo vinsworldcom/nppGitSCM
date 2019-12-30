@@ -19,6 +19,7 @@
 #define GITPANEL_DLG_H
 
 #include <string>
+#include <vector>
 
 #include "DockingDlgInterface.h"
 #include "..\PluginDefinition.h"
@@ -26,6 +27,7 @@
 
 typedef std::basic_string<TCHAR> generic_string;
 
+std::vector<std::wstring> getListSelected();
 bool updateLoc( std::wstring & );
 void updateList();
 void clearList();

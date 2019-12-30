@@ -157,6 +157,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DockingFeature\ContextMenu.cpp" />
     <ClCompile Include="DockingFeature\GitPanelDlg.cpp" />
     <ClCompile Include="DockingFeature\Process.cpp" />
     <ClCompile Include="DockingFeature\StaticDialog.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="PluginDefinition.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DockingFeature\ContextMenu.h" />
     <ClInclude Include="DockingFeature\Docking.h" />
     <ClInclude Include="DockingFeature\DockingDlgInterface.h" />
     <ClInclude Include="DockingFeature\dockingResource.h" />
