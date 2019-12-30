@@ -51,8 +51,8 @@ TCHAR g_GitPrompt[MAX_PATH];
 
 std::wstring g_tortoiseLoc;
 
-#define DOCKABLE_INDEX 3
-#define TORTOISE_INDEX 17
+#define DOCKABLE_INDEX 4
+#define TORTOISE_INDEX 18
 
 //
 // Initialize your plugin data here
@@ -123,22 +123,23 @@ void commandMenuInit()
 
     setCommand( 0,  TEXT( "Git &GUI" ),      gitGui, NULL, false );
     setCommand( 1,  TEXT( "GiT&k" ),         giTk, NULL, false );
-    setCommand( 2,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 2,  TEXT( "Git Pro&mpt" ),   gitPrompt, NULL, false );
+    setCommand( 3,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL,
                 false );
-    setCommand( 4,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( 5,  TEXT( "&Diff File" ),    diffFile, NULL, false );
-    setCommand( 6,  TEXT( "&Add File" ),     addFile, NULL, false );
-    setCommand( 7,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
-    setCommand( 8,  TEXT( "&Revert File" ),  revertFile, NULL, false );
-    setCommand( 9,  TEXT( "&Log File" ),     logFile, NULL, false );
-    setCommand( 10, TEXT( "&Blame File" ),   blameFile, NULL, false );
-    setCommand( 11, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( 12, TEXT( "&Pull" ),         pullFile, NULL, false );
-    setCommand( 13, TEXT( "&Status" ),       statusAll, NULL, false );
-    setCommand( 14, TEXT( "&Commit" ),       commitAll, NULL, false );
-    setCommand( 15, TEXT( "Pus&h" ),         pushFile, NULL, false );
-    setCommand( 16, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 5,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 6,  TEXT( "&Diff File" ),    diffFile, NULL, false );
+    setCommand( 7,  TEXT( "&Add File" ),     addFile, NULL, false );
+    setCommand( 8,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
+    setCommand( 9,  TEXT( "&Revert File" ),  revertFile, NULL, false );
+    setCommand( 10,  TEXT( "&Log File" ),     logFile, NULL, false );
+    setCommand( 11, TEXT( "&Blame File" ),   blameFile, NULL, false );
+    setCommand( 12, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 13, TEXT( "&Pull" ),         pullFile, NULL, false );
+    setCommand( 14, TEXT( "&Status" ),       statusAll, NULL, false );
+    setCommand( 15, TEXT( "&Commit" ),       commitAll, NULL, false );
+    setCommand( 16, TEXT( "Pus&h" ),         pushFile, NULL, false );
+    setCommand( 17, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
                 g_useTortoise ? true : false );
 }
@@ -350,6 +351,21 @@ void updatePanel()
 {
     if ( _gitPanel.isVisible() )
         updateList();
+}
+
+void gitPrompt()
+{
+    std::wstring pathName;
+    if ( _gitPanel.isVisible() )
+        updateLoc( pathName );
+    else
+    {
+        TCHAR tempPath[MAX_PATH] = {0};
+        SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )tempPath );
+        pathName = tempPath;
+    }
+
+    ShellExecute( nppData._nppHandle, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
 }
 
 void gitGui()

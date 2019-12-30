@@ -101,7 +101,7 @@ bool updateLoc( std::wstring &loc )
     SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
     SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
-    loc = loc.append( pathName );
+    loc = pathName;
     return true;
 }
 
