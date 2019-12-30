@@ -38,7 +38,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 16;
+const int nbFunc = 18;
 
 
 //
@@ -96,6 +96,10 @@ void logFile();
 void logFileFiles( std::vector<std::wstring> );
 void blameFile();
 void blameFileFiles( std::vector<std::wstring> );
+void pushFile();
+void pushFileFiles( std::vector<std::wstring> );
+void pullFile();
+void pullFileFiles( std::vector<std::wstring> );
 void doTortoise();
 void DockableDlg();
 

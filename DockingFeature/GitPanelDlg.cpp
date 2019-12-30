@@ -386,6 +386,18 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     return TRUE;
                 }
 
+                case IDC_BTN12 :
+                {
+                    pushFile();
+                    return TRUE;
+                }
+
+                case IDC_BTN13 :
+                {
+                    pullFile();
+                    return TRUE;
+                }
+
                 case IDC_BTN11 :
                 {
                     // From:

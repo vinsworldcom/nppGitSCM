@@ -50,7 +50,7 @@ TCHAR g_GitPath[MAX_PATH];
 std::wstring g_tortoiseLoc;
 
 #define DOCKABLE_INDEX 3
-#define TORTOISE_INDEX 15
+#define TORTOISE_INDEX 17
 
 //
 // Initialize your plugin data here
@@ -118,19 +118,21 @@ void commandMenuInit()
     setCommand( 0,  TEXT( "Git &GUI" ),      gitGui, NULL, false );
     setCommand( 1,  TEXT( "GiT&k" ),         giTk, NULL, false );
     setCommand( 2,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking &Panel" ), DockableDlg, NULL,
+    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL,
                 false );
     setCommand( 4,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( 5,  TEXT( "&Diff File" ),    diffFile, NULL, false );
     setCommand( 6,  TEXT( "&Add File" ),     addFile, NULL, false );
     setCommand( 7,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
-    setCommand( 8, TEXT( "&Revert File" ),  revertFile, NULL, false );
-    setCommand( 9, TEXT( "&Log File" ),     logFile, NULL, false );
+    setCommand( 8,  TEXT( "&Revert File" ),  revertFile, NULL, false );
+    setCommand( 9,  TEXT( "&Log File" ),     logFile, NULL, false );
     setCommand( 10, TEXT( "&Blame File" ),   blameFile, NULL, false );
     setCommand( 11, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( 12,  TEXT( "&Status" ),       statusAll, NULL, false );
-    setCommand( 13,  TEXT( "&Commit" ),       commitAll, NULL, false );
-    setCommand( 14, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 12, TEXT( "&Pull" ),         pullFile, NULL, false );
+    setCommand( 13, TEXT( "&Status" ),       statusAll, NULL, false );
+    setCommand( 14, TEXT( "&Commit" ),       commitAll, NULL, false );
+    setCommand( 15, TEXT( "Pus&h" ),         pushFile, NULL, false );
+    setCommand( 16, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
                 g_useTortoise ? true : false );
 }
@@ -465,7 +467,6 @@ void logFileFiles( std::vector<std::wstring> files = {} )
         ExecTortoiseCommand( TEXT( "log" ), files, false, true );
     else
         ExecGitCommand( TEXT( " log" ), files, false, true );
-
 }
 
 void blameFile()
@@ -482,6 +483,32 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
         ExecTortoiseCommand( TEXT( "blame" ), files, false, true );
     else
         ExecGitCommand( TEXT( " blame" ), files, false, true );
+}
+
+void pullFile()
+{
+     std::vector<std::wstring> files = {};
+     pullFileFiles( files );
+}
+void pullFileFiles( std::vector<std::wstring> files = {} )
+{
+    if ( g_useTortoise )
+        ExecTortoiseCommand( TEXT( "pull" ), files, true, true );
+    else
+        ExecGitCommand( TEXT( " pull" ), files, true, true );
+}
+
+void pushFile()
+{
+     std::vector<std::wstring> files = {};
+     pushFileFiles( files );
+}
+void pushFileFiles( std::vector<std::wstring> files = {} )
+{
+    if ( g_useTortoise )
+        ExecTortoiseCommand( TEXT( "push" ), files, true, true );
+    else
+        ExecGitCommand( TEXT( " push" ), files, true, true );
 }
 
 void doTortoise()
