@@ -25,10 +25,11 @@
 
 #include "DockingFeature/GitPanelDlg.h"
 
-const TCHAR configFileName[] = TEXT( "GitSCM.ini" );
-const TCHAR sectionName[]    = TEXT( "Git" );
-const TCHAR iniKeyTortoise[] = TEXT( "Tortoise" );
-const TCHAR iniKeyGitpath[]  = TEXT( "GitPath" );
+const TCHAR configFileName[]  = TEXT( "GitSCM.ini" );
+const TCHAR sectionName[]     = TEXT( "Git" );
+const TCHAR iniKeyTortoise[]  = TEXT( "Tortoise" );
+const TCHAR iniKeyGitPath[]   = TEXT( "GitPath" );
+const TCHAR iniKeyGitPrompt[] = TEXT( "GitPrompt" );
 
 DemoDlg _gitPanel;
 
@@ -46,6 +47,7 @@ TCHAR iniFilePath[MAX_PATH];
 bool  g_useTortoise = false;
 bool  g_NppReady    = false;
 TCHAR g_GitPath[MAX_PATH];
+TCHAR g_GitPrompt[MAX_PATH];
 
 std::wstring g_tortoiseLoc;
 
@@ -68,8 +70,10 @@ void pluginCleanUp()
 {
     ::WritePrivateProfileString( sectionName, iniKeyTortoise,
                                  g_useTortoise ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
-	::WritePrivateProfileString( sectionName, iniKeyGitpath, 
+	::WritePrivateProfileString( sectionName, iniKeyGitPath, 
                                  g_GitPath, iniFilePath);
+	::WritePrivateProfileString( sectionName, iniKeyGitPrompt, 
+                                 g_GitPrompt, iniFilePath);
 }
 
 //
@@ -95,8 +99,10 @@ void commandMenuInit()
     // get the parameter value from plugin config
     g_useTortoise = ::GetPrivateProfileInt( sectionName, iniKeyTortoise,
                                             0, iniFilePath );
-	::GetPrivateProfileString( sectionName, iniKeyGitpath, TEXT(""), 
+	::GetPrivateProfileString( sectionName, iniKeyGitPath, TEXT(""), 
                                g_GitPath, MAX_PATH, iniFilePath );
+	::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"), 
+                               g_GitPrompt, MAX_PATH, iniFilePath );
 
     if ( g_useTortoise )
     {

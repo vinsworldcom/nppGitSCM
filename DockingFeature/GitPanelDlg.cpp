@@ -35,6 +35,7 @@ extern NppData nppData;
 extern bool    g_useTortoise;
 extern bool    g_NppReady;
 extern TCHAR   g_GitPath[MAX_PATH];;
+extern TCHAR   g_GitPrompt[MAX_PATH];;
 extern HWND    hDialog;
 extern NppData nppData;
 
@@ -305,7 +306,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                                        LPARAM lParam )
 {
 
-    ::SendMessage( GetDlgItem( hDialog, IDC_CHK1 ), BM_SETCHECK,
+    ::SendMessage( GetDlgItem( hDialog, IDC_CHK_TORTOISE ), BM_SETCHECK,
                    ( LPARAM )( g_useTortoise ? 1 : 0 ), 0 );
 
     switch ( message )
@@ -314,91 +315,99 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
         {
             switch ( wParam )
             {
-                case IDC_BTN1 :
+                case IDC_BTN_GITGUI :
                 {
                     gitGui();
                     return TRUE;
                 }
 
-                case IDC_BTN2 :
+                case IDC_BTN_GITK :
                 {
                     giTk();
                     return TRUE;
                 }
 
-                case IDC_CHK1 :
+                case IDC_BTN_PROMPT :
+                {
+                    std::wstring pathName;
+                    updateLoc( pathName );
+                    ShellExecute( nppData._nppHandle, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
+                    return TRUE;
+                }
+
+                case IDC_CHK_TORTOISE :
                 {
                     doTortoise();
                     return TRUE;
                 }
 
-                case IDC_BTN3 :
-                {
-                    statusAll();
-                    SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
-                    return TRUE;
-                }
-
-                case IDC_BTN4 :
+                case IDC_BTN_DIFF :
                 {
                     diffFile();
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
 
-                case IDC_BTN5 :
+                case IDC_BTN_ADD :
                 {
                     addFile();
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
 
-                case IDC_BTN6 :
-                {
-                    commitAll();
-                    SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
-                    return TRUE;
-                }
-
-                case IDC_BTN7 :
+                case IDC_BTN_UNSTAGE :
                 {
                     unstageFile();
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
 
-                case IDC_BTN8 :
+                case IDC_BTN_REVERT :
                 {
                     revertFile();
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
 
-                case IDC_BTN9 :
+                case IDC_BTN_LOG :
                 {
                     logFile();
                     return TRUE;
                 }
 
-                case IDC_BTN10 :
+                case IDC_BTN_BLAME :
                 {
                     blameFile();
                     return TRUE;
                 }
 
-                case IDC_BTN12 :
-                {
-                    pushFile();
-                    return TRUE;
-                }
-
-                case IDC_BTN13 :
+                case IDC_BTN_PULL :
                 {
                     pullFile();
                     return TRUE;
                 }
 
-                case IDC_BTN11 :
+                case IDC_BTN_STATUS :
+                {
+                    statusAll();
+                    SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
+                    return TRUE;
+                }
+
+                case IDC_BTN_COMMIT :
+                {
+                    commitAll();
+                    SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
+                    return TRUE;
+                }
+
+                case IDC_BTN_PUSH :
+                {
+                    pushFile();
+                    return TRUE;
+                }
+
+                case IDC_BTN_GITPATH :
                 {
                     // From:
                     // npp-explorer-plugin\Explorer\src\OptionDlg\OptionDialog.cpp
