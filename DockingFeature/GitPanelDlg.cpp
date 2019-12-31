@@ -171,7 +171,7 @@ bool execCommand( std::wstring command, std::wstring &wide )
 
     generic_string progInputStr  = progInput ? progInput : TEXT( "" );
     generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
-    generic_string paramInput    = g_GitPath;
+    generic_string paramInput    = getGitLocation();
     paramInput += command;
     // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
 
@@ -254,7 +254,7 @@ void updateList()
     clearList();
 
     std::wstring wide;
-    if ( execCommand( TEXT( "\\git.exe status --porcelain" ), wide ) )
+    if ( execCommand( TEXT( "git.exe status --porcelain" ), wide ) )
     {
         std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
 
@@ -476,7 +476,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                     if( ( (LPNMHDR)lParam )->code == NM_DBLCLK )
                     {
                         std::wstring wide;
-                        if ( execCommand( TEXT( "\\git.exe rev-parse --show-toplevel" ), wide ) )
+                        if ( execCommand( TEXT( "git.exe rev-parse --show-toplevel" ), wide ) )
                         {
                             wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
 
@@ -535,7 +535,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
 						ListView_HitTest( GetDlgItem( hDialog, IDC_LSV1 ), &ht);
 
                         std::wstring wide;
-                        if ( execCommand( TEXT( "\\git.exe rev-parse --show-toplevel" ), wide ) )
+                        if ( execCommand( TEXT( "git.exe rev-parse --show-toplevel" ), wide ) )
                         {
                             wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
 

@@ -223,6 +223,18 @@ bool getTortoiseLocation( std::wstring &loc )
     return true;
 }
 
+std::wstring getGitLocation()
+{
+    std::wstring gp = g_GitPath;
+    if ( gp.size() == 0 )
+        return TEXT("");
+    else
+    {
+        gp += TEXT("\\");
+        return gp;
+    }
+}
+
 ///
 /// Launches Git using the supplied command
 ///
@@ -267,8 +279,8 @@ void ExecGitCommand(
     bool pause = true )
 {
     std::wstring command = TEXT( "cmd /c \"" );
-    command += g_GitPath;
-    command += TEXT( "\\git" );
+    command += getGitLocation();
+    command += TEXT( "git" );
     command += cmd + TEXT( " " );
 
     if ( !ignoreFiles )

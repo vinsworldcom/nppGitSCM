@@ -74,6 +74,7 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 // Your plugin command functions
 //
 bool getTortoiseLocation( std::wstring & );
+std::wstring getGitLocation();
 void updatePanelLoc();
 void updatePanel();
 void gitPrompt();
