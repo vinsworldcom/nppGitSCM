@@ -29,6 +29,7 @@ typedef std::basic_string<TCHAR> generic_string;
 
 std::vector<std::wstring> getListSelected();
 bool updateLoc( std::wstring & );
+void updateListTimer();
 void updateList();
 void clearList();
 

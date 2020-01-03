@@ -246,6 +246,16 @@ bool execCommand( std::wstring command, std::wstring &wide )
     return false;
 }
 
+void updateListTimer()
+{
+    if ( ! g_NppReady )
+        return;
+
+    clearList();
+    KillTimer( hDialog, 1 );
+    SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
+}
+
 void updateList()
 {
     if ( ! g_NppReady )
@@ -344,6 +354,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN_DIFF :
                 {
                     diffFile();
+                    KillTimer( hDialog, 1 );
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
@@ -351,6 +362,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN_ADD :
                 {
                     addFile();
+                    KillTimer( hDialog, 1 );
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
@@ -358,6 +370,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN_UNSTAGE :
                 {
                     unstageFile();
+                    KillTimer( hDialog, 1 );
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
@@ -365,6 +378,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN_REVERT :
                 {
                     revertFile();
+                    KillTimer( hDialog, 1 );
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
@@ -390,6 +404,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN_STATUS :
                 {
                     statusAll();
+                    KillTimer( hDialog, 1 );
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }
@@ -397,6 +412,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam,
                 case IDC_BTN_COMMIT :
                 {
                     commitAll();
+                    KillTimer( hDialog, 1 );
                     SetTimer( hDialog, 1, LSV1_REFRESH_DELAY, NULL );
                     return TRUE;
                 }

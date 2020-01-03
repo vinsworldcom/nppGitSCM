@@ -357,6 +357,7 @@ void updatePanelLoc()
         std::wstring temp;
         updateLoc( temp );
     }
+    updateListTimer();
 }
 
 void updatePanel()
