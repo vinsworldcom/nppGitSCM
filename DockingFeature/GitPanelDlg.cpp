@@ -161,8 +161,12 @@ std::vector<std::wstring> getListSelected(void)
 
 bool execCommand( std::wstring command, std::wstring &wide )
 {
+    wide = TEXT( "" );
+
     std::wstring pathName;
     updateLoc( pathName );
+    if ( pathName.empty() )
+        return false;
 
     const TCHAR *programPath = TEXT( "\0" ); // Overridden as NULL in Process.cpp
     const TCHAR *pProgramDir = pathName.c_str();
@@ -242,7 +246,6 @@ bool execCommand( std::wstring command, std::wstring &wide )
         convertProcessText2Wide( program.getStderr(), wide );
         return false;
     }
-    wide = TEXT( "" );
     return false;
 }
 
@@ -258,6 +261,8 @@ void updateListTimer()
 
 void updateList()
 {
+    KillTimer( hDialog, 1 );
+
     if ( ! g_NppReady )
         return;
 
