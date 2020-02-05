@@ -61,7 +61,7 @@ enum eContextMenuID {
     CTX_DIFF,
     CTX_ADD,
     CTX_UNSTAGE,
-    CTX_REVERT
+    CTX_RESTORE
 } ;
 
 class ContextMenu  

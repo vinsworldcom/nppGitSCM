@@ -1,4 +1,4 @@
-    //this file is part of notepad++
+//this file is part of notepad++
 //Copyright (C)2003 Don HO <donho@altern.org>
 //
 //This program is free software; you can redistribute it and/or
@@ -15,21 +15,22 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#include "DockingFeature/SettingsDlg.h"
 #include "PluginDefinition.h"
+#include "DockingFeature/GitPanelDlg.h"
 #include "menuCmdID.h"
-
 #include "stdafx.h"
+
+#include <shlwapi.h>
 #include <string>
 #include <vector>
-#include <shlwapi.h>
-
-#include "DockingFeature/GitPanelDlg.h"
 
 const TCHAR configFileName[]  = TEXT( "GitSCM.ini" );
 const TCHAR sectionName[]     = TEXT( "Git" );
 const TCHAR iniKeyTortoise[]  = TEXT( "Tortoise" );
 const TCHAR iniKeyGitPath[]   = TEXT( "GitPath" );
 const TCHAR iniKeyGitPrompt[] = TEXT( "GitPrompt" );
+const TCHAR iniUseNppColors[] = TEXT( "UseNppColors" );
 
 DemoDlg _gitPanel;
 
@@ -41,13 +42,15 @@ FuncItem funcItem[nbFunc];
 //
 // The data of Notepad++ that you can use in your plugin commands
 //
-NppData nppData;
+NppData   nppData;
+HINSTANCE g_hInst;
 
 TCHAR iniFilePath[MAX_PATH];
-bool  g_useTortoise = false;
-bool  g_NppReady    = false;
+bool  g_useTortoise  = false;
+bool  g_NppReady     = false;
 TCHAR g_GitPath[MAX_PATH];
 TCHAR g_GitPrompt[MAX_PATH];
+bool  g_useNppColors = false;
 
 std::wstring g_tortoiseLoc;
 
@@ -70,10 +73,12 @@ void pluginCleanUp()
 {
     ::WritePrivateProfileString( sectionName, iniKeyTortoise,
                                  g_useTortoise ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
-	::WritePrivateProfileString( sectionName, iniKeyGitPath, 
+    ::WritePrivateProfileString( sectionName, iniKeyGitPath, 
                                  g_GitPath, iniFilePath);
-	::WritePrivateProfileString( sectionName, iniKeyGitPrompt, 
+    ::WritePrivateProfileString( sectionName, iniKeyGitPrompt, 
                                  g_GitPrompt, iniFilePath);
+    ::WritePrivateProfileString( sectionName, iniUseNppColors,
+                                 g_useNppColors ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
 }
 
 //
@@ -99,10 +104,12 @@ void commandMenuInit()
     // get the parameter value from plugin config
     g_useTortoise = ::GetPrivateProfileInt( sectionName, iniKeyTortoise,
                                             0, iniFilePath );
-	::GetPrivateProfileString( sectionName, iniKeyGitPath, TEXT(""), 
+    ::GetPrivateProfileString( sectionName, iniKeyGitPath, TEXT(""), 
                                g_GitPath, MAX_PATH, iniFilePath );
-	::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"), 
+    ::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"), 
                                g_GitPrompt, MAX_PATH, iniFilePath );
+    g_useNppColors = ::GetPrivateProfileInt( sectionName, iniUseNppColors,
+                                             0, iniFilePath );
 
     if ( g_useTortoise )
     {
@@ -128,11 +135,11 @@ void commandMenuInit()
     setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL,
                 false );
     setCommand( 5,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( 6,  TEXT( "&Diff File" ),    diffFile, NULL, false );
-    setCommand( 7,  TEXT( "&Add File" ),     addFile, NULL, false );
-    setCommand( 8,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
-    setCommand( 9,  TEXT( "&Revert File" ),  revertFile, NULL, false );
-    setCommand( 10,  TEXT( "&Log File" ),     logFile, NULL, false );
+    setCommand( 6,  TEXT( "&Add File" ),     addFile, NULL, false );
+    setCommand( 7,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
+    setCommand( 8,  TEXT( "&Restore File" ), restoreFile, NULL, false );
+    setCommand( 9,  TEXT( "&Diff File" ),    diffFile, NULL, false );
+    setCommand( 10, TEXT( "&Log File" ),     logFile, NULL, false );
     setCommand( 11, TEXT( "&Blame File" ),   blameFile, NULL, false );
     setCommand( 12, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( 13, TEXT( "&Pull" ),         pullFile, NULL, false );
@@ -142,6 +149,7 @@ void commandMenuInit()
     setCommand( 17, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
                 g_useTortoise ? true : false );
+    setCommand( 19, TEXT( "S&ettings" ),      doSettings, NULL, false );
 }
 
 //
@@ -181,6 +189,15 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 ///
 /// @return Current file path.
 ///
+HWND getCurScintilla()
+{
+    int which = -1;
+    ::SendMessage( nppData._nppHandle, NPPM_GETCURRENTSCINTILLA, 0,
+                   ( LPARAM )&which );
+    return ( which == 0 ) ? nppData._scintillaMainHandle :
+           nppData._scintillaSecondHandle;
+}
+
 std::wstring getCurrentFile()
 {
     TCHAR path[MAX_PATH];
@@ -356,8 +373,8 @@ void updatePanelLoc()
     {
         std::wstring temp;
         updateLoc( temp );
+        updateListWithDelay();
     }
-    updateListTimer();
 }
 
 void updatePanel()
@@ -472,12 +489,12 @@ void unstageFileFiles( std::vector<std::wstring> files = {} )
     ExecGitCommand( TEXT( " reset HEAD" ), files, false, false );
 }
 
-void revertFile()
+void restoreFile()
 {
      std::vector<std::wstring> files = {};
-     revertFileFiles( files );
+     restoreFileFiles( files );
 }
-void revertFileFiles( std::vector<std::wstring> files = {} )
+void restoreFileFiles( std::vector<std::wstring> files = {} )
 {
     if ( files.size() == 0 )
         files.push_back( getCurrentFile() );
@@ -548,12 +565,16 @@ void pushFileFiles( std::vector<std::wstring> files = {} )
 
 void doTortoise()
 {
-    UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
-                                 funcItem[TORTOISE_INDEX]._cmdID,
-                                 MF_BYCOMMAND );
+    // UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
+                                 // funcItem[TORTOISE_INDEX]._cmdID,
+                                 // MF_BYCOMMAND );
 
-    if ( state & MF_CHECKED )
+    if ( g_useTortoise )
+    {
         g_useTortoise = false;
+        ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                       funcItem[TORTOISE_INDEX]._cmdID, MF_UNCHECKED );
+    }
     else
     {
         if ( ! getTortoiseLocation( g_tortoiseLoc ) )
@@ -564,11 +585,12 @@ void doTortoise()
             return;
         }
         else
+        {
             g_useTortoise = true;
+            ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                           funcItem[TORTOISE_INDEX]._cmdID, MF_CHECKED );
+        }
     }
-
-    ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
-                   funcItem[TORTOISE_INDEX]._cmdID, !( state & MF_CHECKED ) );
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -599,14 +621,19 @@ void DockableDlg()
                        ( LPARAM )&data );
     }
 
-    UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
-                                 funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND );
+    // UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
+                                 // funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND );
 
-    if ( state & MF_CHECKED )
+    if ( _gitPanel.isWindowVisible() )
+    {
         _gitPanel.display( false );
+        ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                       funcItem[DOCKABLE_INDEX]._cmdID, MF_UNCHECKED );
+    }
     else
+    {
         _gitPanel.display();
-
-    ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
-                   funcItem[DOCKABLE_INDEX]._cmdID, !( state & MF_CHECKED ) );
+        ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                       funcItem[DOCKABLE_INDEX]._cmdID, MF_CHECKED );
+    }
 }

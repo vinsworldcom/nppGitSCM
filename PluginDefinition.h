@@ -22,6 +22,7 @@
 // All difinitions of plugin interface
 //
 #include "PluginInterface.h"
+
 #include <string>
 #include <vector>
 
@@ -38,7 +39,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 19;
+const int nbFunc = 20;
 
 
 //
@@ -73,6 +74,7 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 //
 // Your plugin command functions
 //
+HWND getCurScintilla();
 bool getTortoiseLocation( std::wstring & );
 std::wstring getGitLocation();
 void updatePanelLoc();
@@ -92,8 +94,8 @@ void diffFile();
 void diffFileFiles( std::vector<std::wstring> );
 void unstageFile();
 void unstageFileFiles( std::vector<std::wstring> );
-void revertFile();
-void revertFileFiles( std::vector<std::wstring> );
+void restoreFile();
+void restoreFileFiles( std::vector<std::wstring> );
 void logFile();
 void logFileFiles( std::vector<std::wstring> );
 void blameFile();
