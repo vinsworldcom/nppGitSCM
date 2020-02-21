@@ -48,6 +48,8 @@ public :
 	};
 	virtual void create(int dialogID, bool isRTL = false);
 
+    BOOL isWindowVisible();
+
     virtual bool isCreated() const {
 		return (_hSelf != NULL);
 	};

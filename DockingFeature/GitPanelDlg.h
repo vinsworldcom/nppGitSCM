@@ -18,8 +18,24 @@
 #ifndef GITPANEL_DLG_H
 #define GITPANEL_DLG_H
 
+#include <string>
+#include <vector>
+
 #include "DockingDlgInterface.h"
+#include "..\PluginDefinition.h"
 #include "resource.h"
+
+typedef std::basic_string<TCHAR> generic_string;
+
+std::vector<std::wstring> getListSelected();
+bool updateLoc( std::wstring & );
+void updateListWithDelay();
+void updateList();
+void clearList();
+bool execCommand( std::wstring, std::wstring & );
+void SetNppColors();
+void SetSysColors();
+void ChangeColors();
 
 class DemoDlg : public DockingDlgInterface
 {

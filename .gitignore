@@ -8,3 +8,6 @@ Release
 *.ipdb
 *.user
 *.zip
+tags
+bin/*
+bin64/*

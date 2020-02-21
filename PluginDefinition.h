@@ -23,6 +23,9 @@
 //
 #include "PluginInterface.h"
 
+#include <string>
+#include <vector>
+
 //-------------------------------------//
 //-- STEP 1. DEFINE YOUR PLUGIN NAME --//
 //-------------------------------------//
@@ -36,7 +39,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 15;
+const int nbFunc = 20;
 
 
 //
@@ -71,17 +74,37 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 //
 // Your plugin command functions
 //
+HWND getCurScintilla();
+bool getTortoiseLocation( std::wstring & );
+std::wstring getGitLocation();
+void updatePanelLoc();
+void updatePanel();
+void gitPrompt();
 void gitGui();
+void gitGuiFiles( std::vector<std::wstring> );
 void giTk();
-void DockableDlg();
+void giTkFiles( std::vector<std::wstring> );
 void statusAll();
+void statusAllFiles( std::vector<std::wstring> );
 void commitAll();
+void commitAllFiles( std::vector<std::wstring> );
 void addFile();
+void addFileFiles( std::vector<std::wstring> );
 void diffFile();
+void diffFileFiles( std::vector<std::wstring> );
 void unstageFile();
-void revertFile();
+void unstageFileFiles( std::vector<std::wstring> );
+void restoreFile();
+void restoreFileFiles( std::vector<std::wstring> );
 void logFile();
+void logFileFiles( std::vector<std::wstring> );
 void blameFile();
+void blameFileFiles( std::vector<std::wstring> );
+void pushFile();
+void pushFileFiles( std::vector<std::wstring> );
+void pullFile();
+void pullFileFiles( std::vector<std::wstring> );
 void doTortoise();
+void DockableDlg();
 
 #endif //PLUGINDEFINITION_H

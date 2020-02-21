@@ -20,14 +20,17 @@
 
 #include "PluginDefinition.h"
 
-extern FuncItem funcItem[nbFunc];
-extern NppData nppData;
+extern FuncItem  funcItem[nbFunc];
+extern HINSTANCE g_hInst;
+extern NppData   nppData;
+extern bool      g_NppReady;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  reasonForCall, LPVOID /*lpReserved*/ )
 {
     switch ( reasonForCall )
     {
         case DLL_PROCESS_ATTACH:
+            g_hInst = ( HINSTANCE )hModule;
             pluginInit( hModule );
             break;
 
@@ -66,17 +69,39 @@ extern "C" __declspec( dllexport ) void beNotified( SCNotification *notifyCode )
 {
     switch (notifyCode->nmhdr.code)
     {
-    case NPPN_SHUTDOWN:
-    {
-        commandMenuCleanUp();
-    }
-    break;
+        case NPPN_READY:
+            g_NppReady = true;
+            updatePanelLoc();
+            break;
 
-    default:
-        return;
+// TODO:2019-12-25:MVINCENT: if updatePanel() is used, Causes very slow tab switching
+//                           Convert Process.cpp CreateProcess to CreateThread
+        case NPPN_BUFFERACTIVATED:
+        {
+            if ( g_NppReady )    
+                updatePanelLoc();
+        }
+        break;
+
+        case NPPN_FILESAVED:
+            updatePanel();
+            break;
+
+        case NPPN_FILEOPENED:
+        {
+            if ( g_NppReady )    
+                updatePanel();
+        }
+        break;
+
+        case NPPN_SHUTDOWN:
+            commandMenuCleanUp();
+            break;
+
+        default:
+            return;
     }
 }
-
 
 // Here you can process the Npp Messages
 // I will make the messages accessible little by little, according to the need of plugin development.
