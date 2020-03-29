@@ -633,6 +633,13 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     pushFile();
                     return TRUE;
                 }
+                // case IDC_BTN_BRANCH :
+                // {
+                    // branchFile();
+                    // doRefreshTimer();
+                    // return TRUE;
+                // }
+
                 case IDC_BTN_SETTINGS :
                 {
                     doSettings();

@@ -39,7 +39,7 @@ const TCHAR NPP_PLUGIN_NAME[] = TEXT( "&Git SCM" );
 //
 // Here define the number of your plugin commands
 //
-const int nbFunc = 20;
+const int nbFunc = 21;
 
 
 //
@@ -100,6 +100,8 @@ void logFile();
 void logFileFiles( std::vector<std::wstring> );
 void blameFile();
 void blameFileFiles( std::vector<std::wstring> );
+void branchFile();
+void branchFileFiles( std::vector<std::wstring> );
 void pushFile();
 void pushFileFiles( std::vector<std::wstring> );
 void pullFile();

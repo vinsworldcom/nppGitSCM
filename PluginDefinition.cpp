@@ -55,7 +55,7 @@ bool  g_useNppColors = false;
 std::wstring g_tortoiseLoc;
 
 #define DOCKABLE_INDEX 4
-#define TORTOISE_INDEX 18
+#define TORTOISE_INDEX 19
 
 //
 // Initialize your plugin data here
@@ -144,12 +144,13 @@ void commandMenuInit()
     setCommand( 12, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( 13, TEXT( "&Pull" ),         pullFile, NULL, false );
     setCommand( 14, TEXT( "&Status" ),       statusAll, NULL, false );
-    setCommand( 15, TEXT( "&Commit" ),       commitAll, NULL, false );
-    setCommand( 16, TEXT( "Pus&h" ),         pushFile, NULL, false );
-    setCommand( 17, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
+    setCommand( 15, TEXT( "&Branch/Checkout" ), branchFile, NULL, false );
+    setCommand( 16, TEXT( "&Commit" ),       commitAll, NULL, false );
+    setCommand( 17, TEXT( "Pus&h" ),         pushFile, NULL, false );
+    setCommand( 18, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
                 g_useTortoise ? true : false );
-    setCommand( 19, TEXT( "S&ettings" ),      doSettings, NULL, false );
+    setCommand( 20, TEXT( "S&ettings" ),      doSettings, NULL, false );
 }
 
 //
@@ -320,6 +321,8 @@ void ExecGitCommand(
     if ( !launchGit( command ) )
         MessageBox( nppData._nppHandle, TEXT( "Could not launch Git." ),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
+
+    updatePanel();
 }
 
 ///
@@ -361,6 +364,8 @@ void ExecTortoiseCommand(
     if ( !launchGit( command ) )
         MessageBox( nppData._nppHandle, TEXT( "Could not launch TortoiseGit." ),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
+
+    updatePanel();
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -535,6 +540,26 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
         ExecTortoiseCommand( TEXT( "blame" ), files, false, true );
     else
         ExecGitCommand( TEXT( " blame" ), files, false, true );
+}
+
+void branchFile()
+{
+     std::vector<std::wstring> files = {};
+     branchFileFiles( files );
+}
+void branchFileFiles( std::vector<std::wstring> files = {} )
+{
+    if ( g_useTortoise )
+        ExecTortoiseCommand( TEXT( "switch" ), files, true, true );
+    else
+    {
+        if ( files.size() == 0 )
+        {
+            // files.push_back( getBranch() );
+        }
+        ExecGitCommand( TEXT( " branch" ), files, false, false );
+        ExecGitCommand( TEXT( " checkout" ), files, false, true );
+    }
 }
 
 void pullFile()
