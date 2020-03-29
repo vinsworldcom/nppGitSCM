@@ -104,7 +104,7 @@ INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM lPara
 //                            )
 //                          {
                                 // Set edit control to the directory path.
-//                              ::SetWindowText(::GetDlgItem(hDialog, IDC_EDT1), g_GitPath);
+//                              ::SetWindowText(::GetDlgItem(hDialog, IDC_EDT_DIR), g_GitPath);
 //                          }
                             pShellMalloc->Free(pidl);
                         }
