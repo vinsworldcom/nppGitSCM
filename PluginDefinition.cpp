@@ -405,8 +405,8 @@ void gitPrompt()
 
 void gitGui()
 {
-     std::vector<std::wstring> files = {};
-     gitGuiFiles( files );
+    std::vector<std::wstring> files = {};
+    gitGuiFiles( files );
 }
 void gitGuiFiles( std::vector<std::wstring> files )
 {
@@ -415,8 +415,8 @@ void gitGuiFiles( std::vector<std::wstring> files )
 
 void giTk()
 {
-     std::vector<std::wstring> files = {};
-     giTkFiles( files );
+    std::vector<std::wstring> files = {};
+    giTkFiles( files );
 }
 void giTkFiles( std::vector<std::wstring> files = {} )
 {
@@ -425,8 +425,8 @@ void giTkFiles( std::vector<std::wstring> files = {} )
 
 void statusAll()
 {
-     std::vector<std::wstring> files = {};
-     statusAllFiles( files );
+    std::vector<std::wstring> files = {};
+    statusAllFiles( files );
 }
 void statusAllFiles( std::vector<std::wstring> files = {} )
 {
@@ -451,8 +451,8 @@ void commitAllFiles( std::vector<std::wstring> files = {} )
 
 void addFile()
 {
-     std::vector<std::wstring> files = {};
-     addFileFiles( files );
+    std::vector<std::wstring> files = {};
+    addFileFiles( files );
 }
 void addFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -467,8 +467,8 @@ void addFileFiles( std::vector<std::wstring> files = {} )
 
 void diffFile()
 {
-     std::vector<std::wstring> files = {};
-     diffFileFiles( files );
+    std::vector<std::wstring> files = {};
+    diffFileFiles( files );
 }
 void diffFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -483,8 +483,8 @@ void diffFileFiles( std::vector<std::wstring> files = {} )
 
 void unstageFile()
 {
-     std::vector<std::wstring> files = {};
-     unstageFileFiles( files );
+    std::vector<std::wstring> files = {};
+    unstageFileFiles( files );
 }
 void unstageFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -496,8 +496,8 @@ void unstageFileFiles( std::vector<std::wstring> files = {} )
 
 void restoreFile()
 {
-     std::vector<std::wstring> files = {};
-     restoreFileFiles( files );
+    std::vector<std::wstring> files = {};
+    restoreFileFiles( files );
 }
 void restoreFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -512,8 +512,8 @@ void restoreFileFiles( std::vector<std::wstring> files = {} )
 
 void logFile()
 {
-     std::vector<std::wstring> files = {};
-     logFileFiles( files );
+    std::vector<std::wstring> files = {};
+    logFileFiles( files );
 }
 void logFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -528,8 +528,8 @@ void logFileFiles( std::vector<std::wstring> files = {} )
 
 void blameFile()
 {
-     std::vector<std::wstring> files = {};
-     blameFileFiles( files );
+    std::vector<std::wstring> files = {};
+    blameFileFiles( files );
 }
 void blameFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -544,28 +544,26 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
 
 void branchFile()
 {
-     std::vector<std::wstring> files = {};
-     branchFileFiles( files );
-}
-void branchFileFiles( std::vector<std::wstring> files = {} )
-{
+    std::vector<std::wstring> files = {};
+
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "switch" ), files, true, true );
     else
     {
-        if ( files.size() == 0 )
-        {
-            // files.push_back( getBranch() );
-        }
-        ExecGitCommand( TEXT( " branch" ), files, false, false );
-        ExecGitCommand( TEXT( " checkout" ), files, false, true );
+        // files.push_back( getBranchDlg() );
+        branchFileFiles( files );
     }
+}
+void branchFileFiles( std::vector<std::wstring> files = {} )
+{
+    ExecGitCommand( TEXT( " branch" ), files, false, false );
+    ExecGitCommand( TEXT( " checkout" ), files, false, true );
 }
 
 void pullFile()
 {
-     std::vector<std::wstring> files = {};
-     pullFileFiles( files );
+    std::vector<std::wstring> files = {};
+    pullFileFiles( files );
 }
 void pullFileFiles( std::vector<std::wstring> files = {} )
 {
@@ -577,8 +575,8 @@ void pullFileFiles( std::vector<std::wstring> files = {} )
 
 void pushFile()
 {
-     std::vector<std::wstring> files = {};
-     pushFileFiles( files );
+    std::vector<std::wstring> files = {};
+    pushFileFiles( files );
 }
 void pushFileFiles( std::vector<std::wstring> files = {} )
 {
