@@ -550,8 +550,9 @@ void branchFile()
         ExecTortoiseCommand( TEXT( "switch" ), files, true, true );
     else
     {
+        MessageBox( nppData._nppHandle, TEXT("Only supported with TortioseGit"), TEXT("Not Implemented"), MB_OK );
         // files.push_back( getBranchDlg() );
-        branchFileFiles( files );
+        // branchFileFiles( files );
     }
 }
 void branchFileFiles( std::vector<std::wstring> files = {} )

@@ -633,12 +633,13 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     pushFile();
                     return TRUE;
                 }
-                // case IDC_BTN_BRANCH :
-                // {
-                    // branchFile();
-                    // doRefreshTimer();
-                    // return TRUE;
-                // }
+
+                case IDB_BTN_BRANCH :
+                {
+                    branchFile();
+                    doRefreshTimer();
+                    return TRUE;
+                }
 
                 case IDC_BTN_SETTINGS :
                 {
@@ -789,7 +790,10 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             getClientRect( rc );
 
             ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT_BRANCH ), NULL,
-                            rc.left + 15, rc.top + 110, rc.right - 25, 20,
+                            rc.left + 15, rc.top + 110, rc.right - 90, 20,
+                            SWP_NOZORDER | SWP_SHOWWINDOW );
+            ::SetWindowPos( GetDlgItem( hDialog, IDB_BTN_BRANCH ), NULL,
+                            rc.right - 70, rc.top + 110, 60, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
             ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT_DIR ), NULL,
                             rc.left + 15, rc.top + 140, rc.right - 25, 20,
