@@ -173,7 +173,7 @@ bool updateLoc( std::wstring &loc )
 {
     TCHAR pathName[MAX_PATH] = {0};
     SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
-    SendMessage( GetDlgItem( hDialog, IDC_EDT1 ), WM_SETTEXT, 0, ( LPARAM )pathName );
+    SendMessage( GetDlgItem( hDialog, IDC_EDT_DIR ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
     loc = pathName;
     return true;
@@ -362,16 +362,18 @@ void updateList()
     clearList();
 
     std::wstring wide;
-    if ( execCommand( TEXT( "git.exe status --porcelain" ), wide ) )
+    if ( execCommand( TEXT( "git.exe status --porcelain --branch" ), wide ) )
     {
         std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
 
-        for ( unsigned int i = 0; i < splittedStrings.size() ; i++ )
+        std::wstring strBranch = splittedStrings[0].erase(0, 3);
+        SendMessage( GetDlgItem( hDialog, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )strBranch.c_str() );
+        for ( unsigned int i = 1; i < splittedStrings.size() ; i++ )
         {
             std::wstring strI    = splittedStrings[i].substr(0, 1);
             std::wstring strW    = splittedStrings[i].substr(1, 1);
             std::wstring strFile = splittedStrings[i].erase(0, 3);
-            setListColumns( i, strI, strW, strFile );
+            setListColumns( i-1, strI, strW, strFile );
         }
     }
     else
@@ -631,13 +633,22 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     pushFile();
                     return TRUE;
                 }
+
+                case IDB_BTN_BRANCH :
+                {
+                    branchFile();
+                    doRefreshTimer();
+                    return TRUE;
+                }
+
                 case IDC_BTN_SETTINGS :
                 {
                     doSettings();
                     return TRUE;
                 }
 
-                case MAKELONG( IDC_EDT1, EN_SETFOCUS ) :
+                case MAKELONG( IDC_EDT_BRANCH, EN_SETFOCUS ) :
+                case MAKELONG( IDC_EDT_DIR, EN_SETFOCUS ) :
                 {
                     updateList();
                     return TRUE;
@@ -779,11 +790,17 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             RECT rc = {0};
             getClientRect( rc );
 
-            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT1 ), NULL,
-                            rc.left + 15, rc.top + 110, rc.right - 25, 20,
+            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT_BRANCH ), NULL,
+                            rc.left + 15, rc.top + 110, rc.right - 90, 20,
+                            SWP_NOZORDER | SWP_SHOWWINDOW );
+            ::SetWindowPos( GetDlgItem( hDialog, IDB_BTN_BRANCH ), NULL,
+                            rc.right - 70, rc.top + 110, 60, 20,
+                            SWP_NOZORDER | SWP_SHOWWINDOW );
+            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT_DIR ), NULL,
+                            rc.left + 15, rc.top + 140, rc.right - 25, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
             ::SetWindowPos( GetDlgItem( hDialog, IDC_LSV1 ), NULL,
-                            rc.left + 15, rc.top + 140, rc.right - 25, rc.bottom - 150,
+                            rc.left + 15, rc.top + 170, rc.right - 25, rc.bottom - 180,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
 
             SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
