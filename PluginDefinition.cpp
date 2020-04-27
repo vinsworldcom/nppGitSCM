@@ -17,6 +17,7 @@
 
 #include "DockingFeature/SettingsDlg.h"
 #include "PluginDefinition.h"
+#include "resource.h"
 #include "DockingFeature/GitPanelDlg.h"
 #include "menuCmdID.h"
 #include "stdafx.h"
@@ -33,6 +34,8 @@ const TCHAR iniKeyGitPrompt[] = TEXT( "GitPrompt" );
 const TCHAR iniUseNppColors[] = TEXT( "UseNppColors" );
 
 DemoDlg _gitPanel;
+
+toolbarIcons g_TBGit;
 
 //
 // The plugin data that Notepad++ needs
@@ -53,9 +56,6 @@ TCHAR g_GitPrompt[MAX_PATH];
 bool  g_useNppColors = false;
 
 std::wstring g_tortoiseLoc;
-
-#define DOCKABLE_INDEX 4
-#define TORTOISE_INDEX 19
 
 //
 // Initialize your plugin data here
@@ -79,6 +79,15 @@ void pluginCleanUp()
                                  g_GitPrompt, iniFilePath);
     ::WritePrivateProfileString( sectionName, iniUseNppColors,
                                  g_useNppColors ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+
+    if (g_TBGit.hToolbarBmp) {
+        ::DeleteObject(g_TBGit.hToolbarBmp);
+        g_TBGit.hToolbarBmp = nullptr;
+    }
+    if (g_TBGit.hToolbarIcon) {
+        ::DestroyIcon(g_TBGit.hToolbarIcon);
+        g_TBGit.hToolbarIcon = nullptr;
+    }
 }
 
 //

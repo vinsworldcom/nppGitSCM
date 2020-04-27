@@ -189,6 +189,7 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="GitSCM.ico" />
+    <Image Include="DockingFeature\res\Git.bmp" />
     <Image Include="DockingFeature\res\Toolbar1.bmp" />
     <Image Include="DockingFeature\res\Toolbar2.bmp" />
   </ItemGroup>

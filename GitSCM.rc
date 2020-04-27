@@ -30,3 +30,6 @@ FILETYPE VFT_DLL
         VALUE "Translation", 0x0409, 1252
     }
 }
+
+IDB_TB_GIT BITMAP "DockingFeature\\res\\Git.bmp"
+
