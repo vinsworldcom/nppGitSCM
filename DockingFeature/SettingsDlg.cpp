@@ -84,7 +84,7 @@ INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM lPara
                         info.hwndOwner          = nppData._nppHandle;
                         info.pidlRoot           = NULL;
                         info.pszDisplayName     = (LPTSTR)new TCHAR[MAX_PATH];
-                        info.lpszTitle          = TEXT( "Foler where git.exe is installed" );
+                        info.lpszTitle          = TEXT( "Folder where git.exe is installed" );
                         info.ulFlags            = BIF_RETURNONLYFSDIRS | BIF_USENEWUI | BIF_NONEWFOLDERBUTTON;
                         info.lpfn               = BrowseCallbackProc;
                         info.lParam             = (LPARAM)g_GitPath;
