@@ -7,7 +7,7 @@
 /* VERSION DEFINITIONS */
 #define VER_MAJOR   1
 #define VER_MINOR   4
-#define VER_RELEASE 2
+#define VER_RELEASE 3
 #define VER_BUILD   1
 #define VER_STRING  STR(VER_MAJOR) "." STR(VER_MINOR) "." STR(VER_RELEASE) "." STR(VER_BUILD)
 
@@ -23,5 +23,10 @@
 #define PRODUCT_VERSION   VER_STRING
 
 /* ADDITIONAL DEFINITIONS */
+
+#define DOCKABLE_INDEX 4
+#define TORTOISE_INDEX 19
+
+#define IDB_TB_GIT 1001
 
 #endif

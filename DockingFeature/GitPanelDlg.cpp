@@ -35,8 +35,8 @@ extern NppData nppData;
 extern HWND    hDialog;
 extern bool    g_useTortoise;
 extern bool    g_NppReady;
-extern TCHAR   g_GitPath[MAX_PATH];;
-extern TCHAR   g_GitPrompt[MAX_PATH];;
+extern TCHAR   g_GitPath[MAX_PATH];
+extern TCHAR   g_GitPrompt[MAX_PATH];
 extern bool    g_useNppColors;
 
 LVITEM   LvItem;
