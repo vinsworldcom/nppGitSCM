@@ -662,6 +662,12 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                         gotoFile();
                     return TRUE;
                 }
+                // Trap VK_ESCAPE in the LISTVIEW
+                case IDCANCEL :
+                { 
+                    ::SetFocus( getCurScintilla() );
+                    return TRUE;
+                }
             }
             return FALSE;
         }
