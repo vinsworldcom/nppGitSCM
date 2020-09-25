@@ -652,10 +652,11 @@ void DockableDlg()
         data.dlgID = DOCKABLE_INDEX;
         ::SendMessage( nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0,
                        ( LPARAM )&data );
-    }
 
-    // UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
-                                 // funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND );
+        ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                       funcItem[DOCKABLE_INDEX]._cmdID, MF_CHECKED );
+        return;
+    }
 
     if ( _gitPanel.isWindowVisible() )
     {
