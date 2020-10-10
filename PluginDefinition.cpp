@@ -310,7 +310,7 @@ void ExecGitCommand(
     bool ignoreFiles = false, 
     bool pause = true )
 {
-    std::wstring command = TEXT( "cmd /c \"\"" );
+    std::wstring command = TEXT( "cmd /d/c \"\"" );
     command += getGitLocation();
     command += TEXT( "git" );
     command += cmd + TEXT( " " );
