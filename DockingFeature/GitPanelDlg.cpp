@@ -33,11 +33,12 @@
 
 extern NppData nppData;
 extern HWND    hDialog;
-extern bool    g_useTortoise;
-extern bool    g_NppReady;
 extern TCHAR   g_GitPath[MAX_PATH];
 extern TCHAR   g_GitPrompt[MAX_PATH];
+extern bool    g_useTortoise;
+extern bool    g_NppReady;
 extern bool    g_useNppColors;
+extern bool    g_Debug;
 
 LVITEM   LvItem;
 LVCOLUMN LvCol;
@@ -272,8 +273,9 @@ bool execCommand( std::wstring command, std::wstring &wide )
     generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
     generic_string paramInput    = getGitLocation();
     paramInput += command;
-    // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
 
+    if ( g_Debug )
+        OutputDebugString( paramInput.c_str() );
     Process program( programPath, paramInput.c_str(), pProgramDir,
                      CONSOLE_PROG );
     program.run();

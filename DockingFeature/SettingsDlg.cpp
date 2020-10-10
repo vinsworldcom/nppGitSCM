@@ -19,7 +19,7 @@ static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pDa
     return 0;
 };
 
-INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM /* lParam */)
 {
     ::SendMessage( GetDlgItem( hWndDlg, IDC_CHK_NPPCOLOR ), BM_SETCHECK,
                    ( LPARAM )( g_useNppColors ? 1 : 0 ), 0 );
@@ -50,6 +50,7 @@ INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM lPara
             switch (LOWORD(wParam))
             {
                 case IDB_OK:
+                    SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPATH ), WM_GETTEXT, ( MAX_PATH - 1 ), ( LPARAM ) g_GitPath );
                     SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPROMPT ), WM_GETTEXT, ( MAX_PATH - 1 ), ( LPARAM ) g_GitPrompt );
                     PostMessage(hWndDlg, WM_CLOSE, 0, 0);
                     return TRUE;
