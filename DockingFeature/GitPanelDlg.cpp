@@ -832,4 +832,6 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
+
+    return FALSE;
 }
