@@ -786,7 +786,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     {
                         gotoFile();
                     }
-                    return FALSE;
+                    return TRUE;
                 }
             }
             return FALSE;
@@ -826,7 +826,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
         case WM_INITDIALOG :
         {
             initDialog();
-            return TRUE;
+            return FALSE;
         }
 
         default :
