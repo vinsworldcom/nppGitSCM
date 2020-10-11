@@ -652,7 +652,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 case MAKELONG( IDC_EDT_BRANCH, EN_SETFOCUS ) :
                 case MAKELONG( IDC_EDT_DIR, EN_SETFOCUS ) :
                 {
-                    updateList();
+                    doRefreshTimer();
                     return TRUE;
                 }
 
