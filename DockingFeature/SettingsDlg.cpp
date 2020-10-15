@@ -1,10 +1,12 @@
 #include <windows.h>
 #include <shlobj.h>
+#include <string.h>
 
 #include "..\PluginInterface.h"
 #include "GitPanelDlg.h"
 #include "SettingsDlg.h"
 #include "resource.h"
+#include "..\resource.h"
 
 extern HINSTANCE g_hInst;
 extern NppData   nppData;
@@ -19,7 +21,8 @@ static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pDa
     return 0;
 };
 
-INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM /* lParam */)
+INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
+                              LPARAM lParam )
 {
     ::SendMessage( GetDlgItem( hWndDlg, IDC_CHK_NPPCOLOR ), BM_SETCHECK,
                    ( LPARAM )( g_useNppColors ? 1 : 0 ), 0 );
@@ -30,6 +33,13 @@ INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM /* lP
         {
             SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPATH ), WM_SETTEXT, 0, ( LPARAM )g_GitPath );
             SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPROMPT ), WM_SETTEXT, 0, ( LPARAM )g_GitPrompt );
+
+            std::string version;
+            version = "<a>";
+            version += VER_STRING;
+            version += "</a>";
+            SetDlgItemTextA(hWndDlg, IDC_STC_VER, version.c_str());
+
             return TRUE;
         }
 
@@ -43,6 +53,26 @@ INT_PTR CALLBACK SettingsDlg(HWND hWndDlg, UINT msg, WPARAM wParam, LPARAM /* lP
         {
             EndDialog(hWndDlg, 0);
             return TRUE;
+        }
+
+        case WM_NOTIFY:
+        {
+            switch (((LPNMHDR)lParam)->code)
+            {
+                case NM_CLICK:
+                case NM_RETURN:
+                {
+                    PNMLINK pNMLink = (PNMLINK)lParam;
+                    LITEM   item    = pNMLink->item;
+                    HWND ver = GetDlgItem( hWndDlg, IDC_STC_VER );
+
+                    if ((((LPNMHDR)lParam)->hwndFrom == ver) && (item.iLink == 0))
+                        ShellExecute(hWndDlg, TEXT("open"), TEXT("https://github.com/VinsWorldcom/nppGitSCM"), NULL, NULL, SW_SHOWNORMAL);
+
+                    return TRUE;
+                }
+            }
+            break;
         }
 
         case WM_COMMAND:
