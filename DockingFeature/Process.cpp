@@ -15,8 +15,11 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
+#include "../PluginInterface.h"
 #include "Process.h"
 #include <string>
+
+extern NppData nppData;
 
 void systemMessage(const TCHAR *title) {
   LPVOID lpMsgBuf;
@@ -27,7 +30,7 @@ void systemMessage(const TCHAR *title) {
                  (LPTSTR) &lpMsgBuf,
                  0,
                  NULL );// Process any inserts in lpMsgBuf.
-  MessageBox( NULL, (LPTSTR)lpMsgBuf, title, MB_OK | MB_ICONSTOP);
+  MessageBox( nppData._nppHandle, (LPTSTR)lpMsgBuf, title, MB_OK | MB_ICONSTOP);
   ::LocalFree(lpMsgBuf);
 };
 
@@ -158,7 +161,7 @@ NULL,
 	} catch (int coderr){
 		TCHAR str[10];
 		wsprintf(str, TEXT("%d"), coderr);
-		::MessageBox(NULL, str, TEXT("Exception :"), MB_OK);
+		::MessageBox(nppData._nppHandle, str, TEXT("Exception :"), MB_OK);
 	}
 
 	// on va fermer toutes les handles

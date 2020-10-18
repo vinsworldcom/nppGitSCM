@@ -33,11 +33,12 @@
 
 extern NppData nppData;
 extern HWND    hDialog;
-extern bool    g_useTortoise;
-extern bool    g_NppReady;
 extern TCHAR   g_GitPath[MAX_PATH];
 extern TCHAR   g_GitPrompt[MAX_PATH];
+extern bool    g_useTortoise;
+extern bool    g_NppReady;
 extern bool    g_useNppColors;
+extern bool    g_Debug;
 
 LVITEM   LvItem;
 LVCOLUMN LvCol;
@@ -272,8 +273,9 @@ bool execCommand( std::wstring command, std::wstring &wide )
     generic_string progOutputStr = progOutput ? progOutput : TEXT( "" );
     generic_string paramInput    = getGitLocation();
     paramInput += command;
-    // DEBUG: MessageBox( NULL, paramInput.c_str(), TEXT("Command"), MB_OK );
 
+    if ( g_Debug )
+        OutputDebugString( paramInput.c_str() );
     Process program( programPath, paramInput.c_str(), pProgramDir,
                      CONSOLE_PROG );
     program.run();
@@ -650,7 +652,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 case MAKELONG( IDC_EDT_BRANCH, EN_SETFOCUS ) :
                 case MAKELONG( IDC_EDT_DIR, EN_SETFOCUS ) :
                 {
-                    updateList();
+                    doRefreshTimer();
                     return TRUE;
                 }
 
@@ -660,6 +662,12 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     HWND hWndCtrl = GetFocus();
                     if ( hWndCtrl == GetDlgItem( hDialog, IDC_LSV1 ) )
                         gotoFile();
+                    return TRUE;
+                }
+                // Trap VK_ESCAPE
+                case IDCANCEL :
+                { 
+                    ::SetFocus( getCurScintilla() );
                     return TRUE;
                 }
             }
@@ -778,7 +786,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     {
                         gotoFile();
                     }
-                    return FALSE;
+                    return TRUE;
                 }
             }
             return FALSE;
@@ -805,7 +813,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
             SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
 
-            redraw();
+            // redraw();
             return FALSE;
         }
 
@@ -818,10 +826,12 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
         case WM_INITDIALOG :
         {
             initDialog();
-            return TRUE;
+            return FALSE;
         }
 
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
+
+    return FALSE;
 }

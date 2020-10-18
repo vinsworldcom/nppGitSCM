@@ -32,6 +32,7 @@ const TCHAR iniKeyTortoise[]  = TEXT( "Tortoise" );
 const TCHAR iniKeyGitPath[]   = TEXT( "GitPath" );
 const TCHAR iniKeyGitPrompt[] = TEXT( "GitPrompt" );
 const TCHAR iniUseNppColors[] = TEXT( "UseNppColors" );
+const TCHAR iniDebug[]        = TEXT( "Debug" );
 
 DemoDlg _gitPanel;
 
@@ -49,11 +50,12 @@ NppData   nppData;
 HINSTANCE g_hInst;
 
 TCHAR iniFilePath[MAX_PATH];
-bool  g_useTortoise  = false;
-bool  g_NppReady     = false;
 TCHAR g_GitPath[MAX_PATH];
 TCHAR g_GitPrompt[MAX_PATH];
+bool  g_useTortoise  = false;
+bool  g_NppReady     = false;
 bool  g_useNppColors = false;
+bool  g_Debug        = false;
 
 std::wstring g_tortoiseLoc;
 
@@ -118,6 +120,8 @@ void commandMenuInit()
     ::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"), 
                                g_GitPrompt, MAX_PATH, iniFilePath );
     g_useNppColors = ::GetPrivateProfileInt( sectionName, iniUseNppColors,
+                                             0, iniFilePath );
+    g_Debug = ::GetPrivateProfileInt( sectionName, iniDebug,
                                              0, iniFilePath );
 
     if ( g_useTortoise )
@@ -277,7 +281,8 @@ bool launchGit( std::wstring &command )
     memset( &pi, 0, sizeof( pi ) );
     si.cb = sizeof( si );
 
-    // DEBUG: MessageBox( NULL, command.c_str(), TEXT("Command"), MB_OK );
+    if ( g_Debug )
+        OutputDebugString( command.c_str() );
     return CreateProcess(
                NULL,
                const_cast<LPWSTR>( command.c_str() ),
@@ -305,7 +310,7 @@ void ExecGitCommand(
     bool ignoreFiles = false, 
     bool pause = true )
 {
-    std::wstring command = TEXT( "cmd /c \"" );
+    std::wstring command = TEXT( "cmd /d/c \"\"" );
     command += getGitLocation();
     command += TEXT( "git" );
     command += cmd + TEXT( " " );
@@ -323,7 +328,7 @@ void ExecGitCommand(
     }
 
     if ( pause )
-        command += TEXT( " && pause" );
+        command += TEXT( " & pause" );
 
     command += TEXT( "\"" );
 
@@ -419,7 +424,7 @@ void gitGui()
 }
 void gitGuiFiles( std::vector<std::wstring> files )
 {
-    ExecGitCommand( TEXT( "-gui" ), files, true, false );
+    ExecGitCommand( TEXT( "-gui\"" ), files, true, false );
 }
 
 void giTk()
@@ -429,7 +434,7 @@ void giTk()
 }
 void giTkFiles( std::vector<std::wstring> files = {} )
 {
-    ExecGitCommand( TEXT( "k" ), files, true, false );
+    ExecGitCommand( TEXT( "k\"" ), files, true, false );
 }
 
 void statusAll()
@@ -442,7 +447,7 @@ void statusAllFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "repostatus" ), files, true , true);
     else
-        ExecGitCommand( TEXT( " status" ), files, true, true);
+        ExecGitCommand( TEXT( "\" status" ), files, true, true);
 }
 
 void commitAll()
@@ -455,7 +460,7 @@ void commitAllFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "commit" ), files, true, true );
     else
-        ExecGitCommand( TEXT( " commit" ), files, true, true );
+        ExecGitCommand( TEXT( "\" commit" ), files, true, true );
 }
 
 void addFile()
@@ -471,7 +476,7 @@ void addFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "add" ), files, false, false );
     else
-        ExecGitCommand( TEXT( " add" ), files, false, false );
+        ExecGitCommand( TEXT( "\" add" ), files, false, false );
 }
 
 void diffFile()
@@ -487,7 +492,7 @@ void diffFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "diff" ), files, false, true );
     else
-        ExecGitCommand( TEXT( " diff" ), files, false, true );
+        ExecGitCommand( TEXT( "\" diff" ), files, false, true );
 }
 
 void unstageFile()
@@ -500,7 +505,7 @@ void unstageFileFiles( std::vector<std::wstring> files = {} )
     if ( files.size() == 0 )
         files.push_back( getCurrentFile() );
 
-    ExecGitCommand( TEXT( " reset HEAD" ), files, false, false );
+    ExecGitCommand( TEXT( "\" reset HEAD" ), files, false, false );
 }
 
 void restoreFile()
@@ -516,7 +521,7 @@ void restoreFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "revert" ), files, false, false );
     else
-        ExecGitCommand( TEXT( " checkout --" ), files, false, false );
+        ExecGitCommand( TEXT( "\" checkout --" ), files, false, false );
 }
 
 void logFile()
@@ -532,7 +537,7 @@ void logFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "log" ), files, false, true );
     else
-        ExecGitCommand( TEXT( " log" ), files, false, true );
+        ExecGitCommand( TEXT( "\" log" ), files, false, true );
 }
 
 void blameFile()
@@ -548,7 +553,7 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "blame" ), files, false, true );
     else
-        ExecGitCommand( TEXT( " blame" ), files, false, true );
+        ExecGitCommand( TEXT( "\" blame" ), files, false, true );
 }
 
 void branchFile()
@@ -566,8 +571,8 @@ void branchFile()
 }
 void branchFileFiles( std::vector<std::wstring> files = {} )
 {
-    ExecGitCommand( TEXT( " branch" ), files, false, false );
-    ExecGitCommand( TEXT( " checkout" ), files, false, true );
+    ExecGitCommand( TEXT( "\" branch" ), files, false, false );
+    ExecGitCommand( TEXT( "\" checkout" ), files, false, true );
 }
 
 void pullFile()
@@ -580,7 +585,7 @@ void pullFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "pull" ), files, true, true );
     else
-        ExecGitCommand( TEXT( " pull" ), files, true, true );
+        ExecGitCommand( TEXT( "\" pull" ), files, true, true );
 }
 
 void pushFile()
@@ -593,7 +598,7 @@ void pushFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "push" ), files, true, true );
     else
-        ExecGitCommand( TEXT( " push" ), files, true, true );
+        ExecGitCommand( TEXT( "\" push" ), files, true, true );
 }
 
 void doTortoise()
@@ -652,10 +657,11 @@ void DockableDlg()
         data.dlgID = DOCKABLE_INDEX;
         ::SendMessage( nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0,
                        ( LPARAM )&data );
-    }
 
-    // UINT state = ::GetMenuState( ::GetMenu( nppData._nppHandle ),
-                                 // funcItem[DOCKABLE_INDEX]._cmdID, MF_BYCOMMAND );
+        ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
+                       funcItem[DOCKABLE_INDEX]._cmdID, MF_CHECKED );
+        return;
+    }
 
     if ( _gitPanel.isWindowVisible() )
     {

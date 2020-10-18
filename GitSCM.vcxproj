@@ -182,6 +182,7 @@
     <ClInclude Include="PluginDefinition.h" />
     <ClInclude Include="PluginInterface.h" />
     <ClInclude Include="Scintilla.h" />
+    <ClInclude Include="Sci_Position.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="DockingFeature\gitPanel.rc" />
