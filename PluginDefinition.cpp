@@ -157,7 +157,7 @@ void commandMenuInit()
     setCommand( 12, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( 13, TEXT( "&Pull" ),         pullFile, NULL, false );
     setCommand( 14, TEXT( "&Status" ),       statusAll, NULL, false );
-    setCommand( 15, TEXT( "&Branch/Checkout" ), branchFile, NULL, false );
+    setCommand( 15, TEXT( "Bra&nch/Checkout" ), branchFile, NULL, false );
     setCommand( 16, TEXT( "&Commit" ),       commitAll, NULL, false );
     setCommand( 17, TEXT( "Pus&h" ),         pushFile, NULL, false );
     setCommand( 18, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
@@ -551,7 +551,13 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
         files.push_back( getCurrentFile() );
 
     if ( g_useTortoise )
-        ExecTortoiseCommand( TEXT( "blame" ), files, false, true );
+    {
+        int pos = (int)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
+        int line = (int)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
+        std::wstring blame = TEXT( "blame /line:" );
+        blame += std::to_wstring( line + 1 );
+        ExecTortoiseCommand( blame, files, false, true );
+    }
     else
         ExecGitCommand( TEXT( "\" blame" ), files, false, true );
 }
