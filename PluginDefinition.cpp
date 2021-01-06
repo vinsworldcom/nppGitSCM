@@ -222,6 +222,20 @@ std::wstring getCurrentFile()
 }
 
 ///
+/// Gets the path to the current file's directory.
+///
+/// @return Current file's directory path.
+///
+std::wstring getCurrentFileDirectory()
+{
+    TCHAR path[MAX_PATH];
+    ::SendMessage(nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH,
+        (LPARAM)path);
+
+    return std::wstring(path);
+}
+
+///
 /// Gets the path to the TortioseGit executable from the registry.
 ///
 /// @param loc [out] Location of Tortoise executable
@@ -291,7 +305,7 @@ bool launchGit( std::wstring &command )
                FALSE,
                CREATE_DEFAULT_ERROR_MODE,
                NULL,
-               NULL,
+               const_cast<LPCWSTR>( getCurrentFileDirectory().c_str() ),
                &si,
                &pi ) != 0;
 }
@@ -409,9 +423,7 @@ void gitPrompt()
         updateLoc( pathName );
     else
     {
-        TCHAR tempPath[MAX_PATH] = {0};
-        SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )tempPath );
-        pathName = tempPath;
+        pathName = getCurrentFileDirectory();
     }
 
     ShellExecute( nppData._nppHandle, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
