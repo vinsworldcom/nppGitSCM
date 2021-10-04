@@ -665,7 +665,7 @@ void DockableDlg()
 
         data.hIconTab = ( HICON )::LoadImage( _gitPanel.getHinst(),
                                               MAKEINTRESOURCE( IDI_PLUGINGITPANEL ), IMAGE_ICON, 0, 0,
-                                              LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT );
+                                              LR_LOADTRANSPARENT );
         data.pszModuleName = _gitPanel.getPluginFileName();
 
         // the dlgDlg should be the index of funcItem where the current function pointer is
