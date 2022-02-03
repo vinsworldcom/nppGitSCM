@@ -562,8 +562,8 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
 
     if ( g_useTortoise )
     {
-        int pos = (int)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
-        int line = (int)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
+        Sci_Position pos = (Sci_Position)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
+        Sci_Position line = (Sci_Position)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
         std::wstring blame = TEXT( "blame /line:" );
         blame += std::to_wstring( line + 1 );
         ExecTortoiseCommand( blame, files, false, true );
@@ -665,7 +665,7 @@ void DockableDlg()
 
         data.hIconTab = ( HICON )::LoadImage( _gitPanel.getHinst(),
                                               MAKEINTRESOURCE( IDI_PLUGINGITPANEL ), IMAGE_ICON, 0, 0,
-                                              LR_LOADMAP3DCOLORS | LR_LOADTRANSPARENT );
+                                              LR_LOADTRANSPARENT );
         data.pszModuleName = _gitPanel.getPluginFileName();
 
         // the dlgDlg should be the index of funcItem where the current function pointer is
