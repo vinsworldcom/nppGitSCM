@@ -562,8 +562,8 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
 
     if ( g_useTortoise )
     {
-        int pos = (int)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
-        int line = (int)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
+        Sci_Position pos = (Sci_Position)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
+        Sci_Position line = (Sci_Position)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
         std::wstring blame = TEXT( "blame /line:" );
         blame += std::to_wstring( line + 1 );
         ExecTortoiseCommand( blame, files, false, true );

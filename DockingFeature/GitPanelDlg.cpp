@@ -767,7 +767,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 case TTN_GETDISPINFO: /* TTN_NEEDTEXT */
                 {
-                    UINT idButton;
+                    UINT_PTR idButton;
                     LPTOOLTIPTEXT lpttt;
 
                     lpttt           = (LPTOOLTIPTEXT) lParam;
