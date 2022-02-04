@@ -70,7 +70,7 @@ Next time you open Notepad++ you can access through menu Plugins->Git.
 
 ## Usage
 
-This plugin relies on Git SCM for Windows](https://git-scm.com/) and 
+This plugin relies on [Git SCM for Windows](https://git-scm.com/) and 
 optionally [TortoiseGit](https://tortoisegit.org/) for a nicer GUI 
 experience.
 
