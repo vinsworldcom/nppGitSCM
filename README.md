@@ -9,7 +9,8 @@ The original plugin was posted here: https://forum.lowyat.net/topic/1358320/all
 
 I modified the code found here: https://github.com/alansbraga/NPPGit
 
-... to use Git SCM for Windows, not TortoiseGit.  And then after seeing 
+... to use [Git SCM for Windows](https://git-scm.com/), not 
+[TortoiseGit](https://tortoisegit.org/).  And then after seeing 
 what TortoiseGit could do while using underlying Git for Windows, I 
 added the TortoiseGit functionality back in.
 
@@ -70,7 +71,7 @@ Next time you open Notepad++ you can access through menu Plugins->Git.
 
 ## Usage
 
-This plugin relies on Git SCM for Windows](https://git-scm.com/) and 
+This plugin relies on [Git SCM for Windows](https://git-scm.com/) and 
 optionally [TortoiseGit](https://tortoisegit.org/) for a nicer GUI 
 experience.
 
