@@ -31,7 +31,6 @@
 #include <vector>
 #include <windowsx.h>
 
-extern NppData nppData;
 extern TCHAR   g_GitPath[MAX_PATH];
 extern TCHAR   g_GitPrompt[MAX_PATH];
 extern bool    g_useTortoise;
@@ -173,7 +172,7 @@ void DemoDlg::clearList()
 bool DemoDlg::updateLoc( std::wstring &loc )
 {
     TCHAR pathName[MAX_PATH] = {0};
-    SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
+    SendMessage( _hParent, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
     SendMessage( GetDlgItem( _hSelf, IDC_EDT_DIR ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
     loc = pathName;
@@ -524,10 +523,10 @@ void DemoDlg::gotoFile()
             err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
             int ret = ( int )::MessageBox( _hSelf, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
             if ( ret == IDYES )
-                SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+                SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
         }
         else
-            SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+            SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
     }
 }
 
@@ -555,7 +554,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 {
                     std::wstring pathName = TEXT( "" );
                     updateLoc( pathName );
-                    ShellExecute( nppData._nppHandle, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
+                    ShellExecute( _hParent, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
                     return TRUE;
                 }
 
@@ -778,10 +777,10 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                                     err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
                                     int ret = ( int )::MessageBox( _hSelf, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
                                     if ( ret == IDYES )
-                                        SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+                                        SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
                                 }
                                 else
-                                    SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+                                    SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
                             }
                         }
                     }
@@ -805,7 +804,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                             break;
 
                         cm.SetObjects( files );
-                        cm.ShowContextMenu( _hInst, nppData._nppHandle, _hSelf, pt );
+                        cm.ShowContextMenu( _hInst, _hParent, _hSelf, pt );
                     }
                     return TRUE;
                 }
