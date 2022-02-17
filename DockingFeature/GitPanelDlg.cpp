@@ -214,7 +214,7 @@ std::vector<std::wstring> DemoDlg::getListSelected(void)
     if ( itemInt == -1 )
         return selectedItems;
 
-    std::wstring wide;
+    std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe rev-parse --show-toplevel" ), wide ) )
     {
         wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
@@ -259,7 +259,7 @@ bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
 {
     wide = TEXT( "" );
 
-    std::wstring pathName;
+    std::wstring pathName = TEXT( "" );
     updateLoc( pathName );
     if ( pathName.empty() )
         return false;
@@ -365,7 +365,7 @@ void DemoDlg::updateList()
 
     clearList();
 
-    std::wstring wide;
+    std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe status --porcelain --branch" ), wide ) )
     {
         std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
@@ -381,7 +381,10 @@ void DemoDlg::updateList()
         }
     }
     else
+    {
+        SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )TEXT( "" ) );
         setListColumns( 0, TEXT( "" ), TEXT( "" ), wide );
+    }
 }
 
 void DemoDlg::SetNppColors()
@@ -516,7 +519,7 @@ void DemoDlg::gotoFile()
             return;
         else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
         {
-            std::wstring err;
+            std::wstring err = TEXT( "" );
             err += files[i];
             err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
             int ret = ( int )::MessageBox( _hSelf, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
@@ -550,7 +553,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 case IDC_BTN_PROMPT :
                 {
-                    std::wstring pathName;
+                    std::wstring pathName = TEXT( "" );
                     updateLoc( pathName );
                     ShellExecute( nppData._nppHandle, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
                     return TRUE;
@@ -770,7 +773,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                                     break;
                                 else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
                                 {
-                                    std::wstring err;
+                                    std::wstring err = TEXT( "" );
                                     err += files[i];
                                     err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
                                     int ret = ( int )::MessageBox( _hSelf, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
