@@ -156,14 +156,14 @@ std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
     return splittedString;
 }
 
-void DemoDlg::convertProcessText2Wide( std::wstring outputW, std::wstring &wide )
-{
-    std::string output(outputW.begin(), outputW.end());
-    output.assign(outputW.begin(), outputW.end());
+// void DemoDlg::convertProcessText2Wide( std::wstring outputW, std::wstring &wide )
+// {
+    // std::string output(outputW.begin(), outputW.end());
+    // output.assign(outputW.begin(), outputW.end());
 
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    wide = converter.from_bytes(output.c_str());
-}
+    // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    // wide = converter.from_bytes(output.c_str());
+// }
 
 void DemoDlg::clearList()
 {
@@ -334,13 +334,15 @@ bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
         // otherwise, we look in stdout
         else if ( program.hasStdout() )
         {
-            convertProcessText2Wide( program.getStdout(), wide );
+            // convertProcessText2Wide( program.getStdout(), wide );
+            wide = program.getStdout();
             return true;
         }
     }
     else
     {
-        convertProcessText2Wide( program.getStderr(), wide );
+        // convertProcessText2Wide( program.getStderr(), wide );
+        wide = program.getStderr();
         return false;
     }
     return false;
