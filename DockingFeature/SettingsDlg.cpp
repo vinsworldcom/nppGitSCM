@@ -85,22 +85,6 @@ INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
                     PostMessage(hWndDlg, WM_CLOSE, 0, 0);
                     return TRUE;
 
-                case IDC_CHK_NPPCOLOR :
-                {
-                    if ( SendMessage( GetDlgItem( hWndDlg, IDC_CHK_NPPCOLOR ), BM_GETCHECK, 0, 0 ) == BST_CHECKED )
-                    {
-                      SetSysColors();
-                      g_useNppColors = false;
-                    }
-                    else
-                    {
-                      SetNppColors();
-                      g_useNppColors = true;
-                    }
-                    ChangeColors();
-                    return TRUE;
-                }
-
                 case IDC_BTN_GITPATH :
                 {
                     // From:

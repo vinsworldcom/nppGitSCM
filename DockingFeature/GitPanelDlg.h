@@ -27,34 +27,41 @@
 
 typedef std::basic_string<TCHAR> generic_string;
 
-std::vector<std::wstring> getListSelected();
-bool updateLoc( std::wstring & );
-void updateListWithDelay();
-void updateList();
-void clearList();
-bool execCommand( std::wstring, std::wstring & );
-void SetNppColors();
-void SetSysColors();
-void ChangeColors();
-
 class DemoDlg : public DockingDlgInterface
 {
     public :
         DemoDlg() : DockingDlgInterface( IDD_PLUGINGITPANEL ) {};
 
-        virtual void display( bool toShow = true ) const
-        {
-            DockingDlgInterface::display( toShow );
+        virtual void display(bool toShow = true) const {
+            DockingDlgInterface::display(toShow);
         };
-
-        void setParent( HWND parent2set )
-        {
+        
+        void setParent(HWND parent2set){
             _hParent = parent2set;
         };
+
+        bool updateLoc( std::wstring &loc );
+        void updateListWithDelay();
+        void updateList();
 
     protected :
         virtual INT_PTR CALLBACK run_dlgProc( UINT message, WPARAM wParam,
                                               LPARAM lParam );
+
+    private :
+        void doRefreshTimer();
+        std::vector<std::wstring> split( std::wstring stringToBeSplitted, std::wstring delimeter );
+        void convertProcessText2Wide( std::wstring outputW, std::wstring &wide );
+        void clearList();
+        void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW, std::wstring strFile );
+        std::vector<std::wstring> getListSelected();
+        bool execCommand( std::wstring, std::wstring &wide );
+        void SetNppColors();
+        void SetSysColors();
+        void ChangeColors();
+        void refreshDialog();
+        void initDialog();
+        void gotoFile();
 };
 
 #endif //GITPANEL_DLG_H
