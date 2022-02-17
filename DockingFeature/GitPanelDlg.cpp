@@ -381,8 +381,8 @@ void DemoDlg::updateList()
     }
     else
     {
-        SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )TEXT( "" ) );
-        setListColumns( 0, TEXT( "" ), TEXT( "" ), wide );
+        SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )wide.c_str() );
+        setListColumns( 0, TEXT( "" ), TEXT( "" ), TEXT( "" ) );
     }
 }
 
