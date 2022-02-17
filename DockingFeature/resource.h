@@ -34,6 +34,9 @@
 #define IDB_PAGER1   1701
 #define IDB_PAGER2   1702
 
+// The following MUST stay in order so GetNameStrFromCmd() 
+// tooltip lookups from szToolTip will work
+
 #define IDC_BTN_GITGUI    (IDB_TOOLBAR1 + 1)
 #define IDC_BTN_GITK      (IDB_TOOLBAR1 + 2)
 #define IDC_BTN_PROMPT    (IDB_TOOLBAR1 + 3)
@@ -48,6 +51,8 @@
 #define IDC_BTN_LOG       (IDB_TOOLBAR1 + 12)
 #define IDC_BTN_BLAME     (IDB_TOOLBAR1 + 13)
 #define IDC_BTN_SETTINGS  (IDB_TOOLBAR1 + 14)
+
+// END order "MUST stay in order"
 
 #define IDC_CHK_TORTOISE    (IDD_PLUGINGITPANEL + 11)
 #define IDC_CHK_NPPCOLOR    (IDD_PLUGINGITPANEL + 12)

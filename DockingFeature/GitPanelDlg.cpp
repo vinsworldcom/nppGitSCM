@@ -102,7 +102,7 @@ static LPCTSTR szToolTip[16] = {
     TEXT("Settings")
 };
 
-LPCTSTR GetNameStrFromCmd( UINT resID )
+LPCTSTR GetNameStrFromCmd( UINT_PTR resID )
 {
     if ((IDC_BTN_GITGUI <= resID) && (resID <= IDC_BTN_SETTINGS)) {
         return szToolTip[resID - IDC_BTN_GITGUI];
