@@ -241,6 +241,28 @@ std::wstring getCurrentFileDirectory()
     return std::wstring(path);
 }
 
+std::wstring GetLastErrorString(DWORD errorCode)
+{
+	std::wstring errorMsg(_T(""));
+	// Get the error message, if any.
+	// If both error codes (passed error n GetLastError) are 0, then return empty
+	if (errorCode == 0)
+		errorCode = GetLastError();
+	if (errorCode == 0)
+		return errorMsg; //No error message has been recorded
+
+	LPWSTR messageBuffer = nullptr;
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&messageBuffer, 0, nullptr);
+
+	errorMsg += messageBuffer;
+
+	//Free the buffer.
+	LocalFree(messageBuffer);
+
+	return errorMsg;
+}
+
 ///
 /// Gets the path to the TortioseGit executable from the registry.
 ///
@@ -353,8 +375,12 @@ void ExecGitCommand(
     command += TEXT( "\"" );
 
     if ( !launchGit( command ) )
-        MessageBox( nppData._nppHandle, TEXT( "Could not launch Git." ),
+    {
+        std::wstring err = TEXT( "Could not launch Git.\n\n" );
+        err += GetLastErrorString(GetLastError());
+        MessageBox( nppData._nppHandle, err.c_str(),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
+    }
 
     updatePanel();
 }
@@ -396,8 +422,12 @@ void ExecTortoiseCommand(
         command += TEXT( "\" /closeonend:2" );
 
     if ( !launchGit( command ) )
-        MessageBox( nppData._nppHandle, TEXT( "Could not launch TortoiseGit." ),
+    {
+        std::wstring err = TEXT( "Could not launch TortoiseGit.\n\n" );
+        err += GetLastErrorString(GetLastError());
+        MessageBox( nppData._nppHandle, err.c_str(),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
+    }
 
     updatePanel();
 }
