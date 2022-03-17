@@ -26,13 +26,14 @@
 #include <string>
 #include <vector>
 
-const TCHAR configFileName[]  = TEXT( "GitSCM.ini" );
-const TCHAR sectionName[]     = TEXT( "Git" );
-const TCHAR iniKeyTortoise[]  = TEXT( "Tortoise" );
-const TCHAR iniKeyGitPath[]   = TEXT( "GitPath" );
-const TCHAR iniKeyGitPrompt[] = TEXT( "GitPrompt" );
-const TCHAR iniUseNppColors[] = TEXT( "UseNppColors" );
-const TCHAR iniDebug[]        = TEXT( "Debug" );
+const TCHAR configFileName[]     = TEXT( "GitSCM.ini" );
+const TCHAR sectionName[]        = TEXT( "Git" );
+const TCHAR iniKeyTortoise[]     = TEXT( "Tortoise" );
+const TCHAR iniKeyGitPath[]      = TEXT( "GitPath" );
+const TCHAR iniKeyGitPrompt[]    = TEXT( "GitPrompt" );
+const TCHAR iniKeyUseNppColors[] = TEXT( "UseNppColors" );
+const TCHAR iniKeyRaisePanel[]   = TEXT( "RaisePanelorToggle" );
+const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
 
 DemoDlg _gitPanel;
 
@@ -55,6 +56,7 @@ TCHAR g_GitPrompt[MAX_PATH];
 bool  g_useTortoise  = false;
 bool  g_NppReady     = false;
 bool  g_useNppColors = false;
+bool  g_RaisePanel   = false;
 bool  g_Debug        = false;
 
 std::wstring g_tortoiseLoc;
@@ -79,8 +81,10 @@ void pluginCleanUp()
                                  g_GitPath, iniFilePath);
     ::WritePrivateProfileString( sectionName, iniKeyGitPrompt, 
                                  g_GitPrompt, iniFilePath);
-    ::WritePrivateProfileString( sectionName, iniUseNppColors,
+    ::WritePrivateProfileString( sectionName, iniKeyUseNppColors,
                                  g_useNppColors ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+    ::WritePrivateProfileString( sectionName, iniKeyRaisePanel,
+                                 g_RaisePanel ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
 
     if (g_TBGit.hToolbarBmp) {
         ::DeleteObject(g_TBGit.hToolbarBmp);
@@ -119,10 +123,12 @@ void commandMenuInit()
                                g_GitPath, MAX_PATH, iniFilePath );
     ::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"), 
                                g_GitPrompt, MAX_PATH, iniFilePath );
-    g_useNppColors = ::GetPrivateProfileInt( sectionName, iniUseNppColors,
+    g_useNppColors = ::GetPrivateProfileInt( sectionName, iniKeyUseNppColors,
                                              0, iniFilePath );
-    g_Debug = ::GetPrivateProfileInt( sectionName, iniDebug,
+    g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
                                              0, iniFilePath );
+    g_RaisePanel = ::GetPrivateProfileInt( sectionName, iniKeyRaisePanel,
+                                                0, iniFilePath );
 
     if ( g_useTortoise )
     {
@@ -233,6 +239,28 @@ std::wstring getCurrentFileDirectory()
         (LPARAM)path);
 
     return std::wstring(path);
+}
+
+std::wstring GetLastErrorString(DWORD errorCode)
+{
+	std::wstring errorMsg(_T(""));
+	// Get the error message, if any.
+	// If both error codes (passed error n GetLastError) are 0, then return empty
+	if (errorCode == 0)
+		errorCode = GetLastError();
+	if (errorCode == 0)
+		return errorMsg; //No error message has been recorded
+
+	LPWSTR messageBuffer = nullptr;
+	FormatMessageW(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+		nullptr, errorCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&messageBuffer, 0, nullptr);
+
+	errorMsg += messageBuffer;
+
+	//Free the buffer.
+	LocalFree(messageBuffer);
+
+	return errorMsg;
 }
 
 ///
@@ -347,8 +375,12 @@ void ExecGitCommand(
     command += TEXT( "\"" );
 
     if ( !launchGit( command ) )
-        MessageBox( nppData._nppHandle, TEXT( "Could not launch Git." ),
+    {
+        std::wstring err = TEXT( "Could not launch Git.\n\n" );
+        err += GetLastErrorString(GetLastError());
+        MessageBox( nppData._nppHandle, err.c_str(),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
+    }
 
     updatePanel();
 }
@@ -390,8 +422,12 @@ void ExecTortoiseCommand(
         command += TEXT( "\" /closeonend:2" );
 
     if ( !launchGit( command ) )
-        MessageBox( nppData._nppHandle, TEXT( "Could not launch TortoiseGit." ),
+    {
+        std::wstring err = TEXT( "Could not launch TortoiseGit.\n\n" );
+        err += GetLastErrorString(GetLastError());
+        MessageBox( nppData._nppHandle, err.c_str(),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
+    }
 
     updatePanel();
 }
@@ -405,22 +441,22 @@ void updatePanelLoc()
     if ( _gitPanel.isVisible() )
     {
         std::wstring temp;
-        updateLoc( temp );
-        updateListWithDelay();
+        _gitPanel.updateLoc( temp );
+        _gitPanel.updateListWithDelay();
     }
 }
 
 void updatePanel()
 {
     if ( _gitPanel.isVisible() )
-        updateList();
+        _gitPanel.updateList();
 }
 
 void gitPrompt()
 {
     std::wstring pathName;
     if ( _gitPanel.isVisible() )
-        updateLoc( pathName );
+        _gitPanel.updateLoc( pathName );
     else
         pathName = getCurrentFileDirectory();
 
@@ -674,21 +710,21 @@ void DockableDlg()
         ::SendMessage( nppData._nppHandle, NPPM_DMMREGASDCKDLG, 0,
                        ( LPARAM )&data );
 
-        ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
-                       funcItem[DOCKABLE_INDEX]._cmdID, MF_CHECKED );
-        return;
+        _gitPanel.setClosed(true);
     }
 
-    if ( _gitPanel.isWindowVisible() )
+    if ( _gitPanel.isClosed() || g_RaisePanel )
     {
-        _gitPanel.display( false );
+        _gitPanel.display();
+        _gitPanel.setClosed(false);
         ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
-                       funcItem[DOCKABLE_INDEX]._cmdID, MF_UNCHECKED );
+                       funcItem[DOCKABLE_INDEX]._cmdID, MF_CHECKED );
     }
     else
     {
-        _gitPanel.display();
+        _gitPanel.display( false );
+        _gitPanel.setClosed(true);
         ::SendMessage( nppData._nppHandle, NPPM_SETMENUITEMCHECK,
-                       funcItem[DOCKABLE_INDEX]._cmdID, MF_CHECKED );
+                       funcItem[DOCKABLE_INDEX]._cmdID, MF_UNCHECKED );
     }
 }

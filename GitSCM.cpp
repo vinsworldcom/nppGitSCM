@@ -73,7 +73,7 @@ extern "C" __declspec( dllexport ) void beNotified( SCNotification *notifyCode )
     {
         case NPPN_TBMODIFICATION:
             g_TBGit.hToolbarBmp = (HBITMAP)::LoadImage((HINSTANCE)g_hInst, MAKEINTRESOURCE(IDB_TB_GIT), IMAGE_BITMAP, 0, 0, LR_DEFAULTSIZE);
-            ::SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON, (WPARAM)funcItem[DOCKABLE_INDEX]._cmdID, (LPARAM)&g_TBGit);
+            ::SendMessage(nppData._nppHandle, NPPM_ADDTOOLBARICON_DEPRECATED, (WPARAM)funcItem[DOCKABLE_INDEX]._cmdID, (LPARAM)&g_TBGit);
             break;
 
         case NPPN_READY:

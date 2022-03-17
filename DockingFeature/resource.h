@@ -34,6 +34,9 @@
 #define IDB_PAGER1   1701
 #define IDB_PAGER2   1702
 
+// The following MUST stay in order so GetNameStrFromCmd() 
+// tooltip lookups from szToolTip will work
+
 #define IDC_BTN_GITGUI    (IDB_TOOLBAR1 + 1)
 #define IDC_BTN_GITK      (IDB_TOOLBAR1 + 2)
 #define IDC_BTN_PROMPT    (IDB_TOOLBAR1 + 3)
@@ -48,11 +51,16 @@
 #define IDC_BTN_LOG       (IDB_TOOLBAR1 + 12)
 #define IDC_BTN_BLAME     (IDB_TOOLBAR1 + 13)
 #define IDC_BTN_SETTINGS  (IDB_TOOLBAR1 + 14)
-#define IDC_CHK_TORTOISE  (IDD_PLUGINGITPANEL + 11)
-#define IDC_EDT_DIR       (IDD_PLUGINGITPANEL + 12)
-#define IDC_EDT_BRANCH    (IDD_PLUGINGITPANEL + 13)
-#define IDB_BTN_BRANCH    (IDD_PLUGINGITPANEL + 14)
-#define IDC_LSV1          (IDD_PLUGINGITPANEL + 15)
+
+// END order "MUST stay in order"
+
+#define IDC_CHK_TORTOISE    (IDD_PLUGINGITPANEL + 11)
+#define IDC_CHK_NPPCOLOR    (IDD_PLUGINGITPANEL + 12)
+#define IDC_CHK_PANELTOGGLE (IDD_PLUGINGITPANEL + 13)
+#define IDC_EDT_DIR         (IDD_PLUGINGITPANEL + 14)
+#define IDC_EDT_BRANCH      (IDD_PLUGINGITPANEL + 15)
+#define IDB_BTN_BRANCH      (IDD_PLUGINGITPANEL + 16)
+#define IDC_LSV1            (IDD_PLUGINGITPANEL + 17)
 
 // Settings
 #define IDD_SETTINGS      2600
@@ -62,7 +70,6 @@
 #define IDC_BTN_GITPATH   (IDD_SETTINGS + 3)
 #define IDC_EDT_GITPATH   (IDD_SETTINGS + 4)
 #define IDC_EDT_GITPROMPT (IDD_SETTINGS + 5)
-#define IDC_CHK_NPPCOLOR  (IDD_SETTINGS + 6)
 
 #define IDC_STC_VER       (IDD_SETTINGS + 7)
 

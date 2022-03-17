@@ -31,13 +31,12 @@
 #include <vector>
 #include <windowsx.h>
 
-extern NppData nppData;
-extern HWND    hDialog;
 extern TCHAR   g_GitPath[MAX_PATH];
 extern TCHAR   g_GitPrompt[MAX_PATH];
 extern bool    g_useTortoise;
 extern bool    g_NppReady;
 extern bool    g_useNppColors;
+extern bool    g_RaisePanel;
 extern bool    g_Debug;
 
 LVITEM   LvItem;
@@ -51,7 +50,7 @@ COLORREF colorFg;
 #define COL_FILE 2
 
 #define TIMER_ID           1
-#define LSV1_REFRESH_DELAY 2500
+#define LSV1_REFRESH_DELAY 1500
 
 const int WS_TOOLBARSTYLE = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | TBSTYLE_TOOLTIPS |TBSTYLE_FLAT | CCS_TOP | BTNS_AUTOSIZE | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER;
                          /* WS_CHILD | WS_VISIBLE |                                                                                                                    CCS_NORESIZE |                CCS_ADJUSTABLE */
@@ -103,7 +102,7 @@ static LPCTSTR szToolTip[16] = {
     TEXT("Settings")
 };
 
-LPCTSTR GetNameStrFromCmd( UINT resID )
+LPCTSTR GetNameStrFromCmd( UINT_PTR resID )
 {
     if ((IDC_BTN_GITGUI <= resID) && (resID <= IDC_BTN_SETTINGS)) {
         return szToolTip[resID - IDC_BTN_GITGUI];
@@ -125,13 +124,13 @@ void imageToolbar( HINSTANCE hInst, HWND hWndToolbar, UINT ToolbarID, const int 
     SendMessage( hWndToolbar, TB_SETIMAGELIST, 0, ( LPARAM )himlToolBar1 );
 }
 
-void doRefreshTimer()
+void DemoDlg::doRefreshTimer()
 {
-    KillTimer( hDialog, TIMER_ID );
-    SetTimer( hDialog, TIMER_ID, LSV1_REFRESH_DELAY, NULL );
+    KillTimer( _hSelf, TIMER_ID );
+    SetTimer( _hSelf, TIMER_ID, LSV1_REFRESH_DELAY, NULL );
 }
 
-std::vector<std::wstring> split( std::wstring stringToBeSplitted,
+std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
                                  std::wstring delimeter )
 {
     std::vector<std::wstring> splittedString;
@@ -156,31 +155,31 @@ std::vector<std::wstring> split( std::wstring stringToBeSplitted,
     return splittedString;
 }
 
-void convertProcessText2Wide( std::wstring outputW, std::wstring &wide )
-{
-    std::string output(outputW.begin(), outputW.end());
-    output.assign(outputW.begin(), outputW.end());
+// void DemoDlg::convertProcessText2Wide( std::wstring outputW, std::wstring &wide )
+// {
+    // std::string output(outputW.begin(), outputW.end());
+    // output.assign(outputW.begin(), outputW.end());
 
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    wide = converter.from_bytes(output.c_str());
+    // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+    // wide = converter.from_bytes(output.c_str());
+// }
+
+void DemoDlg::clearList()
+{
+    SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_DELETEALLITEMS, 0, 0 );
 }
 
-void clearList()
-{
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_DELETEALLITEMS, 0, 0 );
-}
-
-bool updateLoc( std::wstring &loc )
+bool DemoDlg::updateLoc( std::wstring &loc )
 {
     TCHAR pathName[MAX_PATH] = {0};
-    SendMessage( nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
-    SendMessage( GetDlgItem( hDialog, IDC_EDT_DIR ), WM_SETTEXT, 0, ( LPARAM )pathName );
+    SendMessage( _hParent, NPPM_GETCURRENTDIRECTORY, MAX_PATH, ( LPARAM )pathName );
+    SendMessage( GetDlgItem( _hSelf, IDC_EDT_DIR ), WM_SETTEXT, 0, ( LPARAM )pathName );
 
     loc = pathName;
     return true;
 }
 
-void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
+void DemoDlg::setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
                  std::wstring strFile )
 {
     // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
@@ -191,35 +190,35 @@ void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
 
     // LvItem.iSubItem   = COL_CHK;      // Put in first coluom
     // LvItem.pszText    = TEXT( "" );
-    // SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
+    // SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
 
     LvItem.iSubItem   = COL_I;        // Put in second coluom
     LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
+    SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
 
     LvItem.iSubItem   = COL_W;        // Put in third coluom
     LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
+    SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
 
     LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
     LvItem.pszText    = const_cast<LPWSTR>( strFile.c_str() );
-    SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
+    SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
 }
 
-std::vector<std::wstring> getListSelected(void)
+std::vector<std::wstring> DemoDlg::getListSelected(void)
 {
     std::vector<std::wstring> selectedItems;
     int itemInt = -1;
-    itemInt = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, itemInt, LVNI_SELECTED );
+    itemInt = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_GETNEXTITEM, itemInt, LVNI_SELECTED );
     if ( itemInt == -1 )
         return selectedItems;
 
-    std::wstring wide;
+    std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe rev-parse --show-toplevel" ), wide ) )
     {
         wide.erase(std::remove(wide.begin(), wide.end(), '\n'), wide.end());
 
-        for (itemInt = -1; ( itemInt = ( int )::SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETNEXTITEM, itemInt, LVNI_SELECTED ) ) != -1; )
+        for (itemInt = -1; ( itemInt = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_GETNEXTITEM, itemInt, LVNI_SELECTED ) ) != -1; )
         {
             TCHAR file[MAX_PATH] = {0};
 
@@ -230,7 +229,7 @@ std::vector<std::wstring> getListSelected(void)
             LvItem.cchTextMax = MAX_PATH;
             LvItem.iItem      = itemInt;
 
-            SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_GETITEMTEXT, itemInt, (LPARAM)&LvItem );
+            SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_GETITEMTEXT, itemInt, (LPARAM)&LvItem );
 
             std::wstring tempPath = wide;
             tempPath += TEXT( "\\" );
@@ -255,11 +254,11 @@ std::vector<std::wstring> getListSelected(void)
     return selectedItems;
 }
 
-bool execCommand( std::wstring command, std::wstring &wide )
+bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
 {
     wide = TEXT( "" );
 
-    std::wstring pathName;
+    std::wstring pathName = TEXT( "" );
     updateLoc( pathName );
     if ( pathName.empty() )
         return false;
@@ -334,19 +333,21 @@ bool execCommand( std::wstring command, std::wstring &wide )
         // otherwise, we look in stdout
         else if ( program.hasStdout() )
         {
-            convertProcessText2Wide( program.getStdout(), wide );
+            // convertProcessText2Wide( program.getStdout(), wide );
+            wide = program.getStdout();
             return true;
         }
     }
     else
     {
-        convertProcessText2Wide( program.getStderr(), wide );
+        // convertProcessText2Wide( program.getStderr(), wide );
+        wide = program.getStderr();
         return false;
     }
     return false;
 }
 
-void updateListWithDelay()
+void DemoDlg::updateListWithDelay()
 {
     if ( ! g_NppReady )
         return;
@@ -354,22 +355,22 @@ void updateListWithDelay()
     doRefreshTimer();
 }
 
-void updateList()
+void DemoDlg::updateList()
 {
-    KillTimer( hDialog, TIMER_ID );
+    KillTimer( _hSelf, TIMER_ID );
 
     if ( ! g_NppReady )
         return;
 
     clearList();
 
-    std::wstring wide;
+    std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe status --porcelain --branch" ), wide ) )
     {
         std::vector<std::wstring> splittedStrings = split( wide, TEXT( "\n" ) );
 
         std::wstring strBranch = splittedStrings[0].erase(0, 3);
-        SendMessage( GetDlgItem( hDialog, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )strBranch.c_str() );
+        SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )strBranch.c_str() );
         for ( unsigned int i = 1; i < splittedStrings.size() ; i++ )
         {
             std::wstring strI    = splittedStrings[i].substr(0, 1);
@@ -379,24 +380,27 @@ void updateList()
         }
     }
     else
-        setListColumns( 0, TEXT( "" ), TEXT( "" ), wide );
+    {
+        SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )wide.c_str() );
+        setListColumns( 0, TEXT( "" ), TEXT( "" ), TEXT( "" ) );
+    }
 }
 
-void SetNppColors()
+void DemoDlg::SetNppColors()
 {
     colorBg = ( COLORREF )::SendMessage( getCurScintilla(), SCI_STYLEGETBACK, 0, 0 );
     colorFg = ( COLORREF )::SendMessage( getCurScintilla(), SCI_STYLEGETFORE, 0, 0 );
 }
 
-void SetSysColors()
+void DemoDlg::SetSysColors()
 {
     colorBg = GetSysColor( COLOR_WINDOW );
     colorFg = GetSysColor( COLOR_WINDOWTEXT );
 }
 
-void ChangeColors()
+void DemoDlg::ChangeColors()
 {
-    HWND hList = GetDlgItem( hDialog, IDC_LSV1 );
+    HWND hList = GetDlgItem( _hSelf, IDC_LSV1 );
 
     ::SendMessage(hList, WM_SETREDRAW, FALSE, 0);
 
@@ -408,7 +412,17 @@ void ChangeColors()
     ::RedrawWindow(hList, NULL, NULL, RDW_ERASE | RDW_INVALIDATE | RDW_ALLCHILDREN);
 }
 
-void initDialog()
+void DemoDlg::refreshDialog()
+{
+    SendMessage( GetDlgItem( _hSelf, IDC_CHK_TORTOISE ), BM_SETCHECK, 
+                 ( WPARAM )( g_useTortoise ? 1 : 0 ), 0 );
+    SendMessage( GetDlgItem( _hSelf, IDC_CHK_NPPCOLOR ), BM_SETCHECK,
+                 ( WPARAM )( g_useNppColors ? 1 : 0 ), 0 );
+    SendMessage( GetDlgItem( _hSelf, IDC_CHK_PANELTOGGLE ), BM_SETCHECK,
+                 ( WPARAM )( g_RaisePanel ? 1 : 0 ), 0 );
+}
+
+void DemoDlg::initDialog()
 {
     INITCOMMONCONTROLSEX ic;
 
@@ -417,14 +431,15 @@ void initDialog()
     InitCommonControlsEx( &ic );
 
     HWND hWndToolbar1, hWndToolbar2, hWndPager1, hWndPager2;
+    HMODULE module_name = GetModuleHandle( _moduleName.c_str() );
 
     // TOOLBAR1
     // Create pager.  The parent window is the parent.
     hWndPager1 = CreateWindow( WC_PAGESCROLLER, NULL, WS_VISIBLE | WS_CHILD | PGS_HORZ,
-                              0, 0, 200, 32, hDialog, (HMENU) IDB_PAGER1, GetModuleHandle( TEXT("GitSCM.dll" ) ), NULL );
+                              0, 0, 200, 32, _hSelf, (HMENU) IDB_PAGER1, module_name, NULL );
     // Create Toolbar.  The parent window is the Pager.
     hWndToolbar1 = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, WS_TOOLBARSTYLE,
-                                  0, 0, 200, 32, hWndPager1, ( HMENU ) IDB_TOOLBAR1, GetModuleHandle( TEXT("GitSCM.dll" ) ), NULL );
+                                  0, 0, 200, 32, hWndPager1, ( HMENU ) IDB_TOOLBAR1, module_name, NULL );
 
     SendMessage( hWndToolbar1, TB_BUTTONSTRUCTSIZE, sizeof( TBBUTTON ), 0 );
     SendMessage( hWndToolbar1, TB_SETEXTENDEDSTYLE, 0, ( LPARAM ) TBSTYLE_EX_HIDECLIPPEDBUTTONS | TBSTYLE_EX_DRAWDDARROWS );
@@ -433,15 +448,15 @@ void initDialog()
     // Notify the pager that it contains the toolbar
     SendMessage(hWndPager1, PGM_SETCHILD, 0, (LPARAM) hWndToolbar1);
 
-    imageToolbar( GetModuleHandle( TEXT("GitSCM.dll" ) ), hWndToolbar1, IDB_TOOLBAR1, numButtons1 );
+    imageToolbar( module_name, hWndToolbar1, IDB_TOOLBAR1, numButtons1 );
 
     // TOOLBAR2
     // Create pager.  The parent window is the parent.
     hWndPager2 = CreateWindow( WC_PAGESCROLLER, NULL, WS_VISIBLE | WS_CHILD | PGS_HORZ,
-                              0, 32, 200, 32, hDialog, (HMENU) IDB_PAGER2, GetModuleHandle( TEXT("GitSCM.dll" ) ), NULL );
+                              0, 32, 200, 32, _hSelf, (HMENU) IDB_PAGER2, module_name, NULL );
     // Create Toolbar.  The parent window is the Pager.
     hWndToolbar2 = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, WS_TOOLBARSTYLE,
-                                  0, 0, 200, 32, hWndPager2, ( HMENU ) IDB_TOOLBAR2, GetModuleHandle( TEXT("GitSCM.dll" ) ), NULL );
+                                  0, 0, 200, 32, hWndPager2, ( HMENU ) IDB_TOOLBAR2, module_name, NULL );
 
     SendMessage( hWndToolbar2, TB_BUTTONSTRUCTSIZE, sizeof( TBBUTTON ), 0 );
     SendMessage( hWndToolbar1, TB_SETEXTENDEDSTYLE, 0, ( LPARAM ) TBSTYLE_EX_HIDECLIPPEDBUTTONS | TBSTYLE_EX_DRAWDDARROWS );
@@ -450,17 +465,17 @@ void initDialog()
     // in CreateWindowEx()
     SendMessage(hWndPager2, PGM_SETCHILD, 0, (LPARAM) hWndToolbar2);
 
-    imageToolbar( GetModuleHandle( TEXT("GitSCM.dll" ) ), hWndToolbar2, IDB_TOOLBAR2, numButtons2 );
+    imageToolbar( module_name, hWndToolbar2, IDB_TOOLBAR2, numButtons2 );
 
     // Edit and List controls
-
     if ( g_useNppColors )
         SetNppColors();
     else
         SetSysColors();
     ChangeColors();
+    refreshDialog();
 
-    HWND hList = GetDlgItem( hDialog, IDC_LSV1 );
+    HWND hList = GetDlgItem( _hSelf, IDC_LSV1 );
 
     // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
     SendMessage( hList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, ( LVS_EX_FULLROWSELECT /*| LVS_EX_CHECKBOXES*/ ) );
@@ -490,7 +505,7 @@ void initDialog()
     updateList();
 }
 
-void gotoFile()
+void DemoDlg::gotoFile()
 {
     std::vector<std::wstring> files = getListSelected();
     if ( files.size() == 0 )
@@ -503,24 +518,20 @@ void gotoFile()
             return;
         else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
         {
-            std::wstring err;
+            std::wstring err = TEXT( "" );
             err += files[i];
             err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
-            int ret = ( int )::MessageBox( hDialog, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
+            int ret = ( int )::MessageBox( _hSelf, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
             if ( ret == IDYES )
-                SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+                SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
         }
         else
-            SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+            SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
     }
 }
 
 INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lParam )
 {
-
-    ::SendMessage( GetDlgItem( hDialog, IDC_CHK_TORTOISE ), BM_SETCHECK,
-                   ( LPARAM )( g_useTortoise ? 1 : 0 ), 0 );
-
     switch ( message )
     {
         case WM_COMMAND :
@@ -541,15 +552,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 case IDC_BTN_PROMPT :
                 {
-                    std::wstring pathName;
+                    std::wstring pathName = TEXT( "" );
                     updateLoc( pathName );
-                    ShellExecute( nppData._nppHandle, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
-                    return TRUE;
-                }
-
-                case IDC_CHK_TORTOISE :
-                {
-                    doTortoise();
+                    ShellExecute( _hParent, TEXT("open"), g_GitPrompt, NULL, pathName.c_str(), SW_SHOW );
                     return TRUE;
                 }
 
@@ -649,6 +654,45 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     return TRUE;
                 }
 
+                case IDC_CHK_TORTOISE :
+                {
+                    doTortoise();
+                    return TRUE;
+                }
+
+                case IDC_CHK_NPPCOLOR:
+                {
+                    int check = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_CHK_NPPCOLOR ),
+                                                      BM_GETCHECK, 0, 0 );
+
+                    if ( check & BST_CHECKED )
+                    {
+                        SetNppColors();
+                        g_useNppColors = true;
+                    }
+                    else
+                    {
+                        SetSysColors();
+                        g_useNppColors = false;
+                    }
+
+                    ChangeColors();
+                    refreshDialog();
+                    return TRUE;
+                }
+
+                case IDC_CHK_PANELTOGGLE:
+                {
+                    int check = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_CHK_PANELTOGGLE ),
+                                                      BM_GETCHECK, 0, 0 );
+
+                    if ( check & BST_CHECKED )
+                        g_RaisePanel = true;
+                    else
+                        g_RaisePanel = false;
+                    return TRUE;
+                }
+
                 case MAKELONG( IDC_EDT_BRANCH, EN_SETFOCUS ) :
                 case MAKELONG( IDC_EDT_DIR, EN_SETFOCUS ) :
                 {
@@ -660,7 +704,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 case IDOK :
                 { 
                     HWND hWndCtrl = GetFocus();
-                    if ( hWndCtrl == GetDlgItem( hDialog, IDC_LSV1 ) )
+                    if ( hWndCtrl == GetDlgItem( _hSelf, IDC_LSV1 ) )
                         gotoFile();
                     return TRUE;
                 }
@@ -676,7 +720,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
         case WM_TIMER:
         {
-            KillTimer( hDialog, TIMER_ID );
+            KillTimer( _hSelf, TIMER_ID );
             updateList();
             return FALSE;
         }
@@ -689,7 +733,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             {
                 case NM_DBLCLK:
                 {
-                    if ( nmhdr->hwndFrom == GetDlgItem( hDialog, IDC_LSV1 ) )
+                    if ( nmhdr->hwndFrom == GetDlgItem( _hSelf, IDC_LSV1 ) )
                     {
                         POINT         pt    = {0};
                         LVHITTESTINFO ht    = {0};
@@ -699,9 +743,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                         pt.y = GET_Y_LPARAM(dwpos);
 
                         ht.pt = pt;
-                        ::ScreenToClient( GetDlgItem( hDialog, IDC_LSV1 ), &ht.pt);
+                        ::ScreenToClient( GetDlgItem( _hSelf, IDC_LSV1 ), &ht.pt);
 
-                        ListView_SubItemHitTest( GetDlgItem( hDialog, IDC_LSV1 ), &ht);
+                        ListView_SubItemHitTest( GetDlgItem( _hSelf, IDC_LSV1 ), &ht);
                         if ( ht.iItem == -1 )
                             break;
 
@@ -728,15 +772,15 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                                     break;
                                 else if ( fileOrDir & FILE_ATTRIBUTE_DIRECTORY )
                                 {
-                                    std::wstring err;
+                                    std::wstring err = TEXT( "" );
                                     err += files[i];
                                     err += TEXT( "\n\nIs a directory.  Continue to open all files?" );
-                                    int ret = ( int )::MessageBox( hDialog, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
+                                    int ret = ( int )::MessageBox( _hSelf, err.c_str(), TEXT( "Continue?" ), ( MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2 | MB_APPLMODAL ) );
                                     if ( ret == IDYES )
-                                        SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+                                        SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
                                 }
                                 else
-                                    SendMessage( nppData._nppHandle, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
+                                    SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
                             }
                         }
                     }
@@ -745,7 +789,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 case NM_RCLICK:
                 {
-                    if ( nmhdr->hwndFrom == GetDlgItem( hDialog, IDC_LSV1 ) )
+                    if ( nmhdr->hwndFrom == GetDlgItem( _hSelf, IDC_LSV1 ) )
                     {
                         POINT         pt    = {0};
                         LVHITTESTINFO ht    = {0};
@@ -760,7 +804,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                             break;
 
                         cm.SetObjects( files );
-                        cm.ShowContextMenu( _hInst, nppData._nppHandle, _hSelf, pt );
+                        cm.ShowContextMenu( _hInst, _hParent, _hSelf, pt );
                     }
                     return TRUE;
                 }
@@ -779,7 +823,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 case LVN_KEYDOWN:
                 {
                     LPNMLVKEYDOWN pnkd = (LPNMLVKEYDOWN) lParam;
-                    if ( ( nmhdr->hwndFrom == GetDlgItem( hDialog, IDC_LSV1 ) ) &&
+                    if ( ( nmhdr->hwndFrom == GetDlgItem( _hSelf, IDC_LSV1 ) ) &&
                        ( ( pnkd->wVKey == VK_RETURN )
                       || ( pnkd->wVKey == VK_SPACE )
                       ) )
@@ -798,20 +842,20 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             RECT rc = {0};
             getClientRect( rc );
 
-            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT_BRANCH ), NULL,
-                            rc.left + 15, rc.top + 110, rc.right - 90, 20,
+            ::SetWindowPos( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), NULL,
+                            rc.left + 15, rc.top + 120, rc.right - 90, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
-            ::SetWindowPos( GetDlgItem( hDialog, IDB_BTN_BRANCH ), NULL,
-                            rc.right - 70, rc.top + 110, 60, 20,
+            ::SetWindowPos( GetDlgItem( _hSelf, IDB_BTN_BRANCH ), NULL,
+                            rc.right - 70, rc.top + 120, 60, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
-            ::SetWindowPos( GetDlgItem( hDialog, IDC_EDT_DIR ), NULL,
-                            rc.left + 15, rc.top + 140, rc.right - 25, 20,
+            ::SetWindowPos( GetDlgItem( _hSelf, IDC_EDT_DIR ), NULL,
+                            rc.left + 15, rc.top + 150, rc.right - 25, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
-            ::SetWindowPos( GetDlgItem( hDialog, IDC_LSV1 ), NULL,
-                            rc.left + 15, rc.top + 170, rc.right - 25, rc.bottom - 180,
+            ::SetWindowPos( GetDlgItem( _hSelf, IDC_LSV1 ), NULL,
+                            rc.left + 15, rc.top + 180, rc.right - 25, rc.bottom - 190,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
 
-            SendMessage( GetDlgItem( hDialog, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
+            SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
 
             // redraw();
             return FALSE;
@@ -819,7 +863,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
         case WM_PAINT:
         {
-            ::RedrawWindow( hDialog, NULL, NULL, TRUE);
+            ::RedrawWindow( _hSelf, NULL, NULL, TRUE);
             return FALSE;
         }
 
@@ -833,5 +877,5 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
 
-    return FALSE;
+    // return FALSE;
 }
