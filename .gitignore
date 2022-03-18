@@ -6,7 +6,6 @@ Release
 *.lib
 *.iobj
 *.ipdb
-*.user
 *.zip
 tags
 bin/*
