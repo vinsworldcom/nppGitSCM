@@ -8,6 +8,6 @@ Release
 *.ipdb
 *.zip
 tags
-bin/*
-bin64/*
+Win32/*
+x64/*
 arm64/*
