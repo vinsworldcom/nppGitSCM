@@ -126,17 +126,23 @@ to the index, moving the "M" to the "I" (index) column.
 + Double-clicking any "M" in the "I" (index) column will `git reset HEAD` 
 the file out of the index, moving the "M" to the "W" (working) column.
 
+**Use N++ Colors** simply changes the colors of the List View background and 
+foreground text in the Git Docking Panel to match that of the current 
+Notepad++ theme.
+
+**Panel Raise (or Toggle)** sets the panel action on the "Git Docking Panel" 
+menu option.  Check just raises the panel into view; uncheck shows / hides 
+the panel.
 
 ### Settings
 
-Git Directory Path is only required if `git` is not found in your system 
+**Git Directory Path** is only required if `git` is not found in your system 
 PATH environment variable or if you want to use a different Git.  Only the 
 directory to the Git executable is required - use the "git..." button to 
 help locate and enter the directory only if required.
 
-Git Prompt is to launch a terminal prompt in the current repo directory.  
+**Git Prompt** is to launch a terminal prompt in the current repo directory.  
 The default shell is PowerShell.
 
-Use N++ Colors simply changes the colors of the List View background and 
-foreground text in the Git Docking Panel to match that of the current 
-Notepad++ theme.
+**Refresh on Scintilla focus** will refresh the Panel (if shown) anytime the 
+Scintilla editing component of Notepad++ gets the focus.
