@@ -33,6 +33,7 @@ const TCHAR iniKeyGitPath[]      = TEXT( "GitPath" );
 const TCHAR iniKeyGitPrompt[]    = TEXT( "GitPrompt" );
 const TCHAR iniKeyUseNppColors[] = TEXT( "UseNppColors" );
 const TCHAR iniKeyRaisePanel[]   = TEXT( "RaisePanelorToggle" );
+const TCHAR iniKeyRefScnFocus[]  = TEXT( "RefreshScnFocus" );
 const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
 
 DemoDlg _gitPanel;
@@ -57,6 +58,7 @@ bool  g_useTortoise  = false;
 bool  g_NppReady     = false;
 bool  g_useNppColors = false;
 bool  g_RaisePanel   = false;
+bool  g_RefScnFocus  = false;
 bool  g_Debug        = false;
 
 std::wstring g_tortoiseLoc;
@@ -85,6 +87,8 @@ void pluginCleanUp()
                                  g_useNppColors ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
     ::WritePrivateProfileString( sectionName, iniKeyRaisePanel,
                                  g_RaisePanel ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+    ::WritePrivateProfileString( sectionName, iniKeyRefScnFocus,
+                                 g_RefScnFocus ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
 
     if (g_TBGit.hToolbarBmp) {
         ::DeleteObject(g_TBGit.hToolbarBmp);
@@ -128,6 +132,8 @@ void commandMenuInit()
     g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
                                              0, iniFilePath );
     g_RaisePanel = ::GetPrivateProfileInt( sectionName, iniKeyRaisePanel,
+                                                0, iniFilePath );
+    g_RefScnFocus = ::GetPrivateProfileInt( sectionName, iniKeyRefScnFocus,
                                                 0, iniFilePath );
 
     if ( g_useTortoise )

@@ -12,7 +12,7 @@ extern HINSTANCE g_hInst;
 extern NppData   nppData;
 extern TCHAR     g_GitPath[MAX_PATH];
 extern TCHAR     g_GitPrompt[MAX_PATH];
-extern bool      g_useNppColors;
+extern bool      g_RefScnFocus;
 
 static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pData)
 {
@@ -24,8 +24,6 @@ static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pDa
 INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
                               LPARAM lParam )
 {
-    ::SendMessage( GetDlgItem( hWndDlg, IDC_CHK_NPPCOLOR ), BM_SETCHECK,
-                   ( LPARAM )( g_useNppColors ? 1 : 0 ), 0 );
 
     switch(msg)
     {
@@ -33,6 +31,7 @@ INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
         {
             SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPATH ), WM_SETTEXT, 0, ( LPARAM )g_GitPath );
             SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPROMPT ), WM_SETTEXT, 0, ( LPARAM )g_GitPrompt );
+            SendMessage( GetDlgItem( hWndDlg, IDC_CHK_SCNFOCUS ), BM_SETCHECK, ( LPARAM )( g_RefScnFocus ? 1 : 0 ), 0 );
 
             std::string version;
             version = "<a>";
@@ -126,6 +125,18 @@ INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
                         pShellMalloc->Release();
                         delete [] info.pszDisplayName;
                     }
+                    return TRUE;
+                }
+
+                case IDC_CHK_SCNFOCUS:
+                {
+                    int check = ( int )::SendMessage( GetDlgItem( hWndDlg, IDC_CHK_SCNFOCUS ),
+                                                      BM_GETCHECK, 0, 0 );
+
+                    if ( check & BST_CHECKED )
+                        g_RefScnFocus = true;
+                    else
+                        g_RefScnFocus = false;
                     return TRUE;
                 }
 
