@@ -693,6 +693,16 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     return TRUE;
                 }
 
+                case IDB_BTN_GOTOREMOTE:
+                {
+                    std::wstring wide = TEXT( "" );
+                    if ( execCommand( TEXT( "git config --get remote.origin.url" ), wide ) )
+                    {
+                        ShellExecute(_hSelf, TEXT("open"), wide.c_str(), NULL, NULL, SW_SHOWNORMAL);
+                    }
+                    return TRUE;
+                }
+
                 case MAKELONG( IDC_EDT_BRANCH, EN_SETFOCUS ) :
                 case MAKELONG( IDC_EDT_DIR, EN_SETFOCUS ) :
                 {
