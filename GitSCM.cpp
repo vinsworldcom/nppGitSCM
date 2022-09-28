@@ -25,6 +25,7 @@ extern FuncItem     funcItem[nbFunc];
 extern HINSTANCE    g_hInst;
 extern NppData      nppData;
 extern bool         g_NppReady;
+extern bool         g_RefScnFocus;
 extern toolbarIcons g_TBGit;
 
 BOOL APIENTRY DllMain( HMODULE hModule, DWORD  reasonForCall, LPVOID /*lpReserved*/ )
@@ -86,6 +87,12 @@ extern "C" __declspec( dllexport ) void beNotified( SCNotification *notifyCode )
         case NPPN_BUFFERACTIVATED:
         {
             if ( g_NppReady )    
+                updatePanelLoc();
+        }
+        break;
+        case SCN_FOCUSIN:
+        {
+            if ( g_NppReady && g_RefScnFocus )    
                 updatePanelLoc();
         }
         break;

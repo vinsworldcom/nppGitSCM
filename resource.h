@@ -7,7 +7,7 @@
 /* VERSION DEFINITIONS */
 #define VER_MAJOR   1
 #define VER_MINOR   4
-#define VER_RELEASE 7
+#define VER_RELEASE 8
 #define VER_BUILD   1
 #define VER_STRING  STR(VER_MAJOR) "." STR(VER_MINOR) "." STR(VER_RELEASE) "." STR(VER_BUILD)
 
