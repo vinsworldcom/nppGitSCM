@@ -368,7 +368,9 @@ void ExecGitCommand(
         for ( std::vector<std::wstring>::iterator itr = files.begin();
                 itr != files.end(); itr++ )
         {
+            command += TEXT( "\"" );
             command += ( *itr );
+            command += TEXT( "\"" );
 
             if ( itr != files.end() - 1 )
                 command += TEXT( " " );
