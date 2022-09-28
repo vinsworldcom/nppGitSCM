@@ -59,6 +59,12 @@ bool  g_NppReady     = false;
 bool  g_useNppColors = false;
 bool  g_RaisePanel   = false;
 bool  g_RefScnFocus  = false;
+
+// g_Debug must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
+//   ON  =>  Debug=1
+//   OFF =>  Debug=0
+// It is read at startup, it is NOT written back to the config file!
+// When set ON, use DebugView (DbgView.exe) https://www.sysinternals.com
 bool  g_Debug        = false;
 
 std::wstring g_tortoiseLoc;
