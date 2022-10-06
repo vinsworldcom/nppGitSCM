@@ -853,16 +853,16 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             getClientRect( rc );
 
             ::SetWindowPos( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), NULL,
-                            rc.left + 15, rc.top + 120, rc.right - 90, 20,
+                            rc.left + 5, rc.top + 120, rc.right - 75, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
             ::SetWindowPos( GetDlgItem( _hSelf, IDB_BTN_BRANCH ), NULL,
-                            rc.right - 70, rc.top + 120, 60, 20,
+                            rc.right - 65, rc.top + 120, 60, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
             ::SetWindowPos( GetDlgItem( _hSelf, IDC_EDT_DIR ), NULL,
-                            rc.left + 15, rc.top + 150, rc.right - 25, 20,
+                            rc.left + 5, rc.top + 150, rc.right - 10, 20,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
             ::SetWindowPos( GetDlgItem( _hSelf, IDC_LSV1 ), NULL,
-                            rc.left + 15, rc.top + 180, rc.right - 25, rc.bottom - 190,
+                            rc.left + 5, rc.top + 180, rc.right - 10, rc.bottom - 185,
                             SWP_NOZORDER | SWP_SHOWWINDOW );
 
             SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
