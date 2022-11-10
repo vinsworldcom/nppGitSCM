@@ -163,8 +163,7 @@ void commandMenuInit()
     setCommand( 1,  TEXT( "GiT&k" ),         giTk, NULL, false );
     setCommand( 2,  TEXT( "Git Pro&mpt" ),   gitPrompt, NULL, false );
     setCommand( 3,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL,
-                false );
+    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL, _gitPanel.isVisible() ? true : false );
     setCommand( 5,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( 6,  TEXT( "&Add File" ),     addFile, NULL, false );
     setCommand( 7,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
@@ -179,8 +178,7 @@ void commandMenuInit()
     setCommand( 16, TEXT( "&Commit" ),       commitAll, NULL, false );
     setCommand( 17, TEXT( "Pus&h" ),         pushFile, NULL, false );
     setCommand( 18, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
-                g_useTortoise ? true : false );
+    setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL, g_useTortoise ? true : false );
     setCommand( 20, TEXT( "S&ettings" ),      doSettings, NULL, false );
 }
 
