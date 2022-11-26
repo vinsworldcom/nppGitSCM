@@ -163,8 +163,7 @@ void commandMenuInit()
     setCommand( 1,  TEXT( "GiT&k" ),         giTk, NULL, false );
     setCommand( 2,  TEXT( "Git Pro&mpt" ),   gitPrompt, NULL, false );
     setCommand( 3,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL,
-                false );
+    setCommand( DOCKABLE_INDEX, TEXT( "Git Docking Panel" ), DockableDlg, NULL, _gitPanel.isVisible() ? true : false );
     setCommand( 5,  TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
     setCommand( 6,  TEXT( "&Add File" ),     addFile, NULL, false );
     setCommand( 7,  TEXT( "&Unstage File" ), unstageFile, NULL, false );
@@ -179,8 +178,7 @@ void commandMenuInit()
     setCommand( 16, TEXT( "&Commit" ),       commitAll, NULL, false );
     setCommand( 17, TEXT( "Pus&h" ),         pushFile, NULL, false );
     setCommand( 18, TEXT( "-SEPARATOR-" ),   NULL, NULL, false );
-    setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL,
-                g_useTortoise ? true : false );
+    setCommand( TORTOISE_INDEX, TEXT( "Use &TortoiseGit" ), doTortoise, NULL, g_useTortoise ? true : false );
     setCommand( 20, TEXT( "S&ettings" ),      doSettings, NULL, false );
 }
 
@@ -250,7 +248,7 @@ std::wstring getCurrentFileDirectory()
     ::SendMessage(nppData._nppHandle, NPPM_GETCURRENTDIRECTORY, MAX_PATH,
         (LPARAM)path);
 
-    return std::wstring(path);
+    return std::wstring( path );
 }
 
 std::wstring GetLastErrorString(DWORD errorCode)
@@ -327,7 +325,7 @@ std::wstring getGitLocation()
 ///
 /// @return Whether or not Git could be launched.
 ///
-bool launchGit( std::wstring &command )
+int launchGit( std::wstring &command, bool b_notGui = true )
 {
     STARTUPINFOW si;
     PROCESS_INFORMATION pi;
@@ -337,17 +335,39 @@ bool launchGit( std::wstring &command )
 
     if ( g_Debug )
         OutputDebugString( command.c_str() );
-    return CreateProcess(
-               NULL,
-               const_cast<LPWSTR>( command.c_str() ),
-               NULL,
-               NULL,
-               FALSE,
-               CREATE_DEFAULT_ERROR_MODE,
-               NULL,
-               const_cast<LPCWSTR>( getCurrentFileDirectory().c_str() ),
-               &si,
-               &pi ) != 0;
+
+    int ret = 0;
+    std::wstring path = getCurrentFileDirectory().c_str();
+    if ( path.length() > 0 || b_notGui )
+        ret = CreateProcess(
+            NULL,
+            const_cast<LPWSTR>( command.c_str() ),
+            NULL,
+            NULL,
+            FALSE,
+            CREATE_DEFAULT_ERROR_MODE,
+            NULL,
+            const_cast<LPCWSTR>( getCurrentFileDirectory().c_str() ),
+            &si,
+            &pi
+        );
+    else
+        ret = CreateProcess(
+            NULL,
+            const_cast<LPWSTR>( command.c_str() ),
+            NULL,
+            NULL,
+            FALSE,
+            CREATE_DEFAULT_ERROR_MODE,
+            NULL,
+            NULL,
+            &si,
+            &pi
+        );
+
+    if ( (ret == 0) && (path.length() == 0) )
+        ret = -1;
+    return ret;
 }
 
 ///
@@ -388,10 +408,17 @@ void ExecGitCommand(
 
     command += TEXT( "\"" );
 
-    if ( !launchGit( command ) )
+    bool b_notGui = true;
+    if ( ignoreFiles && !pause )
+        b_notGui = false;
+
+    int ret = launchGit( command, b_notGui );
+    if ( ret <= 0 )
     {
         std::wstring err = TEXT( "Could not launch Git.\n\n" );
         err += GetLastErrorString(GetLastError());
+        if ( ret == -1 )
+            err += TEXT( "\nCurrent directory is empty.\n  Is this a \"new-1\" file or have you saved it?\n  Is the file in a current git repo directory?" );
         MessageBox( nppData._nppHandle, err.c_str(),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
     }
@@ -435,10 +462,13 @@ void ExecTortoiseCommand(
     else
         command += TEXT( "\" /closeonend:2" );
 
-    if ( !launchGit( command ) )
+    int ret = launchGit( command );
+    if ( ret <= 0 )
     {
         std::wstring err = TEXT( "Could not launch TortoiseGit.\n\n" );
         err += GetLastErrorString(GetLastError());
+        if ( ret == -1 )
+            err += TEXT( "\nCurrent directory is empty.\n  Is this a \"new-1\" file or have you saved it?\n  Is the file in a current git repo directory?" );
         MessageBox( nppData._nppHandle, err.c_str(),
                     TEXT( "Failed" ), ( MB_OK | MB_ICONWARNING | MB_APPLMODAL ) );
     }
