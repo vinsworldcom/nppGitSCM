@@ -49,6 +49,13 @@ class DemoDlg : public DockingDlgInterface
                                               LPARAM lParam );
 
     private :
+        static DWORD WINAPI _static_updateList(void* Param)
+        {
+            DemoDlg* This = (DemoDlg*) Param;
+            return This->_updateList();
+        }
+        DWORD _updateList();
+
         void doRefreshTimer();
         std::vector<std::wstring> split( std::wstring stringToBeSplitted, std::wstring delimeter );
         // void convertProcessText2Wide( std::wstring outputW, std::wstring &wide );

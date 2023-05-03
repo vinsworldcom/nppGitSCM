@@ -364,6 +364,13 @@ void DemoDlg::updateList()
 
     clearList();
 
+    HANDLE hThread = CreateThread(NULL, 0, _static_updateList, (void*) this, 0, NULL);
+    // WaitForSingleObject(hThread, 10000);
+    CloseHandle(hThread);
+}
+
+DWORD DemoDlg::_updateList()
+{
     std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe status --porcelain --branch" ), wide ) )
     {
@@ -384,6 +391,8 @@ void DemoDlg::updateList()
         SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )wide.c_str() );
         setListColumns( 0, TEXT( "" ), TEXT( "" ), TEXT( "" ) );
     }
+
+    return 0;
 }
 
 void DemoDlg::SetNppColors()
