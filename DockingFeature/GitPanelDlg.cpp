@@ -38,6 +38,7 @@ extern bool    g_NppReady;
 extern bool    g_useNppColors;
 extern bool    g_RaisePanel;
 extern bool    g_Debug;
+extern int     g_LVDelay;
 
 LVITEM   LvItem;
 LVCOLUMN LvCol;
@@ -50,7 +51,6 @@ COLORREF colorFg;
 #define COL_FILE 2
 
 #define TIMER_ID           1
-#define LSV1_REFRESH_DELAY 1500
 
 const int WS_TOOLBARSTYLE = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | TBSTYLE_TOOLTIPS |TBSTYLE_FLAT | CCS_TOP | BTNS_AUTOSIZE | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER;
                          /* WS_CHILD | WS_VISIBLE |                                                                                                                    CCS_NORESIZE |                CCS_ADJUSTABLE */
@@ -127,7 +127,7 @@ void imageToolbar( HINSTANCE hInst, HWND hWndToolbar, UINT ToolbarID, const int 
 void DemoDlg::doRefreshTimer()
 {
     KillTimer( _hSelf, TIMER_ID );
-    SetTimer( _hSelf, TIMER_ID, LSV1_REFRESH_DELAY, NULL );
+    SetTimer( _hSelf, TIMER_ID, g_LVDelay, NULL );
 }
 
 std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,

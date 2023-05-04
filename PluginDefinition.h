@@ -74,6 +74,8 @@ bool setCommand( size_t index, TCHAR *cmdName, PFUNCPLUGINCMD pFunc,
 //
 // Your plugin command functions
 //
+#define LSV1_REFRESH_DELAY 500
+
 HWND getCurScintilla();
 bool getTortoiseLocation( std::wstring & );
 std::wstring getGitLocation();
