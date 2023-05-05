@@ -35,6 +35,7 @@ const TCHAR iniKeyUseNppColors[] = TEXT( "UseNppColors" );
 const TCHAR iniKeyRaisePanel[]   = TEXT( "RaisePanelorToggle" );
 const TCHAR iniKeyRefScnFocus[]  = TEXT( "RefreshScnFocus" );
 const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
+const TCHAR iniKeyLVDelay[]      = TEXT( "LVDelay" );
 
 DemoDlg _gitPanel;
 
@@ -60,12 +61,14 @@ bool  g_useNppColors = false;
 bool  g_RaisePanel   = false;
 bool  g_RefScnFocus  = false;
 
-// g_Debug must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
+// g_Debug and g_LVDelay must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
 //   ON  =>  Debug=1
 //   OFF =>  Debug=0
+//   LVDelay=<# milliseconds>
 // It is read at startup, it is NOT written back to the config file!
 // When set ON, use DebugView (DbgView.exe) https://www.sysinternals.com
 bool  g_Debug        = false;
+int   g_LVDelay      = LSV1_REFRESH_DELAY;
 
 std::wstring g_tortoiseLoc;
 
@@ -135,12 +138,15 @@ void commandMenuInit()
                                g_GitPrompt, MAX_PATH, iniFilePath );
     g_useNppColors = ::GetPrivateProfileInt( sectionName, iniKeyUseNppColors,
                                              0, iniFilePath );
-    g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
-                                             0, iniFilePath );
     g_RaisePanel = ::GetPrivateProfileInt( sectionName, iniKeyRaisePanel,
                                                 0, iniFilePath );
     g_RefScnFocus = ::GetPrivateProfileInt( sectionName, iniKeyRefScnFocus,
                                                 0, iniFilePath );
+
+    g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
+                                             0, iniFilePath );
+    g_LVDelay = ::GetPrivateProfileInt( sectionName, iniKeyLVDelay,
+                                             0, iniFilePath );
 
     if ( g_useTortoise )
     {

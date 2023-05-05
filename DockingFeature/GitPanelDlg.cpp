@@ -38,6 +38,7 @@ extern bool    g_NppReady;
 extern bool    g_useNppColors;
 extern bool    g_RaisePanel;
 extern bool    g_Debug;
+extern int     g_LVDelay;
 
 LVITEM   LvItem;
 LVCOLUMN LvCol;
@@ -50,7 +51,6 @@ COLORREF colorFg;
 #define COL_FILE 2
 
 #define TIMER_ID           1
-#define LSV1_REFRESH_DELAY 1500
 
 const int WS_TOOLBARSTYLE = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | TBSTYLE_TOOLTIPS |TBSTYLE_FLAT | CCS_TOP | BTNS_AUTOSIZE | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER;
                          /* WS_CHILD | WS_VISIBLE |                                                                                                                    CCS_NORESIZE |                CCS_ADJUSTABLE */
@@ -127,7 +127,7 @@ void imageToolbar( HINSTANCE hInst, HWND hWndToolbar, UINT ToolbarID, const int 
 void DemoDlg::doRefreshTimer()
 {
     KillTimer( _hSelf, TIMER_ID );
-    SetTimer( _hSelf, TIMER_ID, LSV1_REFRESH_DELAY, NULL );
+    SetTimer( _hSelf, TIMER_ID, g_LVDelay, NULL );
 }
 
 std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
@@ -364,6 +364,13 @@ void DemoDlg::updateList()
 
     clearList();
 
+    HANDLE hThread = CreateThread(NULL, 0, _static_updateList, (void*) this, 0, NULL);
+    // WaitForSingleObject(hThread, 10000);
+    CloseHandle(hThread);
+}
+
+DWORD DemoDlg::_updateList()
+{
     std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe status --porcelain --branch" ), wide ) )
     {
@@ -384,6 +391,8 @@ void DemoDlg::updateList()
         SendMessage( GetDlgItem( _hSelf, IDC_EDT_BRANCH ), WM_SETTEXT, 0, ( LPARAM )wide.c_str() );
         setListColumns( 0, TEXT( "" ), TEXT( "" ), TEXT( "" ) );
     }
+
+    return 0;
 }
 
 void DemoDlg::SetNppColors()
