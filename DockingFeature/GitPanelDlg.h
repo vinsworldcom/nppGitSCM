@@ -56,10 +56,8 @@ class DemoDlg : public DockingDlgInterface
         }
         DWORD _updateList();
 
-        void doRefreshTimer();
         std::vector<std::wstring> split( std::wstring stringToBeSplitted, std::wstring delimeter );
         // void convertProcessText2Wide( std::wstring outputW, std::wstring &wide );
-        void clearList();
         void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW, std::wstring strFile );
         std::vector<std::wstring> getListSelected();
         bool execCommand( std::wstring, std::wstring &wide );

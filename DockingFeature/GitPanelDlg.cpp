@@ -124,12 +124,6 @@ void imageToolbar( HINSTANCE hInst, HWND hWndToolbar, UINT ToolbarID, const int 
     SendMessage( hWndToolbar, TB_SETIMAGELIST, 0, ( LPARAM )himlToolBar1 );
 }
 
-void DemoDlg::doRefreshTimer()
-{
-    KillTimer( _hSelf, TIMER_ID );
-    SetTimer( _hSelf, TIMER_ID, g_LVDelay, NULL );
-}
-
 std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
                                  std::wstring delimeter )
 {
@@ -163,11 +157,6 @@ std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
     // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
     // wide = converter.from_bytes(output.c_str());
 // }
-
-void DemoDlg::clearList()
-{
-    SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_DELETEALLITEMS, 0, 0 );
-}
 
 bool DemoDlg::updateLoc( std::wstring &loc )
 {
@@ -352,7 +341,8 @@ void DemoDlg::updateListWithDelay()
     if ( ! g_NppReady )
         return;
 
-    doRefreshTimer();
+    KillTimer( _hSelf, TIMER_ID );
+    SetTimer( _hSelf, TIMER_ID, g_LVDelay, NULL );
 }
 
 void DemoDlg::updateList()
@@ -362,15 +352,16 @@ void DemoDlg::updateList()
     if ( ! g_NppReady )
         return;
 
-    clearList();
-
-    HANDLE hThread = CreateThread(NULL, 0, _static_updateList, (void*) this, 0, NULL);
-    // WaitForSingleObject(hThread, 10000);
-    CloseHandle(hThread);
+    // HANDLE hThread = CreateThread(NULL, 0, _static_updateList, (void*) this, 0, NULL);
+    // CloseHandle(hThread);
+    _updateList();
 }
 
 DWORD DemoDlg::_updateList()
 {
+    // clear list
+    SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_DELETEALLITEMS, 0, 0 );
+
     std::wstring wide = TEXT( "" );
     if ( execCommand( TEXT( "git.exe status --porcelain --branch" ), wide ) )
     {
@@ -567,14 +558,27 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     return TRUE;
                 }
 
-                case IDC_BTN_DIFF :
+                case IDC_BTN_PULL :
                 {
-                    std::vector<std::wstring> files = getListSelected();
-                    if ( files.size() == 0 )
-                        diffFile();
-                    else
-                        diffFileFiles( files );
-                    doRefreshTimer();
+                    pullFile();
+                    return TRUE;
+                }
+
+                case IDC_BTN_STATUS :
+                {
+                    statusAll();
+                    return TRUE;
+                }
+
+                case IDC_BTN_COMMIT :
+                {
+                    commitAll();
+                    return TRUE;
+                }
+
+                case IDC_BTN_PUSH :
+                {
+                    pushFile();
                     return TRUE;
                 }
 
@@ -585,7 +589,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                         addFile();
                     else
                         addFileFiles( files );
-                    doRefreshTimer();
+                    updateListWithDelay();
                     return TRUE;
                 }
 
@@ -596,7 +600,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                         unstageFile();
                     else
                         unstageFileFiles( files );
-                    doRefreshTimer();
+                    updateListWithDelay();
                     return TRUE;
                 }
 
@@ -607,7 +611,17 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                         restoreFile();
                     else
                         restoreFileFiles( files );
-                    doRefreshTimer();
+                    updateListWithDelay();
+                    return TRUE;
+                }
+
+                case IDC_BTN_DIFF :
+                {
+                    std::vector<std::wstring> files = getListSelected();
+                    if ( files.size() == 0 )
+                        diffFile();
+                    else
+                        diffFileFiles( files );
                     return TRUE;
                 }
 
@@ -623,37 +637,10 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     return TRUE;
                 }
 
-                case IDC_BTN_PULL :
-                {
-                    pullFile();
-                    doRefreshTimer();
-                    return TRUE;
-                }
-
-                case IDC_BTN_STATUS :
-                {
-                    statusAll();
-                    doRefreshTimer();
-                    return TRUE;
-                }
-
-                case IDC_BTN_COMMIT :
-                {
-                    commitAll();
-                    doRefreshTimer();
-                    return TRUE;
-                }
-
-                case IDC_BTN_PUSH :
-                {
-                    pushFile();
-                    return TRUE;
-                }
-
                 case IDB_BTN_BRANCH :
                 {
                     branchFile();
-                    doRefreshTimer();
+                    updateListWithDelay();
                     return TRUE;
                 }
 
@@ -715,7 +702,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 case MAKELONG( IDC_EDT_BRANCH, EN_SETFOCUS ) :
                 case MAKELONG( IDC_EDT_DIR, EN_SETFOCUS ) :
                 {
-                    doRefreshTimer();
+                    updateListWithDelay();
                     return TRUE;
                 }
 
@@ -775,12 +762,12 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                         if ( ht.iSubItem == COL_I )
                         {
                             unstageFileFiles( files );
-                            doRefreshTimer();
+                            updateListWithDelay();
                         }
                         else if ( ht.iSubItem == COL_W )
                         {
                             addFileFiles( files );
-                            doRefreshTimer();
+                            updateListWithDelay();
                         }
                         else if ( ht.iSubItem == COL_FILE )
                         {
