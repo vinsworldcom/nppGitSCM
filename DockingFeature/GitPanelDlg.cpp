@@ -31,14 +31,14 @@
 #include <vector>
 #include <windowsx.h>
 
-extern TCHAR   g_GitPath[MAX_PATH];
-extern TCHAR   g_GitPrompt[MAX_PATH];
-extern bool    g_useTortoise;
-extern bool    g_NppReady;
-extern bool    g_useNppColors;
-extern bool    g_RaisePanel;
-extern bool    g_Debug;
-extern int     g_LVDelay;
+extern TCHAR g_GitPath[MAX_PATH];
+extern TCHAR g_GitPrompt[MAX_PATH];
+extern bool  g_useTortoise;
+extern bool  g_NppReady;
+extern bool  g_useNppColors;
+extern bool  g_RaisePanel;
+extern bool  g_Debug;
+extern int   g_LVDelay;
 
 LVITEM   LvItem;
 LVCOLUMN LvCol;
@@ -49,8 +49,7 @@ COLORREF colorFg;
 #define COL_I    0
 #define COL_W    1
 #define COL_FILE 2
-
-#define TIMER_ID           1
+#define TIMER_ID 1
 
 const int WS_TOOLBARSTYLE = WS_CHILD | WS_VISIBLE | WS_CLIPCHILDREN | WS_CLIPSIBLINGS | TBSTYLE_TOOLTIPS |TBSTYLE_FLAT | CCS_TOP | BTNS_AUTOSIZE | CCS_NOPARENTALIGN | CCS_NORESIZE | CCS_NODIVIDER;
                          /* WS_CHILD | WS_VISIBLE |                                                                                                                    CCS_NORESIZE |                CCS_ADJUSTABLE */
@@ -104,7 +103,8 @@ static LPCTSTR szToolTip[16] = {
 
 LPCTSTR GetNameStrFromCmd( UINT_PTR resID )
 {
-    if ((IDC_BTN_GITGUI <= resID) && (resID <= IDC_BTN_SETTINGS)) {
+    if ((IDC_BTN_GITGUI <= resID) && (resID <= IDC_BTN_SETTINGS))
+    {
         return szToolTip[resID - IDC_BTN_GITGUI];
     }
     return NULL;
@@ -124,18 +124,15 @@ void imageToolbar( HINSTANCE hInst, HWND hWndToolbar, UINT ToolbarID, const int 
     SendMessage( hWndToolbar, TB_SETIMAGELIST, 0, ( LPARAM )himlToolBar1 );
 }
 
-std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
-                                 std::wstring delimeter )
+std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted, std::wstring delimeter )
 {
     std::vector<std::wstring> splittedString;
     size_t startIndex = 0;
     size_t endIndex = 0;
 
-    while ( ( endIndex = stringToBeSplitted.find( delimeter,
-                         startIndex ) ) < stringToBeSplitted.size() )
+    while ( ( endIndex = stringToBeSplitted.find( delimeter, startIndex ) ) < stringToBeSplitted.size() )
     {
-        std::wstring val = stringToBeSplitted.substr( startIndex,
-                           endIndex - startIndex );
+        std::wstring val = stringToBeSplitted.substr( startIndex, endIndex - startIndex );
         splittedString.push_back( val );
         startIndex = endIndex + delimeter.size();
     }
@@ -149,15 +146,6 @@ std::vector<std::wstring> DemoDlg::split( std::wstring stringToBeSplitted,
     return splittedString;
 }
 
-// void DemoDlg::convertProcessText2Wide( std::wstring outputW, std::wstring &wide )
-// {
-    // std::string output(outputW.begin(), outputW.end());
-    // output.assign(outputW.begin(), outputW.end());
-
-    // std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
-    // wide = converter.from_bytes(output.c_str());
-// }
-
 bool DemoDlg::updateLoc( std::wstring &loc )
 {
     TCHAR pathName[MAX_PATH] = {0};
@@ -168,29 +156,28 @@ bool DemoDlg::updateLoc( std::wstring &loc )
     return true;
 }
 
-void DemoDlg::setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW,
-                 std::wstring strFile )
+void DemoDlg::setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW, std::wstring strFile )
 {
     // https://www.codeproject.com/Articles/2890/Using-ListView-control-under-Win32-API
     memset( &LvItem, 0, sizeof( LvItem ) ); // Zero struct's Members
-    LvItem.mask       = LVIF_TEXT;    // Text Style
-    LvItem.cchTextMax = MAX_PATH;     // Max size of text
-    LvItem.iItem      = uItem;        // choose item
+    LvItem.mask       = LVIF_TEXT;          // Text Style
+    LvItem.cchTextMax = MAX_PATH;           // Max size of text
+    LvItem.iItem      = uItem;              // choose item
 
-    // LvItem.iSubItem   = COL_CHK;      // Put in first coluom
-    // LvItem.pszText    = TEXT( "" );
+    // LvItem.iSubItem = COL_CHK;         // Put in first coluom
+    // LvItem.pszText  = TEXT( "" );
     // SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
 
-    LvItem.iSubItem   = COL_I;        // Put in second coluom
-    LvItem.pszText    = const_cast<LPWSTR>( strI.c_str() );
+    LvItem.iSubItem = COL_I;        // Put in second coluom
+    LvItem.pszText  = const_cast<LPWSTR>( strI.c_str() );
     SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_INSERTITEM, 0, ( LPARAM )&LvItem );
 
-    LvItem.iSubItem   = COL_W;        // Put in third coluom
-    LvItem.pszText    = const_cast<LPWSTR>( strW.c_str() );
+    LvItem.iSubItem = COL_W;        // Put in third coluom
+    LvItem.pszText  = const_cast<LPWSTR>( strW.c_str() );
     SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
 
-    LvItem.iSubItem   = COL_FILE;     // Put in fourth coluom
-    LvItem.pszText    = const_cast<LPWSTR>( strFile.c_str() );
+    LvItem.iSubItem = COL_FILE;     // Put in fourth coluom
+    LvItem.pszText  = const_cast<LPWSTR>( strFile.c_str() );
     SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETITEM, 0, ( LPARAM )&LvItem );
 }
 
@@ -231,8 +218,10 @@ std::vector<std::wstring> DemoDlg::getListSelected(void)
                 return selectedItems;
             }
 
-            for (unsigned int j = 0; j < tempPath.size(); j++) {
-                if (tempPath[j] == '/') {
+            for (unsigned int j = 0; j < tempPath.size(); j++)
+            {
+                if (tempPath[j] == '/')
+                {
                     tempPath[j] = '\\';
                 }
             }
@@ -264,8 +253,8 @@ bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
 
     if ( g_Debug )
         OutputDebugString( paramInput.c_str() );
-    Process program( programPath, paramInput.c_str(), pProgramDir,
-                     CONSOLE_PROG );
+
+    Process program( programPath, paramInput.c_str(), pProgramDir, CONSOLE_PROG );
     program.run();
 
     if ( !program.hasStderr() )
@@ -294,8 +283,7 @@ bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
                     fileContent.resize( pOutputLen, 0 );
 
                     // read the file
-                    file.read( reinterpret_cast<char *>( &fileContent[0] ),
-                               ( std::streamsize )pOutputLen );
+                    file.read( reinterpret_cast<char *>( &fileContent[0] ), ( std::streamsize )pOutputLen );
 
                     // close the file
                     file.close();
@@ -313,8 +301,7 @@ bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
             }
             else
             {
-                ::MessageBox( NULL, TEXT( "The file is invalid" ), progOutputStr.c_str(),
-                              MB_OK );
+                ::MessageBox( NULL, TEXT( "The file is invalid" ), progOutputStr.c_str(), MB_OK );
                 wide = progOutputStr.c_str();
                 return false;
             }
@@ -322,14 +309,12 @@ bool DemoDlg::execCommand( std::wstring command, std::wstring &wide )
         // otherwise, we look in stdout
         else if ( program.hasStdout() )
         {
-            // convertProcessText2Wide( program.getStdout(), wide );
             wide = program.getStdout();
             return true;
         }
     }
     else
     {
-        // convertProcessText2Wide( program.getStderr(), wide );
         wide = program.getStderr();
         return false;
     }
@@ -414,12 +399,9 @@ void DemoDlg::ChangeColors()
 
 void DemoDlg::refreshDialog()
 {
-    SendMessage( GetDlgItem( _hSelf, IDC_CHK_TORTOISE ), BM_SETCHECK, 
-                 ( WPARAM )( g_useTortoise ? 1 : 0 ), 0 );
-    SendMessage( GetDlgItem( _hSelf, IDC_CHK_NPPCOLOR ), BM_SETCHECK,
-                 ( WPARAM )( g_useNppColors ? 1 : 0 ), 0 );
-    SendMessage( GetDlgItem( _hSelf, IDC_CHK_PANELTOGGLE ), BM_SETCHECK,
-                 ( WPARAM )( g_RaisePanel ? 1 : 0 ), 0 );
+    SendMessage( GetDlgItem( _hSelf, IDC_CHK_TORTOISE ),    BM_SETCHECK, ( WPARAM )( g_useTortoise  ? 1 : 0 ), 0 );
+    SendMessage( GetDlgItem( _hSelf, IDC_CHK_NPPCOLOR ),    BM_SETCHECK, ( WPARAM )( g_useNppColors ? 1 : 0 ), 0 );
+    SendMessage( GetDlgItem( _hSelf, IDC_CHK_PANELTOGGLE ), BM_SETCHECK, ( WPARAM )( g_RaisePanel   ? 1 : 0 ), 0 );
 }
 
 void DemoDlg::initDialog()
@@ -436,35 +418,33 @@ void DemoDlg::initDialog()
     // TOOLBAR1
     // Create pager.  The parent window is the parent.
     hWndPager1 = CreateWindow( WC_PAGESCROLLER, NULL, WS_VISIBLE | WS_CHILD | PGS_HORZ,
-                              0, 0, 200, 32, _hSelf, (HMENU) IDB_PAGER1, module_name, NULL );
+                               0, 0, 200, 32, _hSelf, (HMENU) IDB_PAGER1, module_name, NULL );
     // Create Toolbar.  The parent window is the Pager.
     hWndToolbar1 = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, WS_TOOLBARSTYLE,
-                                  0, 0, 200, 32, hWndPager1, ( HMENU ) IDB_TOOLBAR1, module_name, NULL );
+                                   0, 0, 200, 32, hWndPager1, ( HMENU ) IDB_TOOLBAR1, module_name, NULL );
 
     SendMessage( hWndToolbar1, TB_BUTTONSTRUCTSIZE, sizeof( TBBUTTON ), 0 );
     SendMessage( hWndToolbar1, TB_SETEXTENDEDSTYLE, 0, ( LPARAM ) TBSTYLE_EX_HIDECLIPPEDBUTTONS | TBSTYLE_EX_DRAWDDARROWS );
     SendMessage( hWndToolbar1, TB_ADDBUTTONS, sizeButtonArray1, ( LPARAM )tbButtonsAdd1 );
     SendMessage( hWndToolbar1, TB_AUTOSIZE, 0, 0 );
     // Notify the pager that it contains the toolbar
-    SendMessage(hWndPager1, PGM_SETCHILD, 0, (LPARAM) hWndToolbar1);
-
+    SendMessage( hWndPager1, PGM_SETCHILD, 0, (LPARAM) hWndToolbar1 );
     imageToolbar( module_name, hWndToolbar1, IDB_TOOLBAR1, numButtons1 );
 
     // TOOLBAR2
     // Create pager.  The parent window is the parent.
     hWndPager2 = CreateWindow( WC_PAGESCROLLER, NULL, WS_VISIBLE | WS_CHILD | PGS_HORZ,
-                              0, 32, 200, 32, _hSelf, (HMENU) IDB_PAGER2, module_name, NULL );
+                               0, 32, 200, 32, _hSelf, (HMENU) IDB_PAGER2, module_name, NULL );
     // Create Toolbar.  The parent window is the Pager.
     hWndToolbar2 = CreateWindowEx( 0, TOOLBARCLASSNAME, NULL, WS_TOOLBARSTYLE,
-                                  0, 0, 200, 32, hWndPager2, ( HMENU ) IDB_TOOLBAR2, module_name, NULL );
+                                   0, 0, 200, 32, hWndPager2, ( HMENU ) IDB_TOOLBAR2, module_name, NULL );
 
     SendMessage( hWndToolbar2, TB_BUTTONSTRUCTSIZE, sizeof( TBBUTTON ), 0 );
     SendMessage( hWndToolbar1, TB_SETEXTENDEDSTYLE, 0, ( LPARAM ) TBSTYLE_EX_HIDECLIPPEDBUTTONS | TBSTYLE_EX_DRAWDDARROWS );
     SendMessage( hWndToolbar2, TB_ADDBUTTONS, sizeButtonArray2, ( LPARAM )tbButtonsAdd2 );
     SendMessage( hWndToolbar2, TB_AUTOSIZE, 0, 0 );
     // in CreateWindowEx()
-    SendMessage(hWndPager2, PGM_SETCHILD, 0, (LPARAM) hWndToolbar2);
-
+    SendMessage( hWndPager2, PGM_SETCHILD, 0, (LPARAM) hWndToolbar2 );
     imageToolbar( module_name, hWndToolbar2, IDB_TOOLBAR2, numButtons2 );
 
     // Edit and List controls
@@ -497,11 +477,12 @@ void DemoDlg::initDialog()
     LvCol.pszText = TEXT( "W" );                           // Third Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, COL_W, ( LPARAM )&LvCol );
 
-    LvCol.cx      = 25;                                   // width of column
+    LvCol.cx      = 25;                                    // width of column
     LvCol.pszText = TEXT( "File" );                        // Fourth Header Text
     SendMessage( hList, LVM_INSERTCOLUMN, COL_FILE, ( LPARAM )&LvCol );
 
     SendMessage( hList, LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
+
     updateList();
 }
 
@@ -658,8 +639,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 case IDC_CHK_NPPCOLOR:
                 {
-                    int check = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_CHK_NPPCOLOR ),
-                                                      BM_GETCHECK, 0, 0 );
+                    int check = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_CHK_NPPCOLOR ), BM_GETCHECK, 0, 0 );
 
                     if ( check & BST_CHECKED )
                     {
@@ -679,8 +659,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 case IDC_CHK_PANELTOGGLE:
                 {
-                    int check = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_CHK_PANELTOGGLE ),
-                                                      BM_GETCHECK, 0, 0 );
+                    int check = ( int )::SendMessage( GetDlgItem( _hSelf, IDC_CHK_PANELTOGGLE ), BM_GETCHECK, 0, 0 );
 
                     if ( check & BST_CHECKED )
                         g_RaisePanel = true;
@@ -708,7 +687,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                 // Trap VK_ENTER in the LISTVIEW
                 case IDOK :
-                { 
+                {
                     HWND hWndCtrl = GetFocus();
                     if ( hWndCtrl == GetDlgItem( _hSelf, IDC_LSV1 ) )
                         gotoFile();
@@ -716,7 +695,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 }
                 // Trap VK_ESCAPE
                 case IDCANCEL :
-                { 
+                {
                     ::SetFocus( getCurScintilla() );
                     return TRUE;
                 }
@@ -869,7 +848,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
         case WM_PAINT:
         {
-            ::RedrawWindow( _hSelf, NULL, NULL, TRUE);
+            ::RedrawWindow( _hSelf, NULL, NULL, TRUE );
             return FALSE;
         }
 
