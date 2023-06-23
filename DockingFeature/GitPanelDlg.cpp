@@ -31,6 +31,7 @@
 #include <vector>
 #include <windowsx.h>
 
+extern DemoDlg _gitPanel;
 extern TCHAR g_GitPath[MAX_PATH];
 extern TCHAR g_GitPrompt[MAX_PATH];
 extern bool  g_useTortoise;
@@ -696,7 +697,14 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                 // Trap VK_ESCAPE
                 case IDCANCEL :
                 {
-                    ::SetFocus( getCurScintilla() );
+                    if ( _gitPanel.isFloating() )
+                    {
+                        EndDialog(_hSelf, 0);
+                        _gitPanel.display(false);
+                    }
+                    else
+                        ::SetFocus( getCurScintilla() );
+
                     return TRUE;
                 }
             }
@@ -817,6 +825,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     }
                     return TRUE;
                 }
+
+                default :
+                    return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
             }
             return FALSE;
         }
