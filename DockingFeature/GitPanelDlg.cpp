@@ -516,6 +516,12 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 {
     switch ( message )
     {
+        case WM_INITDIALOG :
+        {
+            initDialog();
+            break;
+        }
+
         case WM_COMMAND :
         {
             switch ( wParam )
@@ -708,7 +714,7 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                     return TRUE;
                 }
             }
-            return FALSE;
+            break;
         }
 
         case WM_TIMER:
@@ -776,8 +782,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                                     SendMessage( _hParent, NPPM_DOOPEN, 0, ( LPARAM )files[i].c_str() );
                             }
                         }
+                        return TRUE;
                     }
-                    return TRUE;
+                    break;
                 }
 
                 case NM_RCLICK:
@@ -798,8 +805,9 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
 
                         cm.SetObjects( files );
                         cm.ShowContextMenu( _hInst, _hParent, _hSelf, pt );
+                        return TRUE;
                     }
-                    return TRUE;
+                    break;
                 }
 
                 case TTN_GETDISPINFO: /* TTN_NEEDTEXT */
@@ -822,13 +830,16 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
                       ) )
                     {
                         gotoFile();
+                        return TRUE;
                     }
-                    return TRUE;
+                    break;
                 }
 
                 default :
-                    return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
+                    break;
             }
+
+            DockingDlgInterface::run_dlgProc( message, wParam, lParam );
             return FALSE;
         }
 
@@ -854,24 +865,18 @@ INT_PTR CALLBACK DemoDlg::run_dlgProc( UINT message, WPARAM wParam, LPARAM lPara
             SendMessage( GetDlgItem( _hSelf, IDC_LSV1 ), LVM_SETCOLUMNWIDTH, COL_FILE, LVSCW_AUTOSIZE_USEHEADER );
 
             // redraw();
-            return FALSE;
+            break;
         }
 
         case WM_PAINT:
         {
             ::RedrawWindow( _hSelf, NULL, NULL, TRUE );
-            return FALSE;
-        }
-
-        case WM_INITDIALOG :
-        {
-            initDialog();
-            return FALSE;
+            break;
         }
 
         default :
             return DockingDlgInterface::run_dlgProc( message, wParam, lParam );
     }
 
-    // return FALSE;
+    return FALSE;
 }

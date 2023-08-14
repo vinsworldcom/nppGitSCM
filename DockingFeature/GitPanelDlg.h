@@ -49,8 +49,7 @@ class DemoDlg : public DockingDlgInterface
         };
 
     protected :
-        virtual INT_PTR CALLBACK run_dlgProc( UINT message, WPARAM wParam,
-                                              LPARAM lParam );
+        virtual INT_PTR CALLBACK run_dlgProc( UINT message, WPARAM wParam, LPARAM lParam ); 
 
     private :
         static DWORD WINAPI _static_updateList(void* Param)
