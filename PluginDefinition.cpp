@@ -536,7 +536,7 @@ void giTk()
 }
 void giTkFiles( std::vector<std::wstring> files = {} )
 {
-    ExecGitCommand( TEXT( "k\"" ), files, true, false );
+    ExecGitCommand( TEXT( "k\" --all" ), files, true, false );
 }
 
 void statusAll()
