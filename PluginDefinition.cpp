@@ -34,7 +34,9 @@ const TCHAR iniKeyGitPrompt[]    = TEXT( "GitPrompt" );
 const TCHAR iniKeyUseNppColors[] = TEXT( "UseNppColors" );
 const TCHAR iniKeyRaisePanel[]   = TEXT( "RaisePanelorToggle" );
 const TCHAR iniKeyRefScnFocus[]  = TEXT( "RefreshScnFocus" );
+const TCHAR iniKeyDiffWordDiff[] = TEXT( "DiffWordDiff" );
 const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
+const TCHAR iniKeyLVDelay[]      = TEXT( "LVDelay" );
 
 DemoDlg _gitPanel;
 
@@ -59,13 +61,16 @@ bool  g_NppReady     = false;
 bool  g_useNppColors = false;
 bool  g_RaisePanel   = false;
 bool  g_RefScnFocus  = false;
+bool  g_DiffWordDiff = false;
 
-// g_Debug must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
+// g_Debug and g_LVDelay must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
 //   ON  =>  Debug=1
 //   OFF =>  Debug=0
+//   LVDelay=<# milliseconds>
 // It is read at startup, it is NOT written back to the config file!
 // When set ON, use DebugView (DbgView.exe) https://www.sysinternals.com
 bool  g_Debug        = false;
+int   g_LVDelay      = LSV1_REFRESH_DELAY;
 
 std::wstring g_tortoiseLoc;
 
@@ -85,9 +90,9 @@ void pluginCleanUp()
 {
     ::WritePrivateProfileString( sectionName, iniKeyTortoise,
                                  g_useTortoise ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
-    ::WritePrivateProfileString( sectionName, iniKeyGitPath, 
+    ::WritePrivateProfileString( sectionName, iniKeyGitPath,
                                  g_GitPath, iniFilePath);
-    ::WritePrivateProfileString( sectionName, iniKeyGitPrompt, 
+    ::WritePrivateProfileString( sectionName, iniKeyGitPrompt,
                                  g_GitPrompt, iniFilePath);
     ::WritePrivateProfileString( sectionName, iniKeyUseNppColors,
                                  g_useNppColors ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
@@ -95,6 +100,8 @@ void pluginCleanUp()
                                  g_RaisePanel ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
     ::WritePrivateProfileString( sectionName, iniKeyRefScnFocus,
                                  g_RefScnFocus ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+    ::WritePrivateProfileString( sectionName, iniKeyDiffWordDiff,
+                                 g_DiffWordDiff ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
 
     if (g_TBGit.hToolbarBmp) {
         ::DeleteObject(g_TBGit.hToolbarBmp);
@@ -129,18 +136,23 @@ void commandMenuInit()
     // get the parameter value from plugin config
     g_useTortoise = ::GetPrivateProfileInt( sectionName, iniKeyTortoise,
                                             0, iniFilePath );
-    ::GetPrivateProfileString( sectionName, iniKeyGitPath, TEXT(""), 
+    ::GetPrivateProfileString( sectionName, iniKeyGitPath, TEXT(""),
                                g_GitPath, MAX_PATH, iniFilePath );
-    ::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"), 
+    ::GetPrivateProfileString( sectionName, iniKeyGitPrompt, TEXT("powershell.exe"),
                                g_GitPrompt, MAX_PATH, iniFilePath );
     g_useNppColors = ::GetPrivateProfileInt( sectionName, iniKeyUseNppColors,
-                                             0, iniFilePath );
-    g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
                                              0, iniFilePath );
     g_RaisePanel = ::GetPrivateProfileInt( sectionName, iniKeyRaisePanel,
                                                 0, iniFilePath );
     g_RefScnFocus = ::GetPrivateProfileInt( sectionName, iniKeyRefScnFocus,
                                                 0, iniFilePath );
+    g_DiffWordDiff = ::GetPrivateProfileInt( sectionName, iniKeyDiffWordDiff,
+                                                0, iniFilePath );
+
+    g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
+                                             0, iniFilePath );
+    g_LVDelay = ::GetPrivateProfileInt( sectionName, iniKeyLVDelay,
+                                             0, iniFilePath );
 
     if ( g_useTortoise )
     {
@@ -379,9 +391,9 @@ int launchGit( std::wstring &command, bool b_notGui = true )
 /// @param pause Pause after command.
 ///
 void ExecGitCommand(
-    const std::wstring &cmd, 
+    const std::wstring &cmd,
     std::vector<std::wstring> files,
-    bool ignoreFiles = false, 
+    bool ignoreFiles = false,
     bool pause = true )
 {
     std::wstring command = TEXT( "cmd /d/c \"\"" );
@@ -435,9 +447,9 @@ void ExecGitCommand(
 /// @param all Execute command on all files, or just the current file.
 ///
 void ExecTortoiseCommand(
-    const std::wstring &cmd, 
+    const std::wstring &cmd,
     std::vector<std::wstring> files,
-    bool ignoreFiles = false, 
+    bool ignoreFiles = false,
     bool pause = true )
 {
     std::wstring command = g_tortoiseLoc;
@@ -524,7 +536,7 @@ void giTk()
 }
 void giTkFiles( std::vector<std::wstring> files = {} )
 {
-    ExecGitCommand( TEXT( "k\"" ), files, true, false );
+    ExecGitCommand( TEXT( "k\" --all" ), files, true, false );
 }
 
 void statusAll()
@@ -582,7 +594,12 @@ void diffFileFiles( std::vector<std::wstring> files = {} )
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "diff" ), files, false, true );
     else
-        ExecGitCommand( TEXT( "\" diff" ), files, false, true );
+    {
+        if ( g_DiffWordDiff )
+            ExecGitCommand( TEXT( "\" diff --word-diff" ), files, false, true );
+        else
+            ExecGitCommand( TEXT( "\" diff" ), files, false, true );
+    }
 }
 
 void unstageFile()

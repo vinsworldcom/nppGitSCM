@@ -44,15 +44,22 @@ class DemoDlg : public DockingDlgInterface
         void updateListWithDelay();
         void updateList();
 
+        bool isFloating() const {
+            return _isFloating;
+        };
+
     protected :
-        virtual INT_PTR CALLBACK run_dlgProc( UINT message, WPARAM wParam,
-                                              LPARAM lParam );
+        virtual INT_PTR CALLBACK run_dlgProc( UINT message, WPARAM wParam, LPARAM lParam ); 
 
     private :
-        void doRefreshTimer();
+        static DWORD WINAPI _static_updateList(void* Param)
+        {
+            DemoDlg* This = (DemoDlg*) Param;
+            return This->_updateList();
+        }
+        DWORD _updateList();
+
         std::vector<std::wstring> split( std::wstring stringToBeSplitted, std::wstring delimeter );
-        // void convertProcessText2Wide( std::wstring outputW, std::wstring &wide );
-        void clearList();
         void setListColumns( unsigned int uItem, std::wstring strI, std::wstring strW, std::wstring strFile );
         std::vector<std::wstring> getListSelected();
         bool execCommand( std::wstring, std::wstring &wide );
