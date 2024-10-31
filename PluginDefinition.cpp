@@ -37,6 +37,7 @@ const TCHAR iniKeyRefScnFocus[]  = TEXT( "RefreshScnFocus" );
 const TCHAR iniKeyDiffWordDiff[] = TEXT( "DiffWordDiff" );
 const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
 const TCHAR iniKeyLVDelay[]      = TEXT( "LVDelay" );
+const TCHAR iniKeyRunWithGITGUI[] = TEXT( "RunWithGITGUI" );
 
 DemoDlg _gitPanel;
 
@@ -62,6 +63,7 @@ bool  g_useNppColors = false;
 bool  g_RaisePanel   = false;
 bool  g_RefScnFocus  = false;
 bool  g_DiffWordDiff = false;
+bool  g_runwithgitgui = false;
 
 // g_Debug and g_LVDelay must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
 //   ON  =>  Debug=1
@@ -102,6 +104,8 @@ void pluginCleanUp()
                                  g_RefScnFocus ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
     ::WritePrivateProfileString( sectionName, iniKeyDiffWordDiff,
                                  g_DiffWordDiff ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
+    ::WritePrivateProfileString( sectionName, iniKeyRunWithGITGUI,
+                                 g_runwithgitgui ? TEXT( "1" ) : TEXT( "0" ), iniFilePath);
 
     if (g_TBGit.hToolbarBmp) {
         ::DeleteObject(g_TBGit.hToolbarBmp);
@@ -148,6 +152,8 @@ void commandMenuInit()
                                                 0, iniFilePath );
     g_DiffWordDiff = ::GetPrivateProfileInt( sectionName, iniKeyDiffWordDiff,
                                                 0, iniFilePath );
+    g_runwithgitgui = ::GetPrivateProfileInt(sectionName, iniKeyRunWithGITGUI,
+                                                0, iniFilePath);
 
     g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
                                              0, iniFilePath );
@@ -399,6 +405,10 @@ void ExecGitCommand(
     std::wstring command = TEXT( "cmd /d/c \"\"" );
     command += getGitLocation();
     command += TEXT( "git" );
+    if (g_runwithgitgui)
+    {
+        command += TEXT("-gui");
+    }
     command += cmd + TEXT( " " );
 
     if ( !ignoreFiles )
