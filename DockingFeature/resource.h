@@ -34,7 +34,7 @@
 #define IDB_PAGER1   1701
 #define IDB_PAGER2   1702
 
-// The following MUST stay in order so GetNameStrFromCmd() 
+// The following MUST stay in order so GetNameStrFromCmd()
 // tooltip lookups from szToolTip will work
 
 #define IDC_BTN_GITGUI    (IDB_TOOLBAR1 + 1)
@@ -66,14 +66,15 @@
 // Settings
 #define IDD_SETTINGS      2600
 
-#define IDB_OK            (IDD_SETTINGS + 1)
-#define IDC_GRP1          (IDD_SETTINGS + 2)
-#define IDC_BTN_GITPATH   (IDD_SETTINGS + 3)
-#define IDC_EDT_GITPATH   (IDD_SETTINGS + 4)
-#define IDC_EDT_GITPROMPT (IDD_SETTINGS + 5)
-#define IDC_CHK_SCNFOCUS  (IDD_SETTINGS + 6)
-#define IDC_CHK_WORDDIFF  (IDD_SETTINGS + 7)
+#define IDB_OK              (IDD_SETTINGS + 1)
+#define IDC_GRP1            (IDD_SETTINGS + 2)
+#define IDC_BTN_GITPATH     (IDD_SETTINGS + 3)
+#define IDC_EDT_GITPATH     (IDD_SETTINGS + 4)
+#define IDC_EDT_GITPROMPT   (IDD_SETTINGS + 5)
+#define IDC_CHK_SCNFOCUS    (IDD_SETTINGS + 6)
+#define IDC_CHK_WORDDIFF    (IDD_SETTINGS + 7)
+#define IDC_CHK_GITGUIBLAME (IDD_SETTINGS + 8)
 
-#define IDC_STC_VER       (IDD_SETTINGS + 8)
+#define IDC_STC_VER         (IDD_SETTINGS + 9)
 
 #endif // DOCKINGFEATURE_RESOURCE_H
