@@ -37,7 +37,7 @@ const TCHAR iniKeyRefScnFocus[]  = TEXT( "RefreshScnFocus" );
 const TCHAR iniKeyDiffWordDiff[] = TEXT( "DiffWordDiff" );
 const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
 const TCHAR iniKeyLVDelay[]      = TEXT( "LVDelay" );
-const TCHAR iniKeyRunWithGITGUI[] = TEXT( "RunWithGITGUI" );
+const TCHAR iniKeyGitGuiBlame[]  = TEXT( "GitGuiBlame" );
 
 DemoDlg _gitPanel;
 
@@ -63,7 +63,7 @@ bool  g_useNppColors = false;
 bool  g_RaisePanel   = false;
 bool  g_RefScnFocus  = false;
 bool  g_DiffWordDiff = false;
-bool  g_runwithgitgui = false;
+bool  g_gitGuiBlame  = false;
 
 // g_Debug and g_LVDelay must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
 //   ON  =>  Debug=1
@@ -104,8 +104,8 @@ void pluginCleanUp()
                                  g_RefScnFocus ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
     ::WritePrivateProfileString( sectionName, iniKeyDiffWordDiff,
                                  g_DiffWordDiff ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
-    ::WritePrivateProfileString( sectionName, iniKeyRunWithGITGUI,
-                                 g_runwithgitgui ? TEXT( "1" ) : TEXT( "0" ), iniFilePath);
+    ::WritePrivateProfileString( sectionName, iniKeyGitGuiBlame,
+                                 g_gitGuiBlame ? TEXT( "1" ) : TEXT( "0" ), iniFilePath);
 
     if (g_TBGit.hToolbarBmp) {
         ::DeleteObject(g_TBGit.hToolbarBmp);
@@ -152,7 +152,7 @@ void commandMenuInit()
                                                 0, iniFilePath );
     g_DiffWordDiff = ::GetPrivateProfileInt( sectionName, iniKeyDiffWordDiff,
                                                 0, iniFilePath );
-    g_runwithgitgui = ::GetPrivateProfileInt(sectionName, iniKeyRunWithGITGUI,
+    g_gitGuiBlame = ::GetPrivateProfileInt(sectionName, iniKeyGitGuiBlame,
                                                 0, iniFilePath);
 
     g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
@@ -405,10 +405,6 @@ void ExecGitCommand(
     std::wstring command = TEXT( "cmd /d/c \"\"" );
     command += getGitLocation();
     command += TEXT( "git" );
-    if (g_runwithgitgui)
-    {
-        command += TEXT("-gui");
-    }
     command += cmd + TEXT( " " );
 
     if ( !ignoreFiles )
@@ -667,16 +663,25 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
     if ( files.size() == 0 )
         files.push_back( getCurrentFile() );
 
+    Sci_Position pos = (Sci_Position)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
+    Sci_Position line = (Sci_Position)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
     if ( g_useTortoise )
     {
-        Sci_Position pos = (Sci_Position)::SendMessage( getCurScintilla(), SCI_GETCURRENTPOS, 0, 0 );
-        Sci_Position line = (Sci_Position)::SendMessage( getCurScintilla(), SCI_LINEFROMPOSITION, pos, 0 );
         std::wstring blame = TEXT( "blame /line:" );
         blame += std::to_wstring( line + 1 );
         ExecTortoiseCommand( blame, files, false, true );
     }
     else
-        ExecGitCommand( TEXT( "\" blame" ), files, false, true );
+    {
+        if (g_gitGuiBlame)
+        {
+            std::wstring blame = TEXT( "-gui\" blame --line=" );
+            blame += std::to_wstring( line + 1 );
+            ExecGitCommand( blame, files, false, false );
+        }
+        else
+            ExecGitCommand( TEXT( "\" blame" ), files, false, true );
+    }
 }
 
 void branchFile()
