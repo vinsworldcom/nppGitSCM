@@ -14,6 +14,7 @@ extern TCHAR     g_GitPath[MAX_PATH];
 extern TCHAR     g_GitPrompt[MAX_PATH];
 extern bool      g_RefScnFocus;
 extern bool      g_DiffWordDiff;
+extern bool      g_gitGuiBlame;
 
 static int __stdcall BrowseCallbackProc(HWND hwnd, UINT uMsg, LPARAM, LPARAM pData)
 {
@@ -34,6 +35,7 @@ INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
             SendMessage( GetDlgItem( hWndDlg, IDC_EDT_GITPROMPT ), WM_SETTEXT, 0, ( LPARAM )g_GitPrompt );
             SendMessage( GetDlgItem( hWndDlg, IDC_CHK_SCNFOCUS ), BM_SETCHECK, ( LPARAM )( g_RefScnFocus ? 1 : 0 ), 0 );
             SendMessage( GetDlgItem( hWndDlg, IDC_CHK_WORDDIFF ), BM_SETCHECK, ( LPARAM )( g_DiffWordDiff ? 1 : 0 ), 0 );
+            SendMessage( GetDlgItem( hWndDlg, IDC_CHK_GITGUIBLAME), BM_SETCHECK, ( LPARAM )( g_gitGuiBlame ? 1 : 0), 0);
 
             std::string version;
             version = "<a>";
@@ -151,6 +153,18 @@ INT_PTR CALLBACK SettingsDlg( HWND hWndDlg, UINT msg, WPARAM wParam,
                         g_DiffWordDiff = true;
                     else
                         g_DiffWordDiff = false;
+                    return TRUE;
+                }
+
+                case IDC_CHK_GITGUIBLAME:
+                {
+                    int check = (int)::SendMessage(GetDlgItem(hWndDlg, IDC_CHK_GITGUIBLAME),
+                        BM_GETCHECK, 0, 0);
+
+                    if (check & BST_CHECKED)
+                        g_gitGuiBlame = true;
+                    else
+                        g_gitGuiBlame = false;
                     return TRUE;
                 }
 
