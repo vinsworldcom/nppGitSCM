@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v4
 
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1
+      uses: microsoft/setup-msbuild@v2
 
     - name: MSBuild of plugin dll
       working-directory: .\
@@ -26,13 +26,13 @@ jobs:
           ZIPCMD: 7z a -tzip
 
     - name: Archive
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
           name: GitSCM-${{ matrix.build_configuration }}-${{ matrix.build_platform }}
           path: ${{ matrix.build_configuration }}\${{ matrix.build_platform }}\GitSCM.dll
 
     - name: Release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: startsWith(github.ref, 'refs/tags/') && matrix.build_configuration == 'Release'
       with:
           body: ${{ github.event.commits[0].message }}
