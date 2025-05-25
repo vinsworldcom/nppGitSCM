@@ -14,7 +14,7 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
+#define NOMINMAX
 #include "DockingFeature/SettingsDlg.h"
 #include "PluginDefinition.h"
 #include "resource.h"
@@ -25,6 +25,7 @@
 #include <shlwapi.h>
 #include <string>
 #include <vector>
+#include <algorithm>
 
 const TCHAR configFileName[]     = TEXT( "GitSCM.ini" );
 const TCHAR sectionName[]        = TEXT( "Git" );
@@ -38,6 +39,7 @@ const TCHAR iniKeyDiffWordDiff[] = TEXT( "DiffWordDiff" );
 const TCHAR iniKeyDebug[]        = TEXT( "Debug" );
 const TCHAR iniKeyLVDelay[]      = TEXT( "LVDelay" );
 const TCHAR iniKeyGitGuiBlame[]  = TEXT( "GitGuiBlame" );
+const TCHAR iniKeyRunWithWSL[]   = TEXT( "RunWithWSL" );
 
 DemoDlg _gitPanel;
 
@@ -64,6 +66,7 @@ bool  g_RaisePanel   = false;
 bool  g_RefScnFocus  = false;
 bool  g_DiffWordDiff = false;
 bool  g_gitGuiBlame  = false;
+bool  g_runwithWSL   = false;
 
 // g_Debug and g_LVDelay must be set manually in config file ($NPP_DIR\plugins\config\GitSCM.ini)
 //   ON  =>  Debug=1
@@ -106,6 +109,8 @@ void pluginCleanUp()
                                  g_DiffWordDiff ? TEXT( "1" ) : TEXT( "0" ), iniFilePath );
     ::WritePrivateProfileString( sectionName, iniKeyGitGuiBlame,
                                  g_gitGuiBlame ? TEXT( "1" ) : TEXT( "0" ), iniFilePath);
+    ::WritePrivateProfileString( sectionName, iniKeyRunWithWSL,
+                                 g_runwithWSL ? TEXT( "1" ) : TEXT( "0" ), iniFilePath);
 
     if (g_TBGit.hToolbarBmp) {
         ::DeleteObject(g_TBGit.hToolbarBmp);
@@ -153,6 +158,8 @@ void commandMenuInit()
     g_DiffWordDiff = ::GetPrivateProfileInt( sectionName, iniKeyDiffWordDiff,
                                                 0, iniFilePath );
     g_gitGuiBlame = ::GetPrivateProfileInt(sectionName, iniKeyGitGuiBlame,
+                                                0, iniFilePath);
+    g_runwithWSL = ::GetPrivateProfileInt(sectionName, iniKeyRunWithWSL,
                                                 0, iniFilePath);
 
     g_Debug = ::GetPrivateProfileInt( sectionName, iniKeyDebug,
@@ -388,6 +395,72 @@ int launchGit( std::wstring &command, bool b_notGui = true )
     return ret;
 }
 
+std::wstring getFileNameManual(const std::wstring& fullPath) {
+    // Find the last occurrence of a backslash ('\')
+    size_t lastBackslashPos = fullPath.find_last_of(L'\\');
+
+    // Find the last occurrence of a forward slash ('/')
+    size_t lastForwardslashPos = fullPath.find_last_of(L'/');
+
+    size_t lastSeparatorPos = std::string::npos;
+
+    // Determine the actual last separator's position
+    if (lastBackslashPos != std::string::npos && lastForwardslashPos != std::string::npos) 
+    {
+        lastSeparatorPos = std::max(lastBackslashPos, lastForwardslashPos);
+    }
+    else if (lastBackslashPos != std::string::npos) 
+    {
+        lastSeparatorPos = lastBackslashPos;
+    }
+    else if (lastForwardslashPos != std::string::npos) 
+    {
+        lastSeparatorPos = lastForwardslashPos;
+    }
+
+    // Extract the filename
+    if (lastSeparatorPos != std::string::npos) 
+    {
+        return fullPath.substr(lastSeparatorPos + 1);
+    }
+    else 
+    {
+        // No separator found, the entire string is the filename
+        return fullPath;
+    }
+}
+
+void ExecGitWSLcommand(
+    const std::wstring& cmd,
+    std::vector<std::wstring> files,
+    bool ignoreFiles = false
+    )
+{
+    std::wstring wslcommand = TEXT("wsl");
+    std::wstring command = TEXT("-- git");
+    std::wstring pathName = getCurrentFileDirectory();
+    command += cmd;
+    command += TEXT(" ");
+    if (!ignoreFiles)
+    {
+        for (std::vector<std::wstring>::iterator itr = files.begin();
+            itr != files.end(); itr++)
+        {
+            command += TEXT("\"");
+            std::wstring filname_temp = getFileNameManual(*itr);
+            command += (filname_temp);
+            command += TEXT("\"");
+
+            if (itr != files.end() - 1)
+                command += TEXT(" ");
+        }
+    }
+    // Go back to Bash
+    command += L" ; exec bash";
+
+    ShellExecute(nppData._nppHandle, TEXT("open"), wslcommand.c_str(), command.c_str(), pathName.c_str(), SW_SHOW);
+}
+
 ///
 /// Builds and executes command line string to send to CreateProcess
 ///
@@ -532,7 +605,14 @@ void gitGui()
 }
 void gitGuiFiles( std::vector<std::wstring> files )
 {
-    ExecGitCommand( TEXT( "-gui\"" ), files, true, false );
+    if (g_runwithWSL)
+    {
+        ExecGitWSLcommand( TEXT( " gui" ), files, true );
+    }
+    else
+    {
+    	ExecGitCommand( TEXT( "-gui\"" ), files, true, false );
+    }
 }
 
 void giTk()
@@ -542,7 +622,14 @@ void giTk()
 }
 void giTkFiles( std::vector<std::wstring> files = {} )
 {
-    ExecGitCommand( TEXT( "k\" --all" ), files, true, false );
+    if (g_runwithWSL)
+    {
+        ExecGitWSLcommand( TEXT( "k" ), files, true );
+    }
+    else
+    {
+    	ExecGitCommand( TEXT( "k\" --all" ), files, true, false );
+	}
 }
 
 void statusAll()
@@ -554,6 +641,8 @@ void statusAllFiles( std::vector<std::wstring> files = {} )
 {
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "repostatus" ), files, true , true);
+    else if ( g_runwithWSL )
+    	ExecGitWSLcommand( TEXT( " status" ), files, true );
     else
         ExecGitCommand( TEXT( "\" status" ), files, true, true);
 }
@@ -567,6 +656,8 @@ void commitAllFiles( std::vector<std::wstring> files = {} )
 {
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "commit" ), files, true, true );
+    else if ( g_runwithWSL )
+    	ExecGitWSLcommand( TEXT( " commit" ), files, true );
     else
         ExecGitCommand( TEXT( "\" commit" ), files, true, true );
 }
@@ -583,6 +674,8 @@ void addFileFiles( std::vector<std::wstring> files = {} )
 
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "add" ), files, false, false );
+    else if ( g_runwithWSL )
+    	ExecGitWSLcommand( TEXT( " add" ), files, false );
     else
         ExecGitCommand( TEXT( "\" add" ), files, false, false );
 }
@@ -599,6 +692,13 @@ void diffFileFiles( std::vector<std::wstring> files = {} )
 
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "diff" ), files, false, true );
+    else if ( g_runwithWSL )
+    {
+    	if ( g_DiffWordDiff )
+			ExecGitWSLcommand( TEXT ( " diff --word-diff" ), files, false );
+        else
+            ExecGitWSLcommand( TEXT ( " diff" ), files, false );
+	}
     else
     {
         if ( g_DiffWordDiff )
@@ -617,8 +717,10 @@ void unstageFileFiles( std::vector<std::wstring> files = {} )
 {
     if ( files.size() == 0 )
         files.push_back( getCurrentFile() );
-
-    ExecGitCommand( TEXT( "\" reset HEAD" ), files, false, false );
+    if ( g_runwithWSL )
+        ExecGitWSLcommand( TEXT( " reset HEAD" ), files, false );
+    else
+    	ExecGitCommand( TEXT( "\" reset HEAD" ), files, false, false );
 }
 
 void restoreFile()
@@ -633,6 +735,8 @@ void restoreFileFiles( std::vector<std::wstring> files = {} )
 
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "revert" ), files, false, false );
+    else if ( g_runwithWSL )
+        ExecGitWSLcommand( TEXT( " checkout --" ), files, false );
     else
         ExecGitCommand( TEXT( "\" checkout --" ), files, false, false );
 }
@@ -649,6 +753,8 @@ void logFileFiles( std::vector<std::wstring> files = {} )
 
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "log" ), files, false, true );
+    else if ( g_runwithWSL )
+        ExecGitWSLcommand( TEXT( " log" ), files, false );
     else
         ExecGitCommand( TEXT( "\" log" ), files, false, true );
 }
@@ -673,12 +779,21 @@ void blameFileFiles( std::vector<std::wstring> files = {} )
     }
     else
     {
-        if (g_gitGuiBlame)
+        if ( g_gitGuiBlame && g_runwithWSL )
         {
-            std::wstring blame = TEXT( "-gui\" blame --line=" );
+            std::wstring blame = TEXT( " gui blame --line=" );
             blame += std::to_wstring( line + 1 );
-            ExecGitCommand( blame, files, false, false );
+            // Turn wsl off to keep the blame GUI on
+            ExecGitWSLcommand( blame, files, false );
         }
+        else if (g_gitGuiBlame)
+        {
+            std::wstring blame = TEXT("-gui\" blame --line=");
+            blame += std::to_wstring(line + 1);
+            ExecGitCommand(blame, files, false, false);
+        }
+        else if ( g_runwithWSL )
+            ExecGitWSLcommand( TEXT( " blame" ), files, false );
         else
             ExecGitCommand( TEXT( "\" blame" ), files, false, true );
     }
@@ -712,6 +827,8 @@ void pullFileFiles( std::vector<std::wstring> files = {} )
 {
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "pull" ), files, true, true );
+    else if ( g_runwithWSL )
+        ExecGitWSLcommand( TEXT( " pull" ), files, true );
     else
         ExecGitCommand( TEXT( "\" pull" ), files, true, true );
 }
@@ -725,6 +842,8 @@ void pushFileFiles( std::vector<std::wstring> files = {} )
 {
     if ( g_useTortoise )
         ExecTortoiseCommand( TEXT( "push" ), files, true, true );
+    else if ( g_runwithWSL )
+        ExecGitWSLcommand( TEXT( " push" ), files, true );
     else
         ExecGitCommand( TEXT( "\" push" ), files, true, true );
 }
