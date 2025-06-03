@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 
 // #include "stdafx.h"
+#include <intrin.h>
 #include "ContextMenu.h"
 #include "../Notepad_plus_msgs.h"
 #include "../PluginDefinition.h"
